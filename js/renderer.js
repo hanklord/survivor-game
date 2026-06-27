@@ -133,64 +133,55 @@
     this._drawProjectiles(state.projectiles, camX, camY);
     this._drawPlayer(player);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
-    // 近戰斬擊視覺（薄弧形刀光軌跡）
+    // 劍氣投射物視覺
     if (state.meleeVisual) {
-      var mv = state.meleeVisual;
-      var progress = 1 - (mv.timer / 0.35);  // 0→1
-      var alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3;
-      var r = mv.range;
+      var qis = state.meleeVisual; // 陣列
+      for (var qi = 0; qi < qis.length; qi++) {
+        var p = qis[qi];
+        if (!this._isVisible(p.x, p.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.globalCompositeOperation = 'lighter';
 
-      ctx.save();
-      ctx.translate(mv.x, mv.y);
-      ctx.rotate(mv.angle);
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = alpha;
-
-      // 薄弧形刀光（arc stroke，120° 弧）
-      var arcStart = -1.05;  // ~-60°
-      var arcEnd = 1.05;     // ~+60°
-
-      // 外層光暈（粗、半透明）
-      ctx.beginPath();
-      ctx.arc(0, 0, r, arcStart, arcEnd);
-      ctx.strokeStyle = 'rgba(200,200,200,0.3)';
-      ctx.lineWidth = 18;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-
-      // 中層白色弧
-      ctx.beginPath();
-      ctx.arc(0, 0, r, arcStart, arcEnd);
-      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-      ctx.lineWidth = 10;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-
-      // 核心亮白（最細）
-      ctx.beginPath();
-      ctx.arc(0, 0, r, arcStart, arcEnd);
-      ctx.strokeStyle = 'rgba(255,255,255,1)';
-      ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-
-      // 白色小碎片（後半段飛散）
-      if (progress > 0.5) {
-        var frag = (progress - 0.5) * 2;
-        for (var fi = 0; fi < 5; fi++) {
-          var fa = arcStart + (arcEnd - arcStart) * (fi / 4);
-          var fd = r + frag * 30 + fi * 4;
-          var fx = Math.cos(fa) * fd;
-          var fy = Math.sin(fa) * fd;
-          ctx.globalAlpha = alpha * (1 - frag);
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(fx - 4, fy - 1, 8, 2);
+        // 拖尾（淡化的弧形殘影）
+        var trail = 3;
+        for (var ti = trail; ti > 0; ti--) {
+          ctx.globalAlpha = 0.15 * ti;
+          ctx.beginPath();
+          ctx.arc(-ti * 12, 0, 18, -0.8, 0.8);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 4;
+          ctx.lineCap = 'round';
+          ctx.stroke();
         }
-      }
 
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = 1;
-      ctx.restore();
+        // 主體新月弧形
+        ctx.globalAlpha = 0.9;
+        // 外層
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, -0.9, 0.9);
+        ctx.strokeStyle = 'rgba(200,200,200,0.5)';
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        // 中層
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, -0.9, 0.9);
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        // 核心
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, -0.9, 0.9);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
     }
     this._drawParticles(state.particles, camX, camY);
 
