@@ -243,11 +243,64 @@
   };
 
   // 武器管理器
+
+  // === 落雷 (Thunder/Lightning) ===
+  var THUNDER_BASE_CD = 3;       // 基礎間隔秒
+  var THUNDER_CD_REDUCE = 0.4;   // 每級減少秒數
+  var THUNDER_MIN_CD = 0.8;      // 最短間隔
+  var THUNDER_BASE_DAMAGE = 25;
+  var THUNDER_DMG_PER_LVL = 10;
+  var THUNDER_VISUAL_DURATION = 0.2; // 閃電視覺持續時間
+
+  function Thunder(player) {
+    this.player = player;
+    this.level = 1;
+    this.cd = THUNDER_BASE_CD;
+    this.damage = THUNDER_BASE_DAMAGE;
+    this.timer = this.cd;
+    this.visual = null; // { x, y, timer } 閃電視覺效果
+  }
+
+  Thunder.prototype.upgrade = function() {
+    this.level++;
+    this.cd = Math.max(THUNDER_MIN_CD, THUNDER_BASE_CD - (this.level - 1) * THUNDER_CD_REDUCE);
+    this.damage = THUNDER_BASE_DAMAGE + (this.level - 1) * THUNDER_DMG_PER_LVL;
+  };
+
+  Thunder.prototype.update = function(dt, enemies, bosses) {
+    var hits = [];
+    // 更新視覺效果計時
+    if (this.visual) {
+      this.visual.timer -= dt;
+      if (this.visual.timer <= 0) this.visual = null;
+    }
+    // 落雷計時
+    this.timer -= dt;
+    if (this.timer <= 0) {
+      this.timer = this.cd;
+      // 隨機選一個敵人
+      var targets = enemies.concat(bosses);
+      if (targets.length > 0) {
+        var idx = Math.floor(Math.random() * targets.length);
+        var target = targets[idx];
+        target.hp -= this.damage;
+        if (target.hp <= 0) hits.push(target);
+        // 觸發視覺效果
+        this.visual = { x: target.x, y: target.y, timer: THUNDER_VISUAL_DURATION };
+      }
+    }
+    return hits;
+  };
+
+  Thunder.prototype.getVisual = function() {
+    return this.visual;
+  };
   function WeaponManager(player) {
     this.player = player;
     this.shield = null;
     this.nova = null;
     this.launcher = null;
+    this.thunder = null;
   }
 
   WeaponManager.prototype.unlockShield = function() {
@@ -265,6 +318,11 @@
     else { this.launcher.cd *= 0.8; }
   };
 
+  WeaponManager.prototype.unlockThunder = function() {
+    if (!this.thunder) this.thunder = new Thunder(this.player);
+    else this.thunder.upgrade();
+  };
+
   WeaponManager.prototype.update = function(dt, enemies, bosses) {
     var allHits = [];
     if (this.shield) {
@@ -273,6 +331,10 @@
     }
     if (this.nova) {
       var h = this.nova.update(dt, enemies, bosses);
+      for (var i = 0; i < h.length; i++) allHits.push(h[i]);
+    }
+    if (this.thunder) {
+      var h = this.thunder.update(dt, enemies, bosses);
       for (var i = 0; i < h.length; i++) allHits.push(h[i]);
     }
     if (this.launcher) {
@@ -287,7 +349,8 @@
     return {
       shieldPositions: this.shield ? this.shield.getPositions() : [],
       novaVisual: this.nova ? this.nova.getVisual() : null,
-      missiles: this.launcher ? this.launcher.missiles : []
+      missiles: this.launcher ? this.launcher.missiles : [],
+      thunderVisual: this.thunder ? this.thunder.getVisual() : null
     };
   };
 

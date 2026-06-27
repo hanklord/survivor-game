@@ -334,6 +334,35 @@
       ctx.beginPath(); ctx.arc(m.x, m.y, 6, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
     }
+
+    // 落雷視覺效果
+    var thunder = visuals.thunderVisual;
+    if (thunder) {
+      var tx = thunder.x, ty = thunder.y;
+      ctx.save();
+      ctx.globalAlpha = 0.8 + Math.random() * 0.2;
+      // 閃電光柱（從上方到目標）
+      ctx.strokeStyle = '#ffff88';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = '#ffff00';
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      var topY = ty - 300;
+      ctx.moveTo(tx, topY);
+      // Z 字形閃電
+      for (var seg = 0; seg < 6; seg++) {
+        var py = topY + (ty - topY) * ((seg + 1) / 7);
+        var px = tx + (Math.random() - 0.5) * 30;
+        ctx.lineTo(px, py);
+      }
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      // 命中光暈
+      ctx.fillStyle = 'rgba(255, 255, 200, 0.6)';
+      ctx.beginPath(); ctx.arc(tx, ty, 20, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
   };
 
   SG.Renderer = Renderer;

@@ -18,7 +18,8 @@
   var WEAPON_UPGRADES = [
     { name: '🔵 旋轉護盾', type: 'shield' },
     { name: '💫 範圍爆炸', type: 'nova' },
-    { name: '🚀 追蹤飛彈', type: 'missile' }
+    { name: '🚀 追蹤飛彈', type: 'missile' },
+    { name: '⚡ 落雷', type: 'thunder' }
   ];
 
   function UI() {
@@ -118,6 +119,7 @@
         if (wup.type === 'shield') weaponManager.unlockShield();
         else if (wup.type === 'nova') weaponManager.unlockNova();
         else if (wup.type === 'missile') weaponManager.unlockMissile();
+        else if (wup.type === 'thunder') weaponManager.unlockThunder();
       }
     });
 
