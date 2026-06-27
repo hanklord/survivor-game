@@ -7,7 +7,10 @@
     this.enabled = audioCfg.enabled !== false;
     this.volume = audioCfg.volume || 0.5;
     this.ctx = null;
+    this._bgm = null;       // 背景音樂 Audio 元素
+    this._bgmPlaying = false;
     this._initContext();
+    this._initBGM();
   }
 
   AudioManager.prototype._initContext = function() {
@@ -26,7 +29,38 @@
   // 切換靜音
   AudioManager.prototype.toggleMute = function() {
     this.enabled = !this.enabled;
+    if (this._bgm) this._bgm.muted = !this.enabled;
     return this.enabled;
+  };
+
+  // 初始化背景音樂
+  AudioManager.prototype._initBGM = function() {
+    this._bgm = new Audio('assets/audio/bgm.mp3');
+    this._bgm.loop = true;
+    this._bgm.volume = this.volume * 0.4; // BGM 音量較低
+  };
+
+  // 開始播放背景音樂（需用戶互動後呼叫）
+  AudioManager.prototype.playBGM = function() {
+    if (!this._bgm || this._bgmPlaying) return;
+    this._bgm.play().then(function() {}).catch(function() {});
+    this._bgmPlaying = true;
+  };
+
+  // 暫停背景音樂
+  AudioManager.prototype.pauseBGM = function() {
+    if (this._bgm) this._bgm.pause();
+  };
+
+  // 恢復背景音樂
+  AudioManager.prototype.resumeBGM = function() {
+    if (this._bgm && this._bgmPlaying) this._bgm.play().catch(function() {});
+  };
+
+  // 停止背景音樂
+  AudioManager.prototype.stopBGM = function() {
+    if (this._bgm) { this._bgm.pause(); this._bgm.currentTime = 0; }
+    this._bgmPlaying = false;
   };
 
   // 播放音效的基礎方法

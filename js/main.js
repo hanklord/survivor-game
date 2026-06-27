@@ -70,9 +70,10 @@
     this._resize();
     window.addEventListener('resize', function() { self._resize(); });
 
-    // 首次互動解鎖音頻
+    // 首次互動解鎖音頻 + 播放 BGM
     var unlockAudio = function() {
       self.audio.resume();
+      self.audio.playBGM();
       document.removeEventListener('click', unlockAudio);
       document.removeEventListener('keydown', unlockAudio);
     };
@@ -91,6 +92,8 @@
   Game.prototype._togglePause = function() {
     this.paused = !this.paused;
     this.ui.togglePause(this.paused);
+    if (this.paused) this.audio.pauseBGM();
+    else this.audio.resumeBGM();
   };
 
   Game.prototype._loadImages = function() {
@@ -418,6 +421,7 @@
 
   Game.prototype._endGame = function() {
     this.gameOver = true;
+    this.audio.stopBGM();
     this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard);
   };
 
