@@ -1,5 +1,5 @@
 window.GAME_CONFIG = {
-  "player": { "image": "0.png", "sprites": { "idle": { "file": "assets/strips/enemy_ghost_idle_8f.png", "fps": 8 } }, "size": 40 },
+  "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/survivor_handgun_idle_20f.png", "fps": 10 }, "run": { "file": "assets/strips/survivor_handgun_move_20f.png", "fps": 12 }, "attack": { "file": "assets/strips/survivor_handgun_shoot_3f.png", "fps": 10 } }, "size": 48 },
   "enemies": [
     { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_ghost_idle_8f.png", "fps": 8 } }, "size": 36, "color": "#44ff44", "hp": 3, "speed": 1.5, "damage": 5 },
     { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_bat_idle_5f.png", "fps": 8 } }, "size": 38, "color": "#8844aa", "hp": 4, "speed": 1.8, "damage": 6 },
