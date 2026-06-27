@@ -2,7 +2,7 @@
 (function() {
   window.SG = window.SG || {};
 
-  var BASE_RANGE = 200;     // 飛行距離
+  var BASE_RANGE = 100;     // 飛行距離
   var BASE_DAMAGE = 15;
   var BASE_CD = 0.8;
   var SWORD_QI_SPEED = 350; // px/s

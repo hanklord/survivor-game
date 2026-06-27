@@ -149,7 +149,7 @@
         for (var ti = trail; ti > 0; ti--) {
           ctx.globalAlpha = 0.15 * ti;
           ctx.beginPath();
-          ctx.arc(-ti * 12, 0, 18, -0.8, 0.8);
+          ctx.arc(-ti * 12, 0, 23, -0.8, 0.8);
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 4;
           ctx.lineCap = 'round';
@@ -160,20 +160,20 @@
         ctx.globalAlpha = 0.9;
         // 外層
         ctx.beginPath();
-        ctx.arc(0, 0, 20, -0.9, 0.9);
+        ctx.arc(0, 0, 26, -0.9, 0.9);
         ctx.strokeStyle = 'rgba(200,200,200,0.5)';
         ctx.lineWidth = 12;
         ctx.lineCap = 'round';
         ctx.stroke();
         // 中層
         ctx.beginPath();
-        ctx.arc(0, 0, 20, -0.9, 0.9);
+        ctx.arc(0, 0, 26, -0.9, 0.9);
         ctx.strokeStyle = 'rgba(255,255,255,0.8)';
         ctx.lineWidth = 6;
         ctx.stroke();
         // 核心
         ctx.beginPath();
-        ctx.arc(0, 0, 20, -0.9, 0.9);
+        ctx.arc(0, 0, 26, -0.9, 0.9);
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.stroke();
