@@ -5,8 +5,8 @@
   var BASE_RANGE = 80;
   var BASE_DAMAGE = 15;
   var BASE_CD = 0.8;
-  var SLASH_DURATION = 0.3; // 延長以播放 4 幀動畫
-  var SLASH_FRAMES = 4;
+  var SLASH_DURATION = 0.35; // 延長以播放 4 幀動畫
+  var SLASH_FRAMES = 6;
 
   function MeleeAttack(player) {
     this.player = player;
@@ -43,6 +43,14 @@
       if (hitAny || targets.length > 0) {
         // 斬擊方向：朝面向方向
         var angle = this.player.facingLeft ? Math.PI : 0;
+        // 朝最近敵人方向斬擊
+        var nearest = null, minD = Infinity;
+        var all = enemies.concat(bosses);
+        for (var k = 0; k < all.length; k++) {
+          var dd = SG.dist(this.player, all[k]);
+          if (dd < minD) { minD = dd; nearest = all[k]; }
+        }
+        if (nearest) angle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
         this.slashVisual = { x: this.player.x, y: this.player.y, angle: angle, timer: SLASH_DURATION, range: this.range };
       }
     }

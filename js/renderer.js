@@ -143,8 +143,8 @@
       if (slashImg) {
         // 計算當前幀（4 幀動畫，根據剩餘時間）
         var progress = 1 - (mv.timer / 0.3);
-        var frameIdx = Math.min(3, Math.floor(progress * 4));
-        var fw = Math.floor(slashImg.width / 4);
+        var frameIdx = Math.min(5, Math.floor(progress * 6));
+        var fw = Math.floor(slashImg.width / 6);
         var fh = slashImg.height;
         var drawSize = mv.range * 2;
         ctx.globalAlpha = 0.9;
