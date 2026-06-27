@@ -31,28 +31,39 @@
     if (this.timer <= 0) {
       this.timer = this.cd;
       var targets = enemies.concat(bosses);
+      if (targets.length === 0) return hits;
+
+      // 先決定斬擊方向（朝最近敵人）
+      var slashAngle = this.player.facingLeft ? Math.PI : 0;
+      var nearest = null, minD = Infinity;
+      for (var k = 0; k < targets.length; k++) {
+        var dd = SG.dist(this.player, targets[k]);
+        if (dd < minD) { minD = dd; nearest = targets[k]; }
+      }
+      if (nearest) slashAngle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
+
+      // 只傷害在斬擊弧形範圍內的敵人（距離內 + 角度±60°）
+      var ARC_HALF = 1.05; // ±60° = 120° 弧
       var hitAny = false;
       for (var i = 0; i < targets.length; i++) {
         var t = targets[i];
-        if (SG.dist(this.player, t) <= this.range + t.size / 2) {
+        var d = SG.dist(this.player, t);
+        if (d > this.range + t.size / 2) continue;
+        // 檢查角度是否在弧內
+        var a = Math.atan2(t.y - this.player.y, t.x - this.player.x);
+        var diff = a - slashAngle;
+        // 正規化到 [-PI, PI]
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        if (Math.abs(diff) <= ARC_HALF) {
           var mDmg = this.damage; t.hp -= mDmg; this._lastHits.push({x: t.x, y: t.y, dmg: mDmg});
           hitAny = true;
           if (t.hp <= 0) hits.push(t);
         }
       }
-      if (hitAny || targets.length > 0) {
-        // 斬擊方向：朝面向方向
-        var angle = this.player.facingLeft ? Math.PI : 0;
-        // 朝最近敵人方向斬擊
-        var nearest = null, minD = Infinity;
-        var all = enemies.concat(bosses);
-        for (var k = 0; k < all.length; k++) {
-          var dd = SG.dist(this.player, all[k]);
-          if (dd < minD) { minD = dd; nearest = all[k]; }
-        }
-        if (nearest) angle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
-        this.slashVisual = { x: this.player.x, y: this.player.y, angle: angle, timer: SLASH_DURATION, range: this.range };
-      }
+
+      // 設定斬擊視覺
+      this.slashVisual = { x: this.player.x, y: this.player.y, angle: slashAngle, timer: SLASH_DURATION, range: this.range };
     }
     return hits;
   };

@@ -138,7 +138,7 @@
       var mv = state.meleeVisual;
       var progress = 1 - (mv.timer / 0.35);  // 0→1
       var alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3;
-      var r = mv.range * 1.2;
+      var r = mv.range;
 
       ctx.save();
       ctx.translate(mv.x, mv.y);
