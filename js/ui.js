@@ -116,9 +116,19 @@
       })(picks[p]);
     }
 
-    // 武器選項（隨機 1 個）
-    var wi = Math.floor(Math.random() * WEAPON_UPGRADES.length);
-    var wup = WEAPON_UPGRADES[wi];
+    // 連鎖閃電必定出現（若未滿級）
+    var chainMaxed = weaponManager.chainLightning && weaponManager.chainLightning.chains >= 8;
+    if (!chainMaxed) {
+      allOptions.push({
+        name: '🔗 連鎖閃電',
+        action: function() { weaponManager.unlockChainLightning(); }
+      });
+    }
+
+    // 其他武器選項（隨機 1 個，排除連鎖閃電）
+    var otherWeapons = WEAPON_UPGRADES.filter(function(w) { return w.type !== 'chainLightning'; });
+    var wi = Math.floor(Math.random() * otherWeapons.length);
+    var wup = otherWeapons[wi];
     allOptions.push({
       name: wup.name,
       action: function() {
@@ -126,7 +136,6 @@
         else if (wup.type === 'nova') weaponManager.unlockNova();
         else if (wup.type === 'missile') weaponManager.unlockMissile();
         else if (wup.type === 'thunder') weaponManager.unlockThunder();
-        else if (wup.type === 'chainLightning') weaponManager.unlockChainLightning();
       }
     });
 
