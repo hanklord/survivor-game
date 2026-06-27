@@ -1,0 +1,344 @@
+// renderer.js — 所有 Canvas 繪製邏輯（含 off-screen culling + 分層 canvas）
+(function() {
+  window.SG = window.SG || {};
+
+  var GRID_SIZE = 60;
+  var GRID_COLOR = 'rgba(255,255,255,0.03)';
+  var PLAYER_COLOR = '#4488ff';
+  var PLAYER_HIT_COLOR = '#ffffff';
+  var PARTICLE_RADIUS = 3;
+  var GEM_DRAW_OFFSET = 8;
+  var GEM_DRAW_SIZE = 16;
+  var GEM_RADIUS = 6;
+  var GEM_GLOW = 8;
+  var HP_BAR_HEIGHT = 4;
+  var BOSS_HP_BAR_HEIGHT = 8;
+  var CULL_MARGIN = 150; // Off-screen culling 邊距，避免物件在邊緣突然出現
+
+  function Renderer(canvas, ctx) {
+    this.canvas = canvas;       // 主遊戲 canvas
+    this.ctx = ctx;
+    this.images = {};
+    this.imgConfig = null;
+    this.bgPattern = null;
+
+    // 分層 canvas：背景層（只在相機移動時重繪）
+    this.bgCanvas = document.getElementById('bg-canvas');
+    this.bgCtx = this.bgCanvas ? this.bgCanvas.getContext('2d') : null;
+    this._lastCamX = null;
+    this._lastCamY = null;
+
+    this.W = 0;
+    this.H = 0;
+  }
+
+  // 視窗大小改變時同步所有 canvas
+  Renderer.prototype.onResize = function(W, H) {
+    this.W = W;
+    this.H = H;
+    if (this.bgCanvas) {
+      this.bgCanvas.width = W;
+      this.bgCanvas.height = H;
+    }
+    // 強制重繪背景
+    this._lastCamX = null;
+  };
+
+  // 設定圖片資源與設定
+  Renderer.prototype.init = function(images, imgConfig) {
+    this.images = images;
+    this.imgConfig = imgConfig;
+    if (imgConfig.background && imgConfig.background.image && images.background) {
+      this.bgPattern = this.ctx.createPattern(images.background, 'repeat');
+    }
+  };
+
+  // 動態切換背景色（關卡系統用）
+  Renderer.prototype.setBgColor = function(color) {
+    this._overrideBgColor = color;
+    this._lastCamX = null; // 強制重繪背景
+  };
+
+  // 判斷物件是否在可見區域內
+  Renderer.prototype._isVisible = function(x, y, camX, camY, margin) {
+    return x >= camX - margin && x <= camX + this.W + margin &&
+           y >= camY - margin && y <= camY + this.H + margin;
+  };
+
+  // 主繪製
+  Renderer.prototype.render = function(state) {
+    var ctx = this.ctx;
+    var W = this.W || this.canvas.width;
+    var H = this.H || this.canvas.height;
+    var player = state.player;
+    var camX = player.x - W / 2;
+    var camY = player.y - H / 2;
+
+    // 背景層：只在相機移動時重繪
+    if (this.bgCtx) {
+      if (this._lastCamX !== camX || this._lastCamY !== camY) {
+        this._drawBackgroundLayer(camX, camY, W, H);
+        this._lastCamX = camX;
+        this._lastCamY = camY;
+      }
+      // 主 canvas 清空（背景已在下層）
+      ctx.clearRect(0, 0, W, H);
+    } else {
+      // 無分層時，背景繪製在主 canvas
+      ctx.save();
+      ctx.translate(-camX, -camY);
+      this._drawBackground(ctx, camX, camY, W, H);
+      ctx.restore();
+    }
+
+    // 遊戲物件繪製（帶 off-screen culling）
+    ctx.save();
+    ctx.translate(-camX, -camY);
+
+    this._drawXPGems(state.xpGems, camX, camY);
+    this._drawEnemies(state.enemies, camX, camY);
+    this._drawBosses(state.bosses, camX, camY);
+    this._drawProjectiles(state.projectiles, camX, camY);
+    this._drawPlayer(player);
+    if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
+    this._drawParticles(state.particles, camX, camY);
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  };
+
+  // 背景層繪製（分層 canvas）
+  Renderer.prototype._drawBackgroundLayer = function(camX, camY, W, H) {
+    var bgCtx = this.bgCtx;
+    bgCtx.save();
+    bgCtx.translate(-camX, -camY);
+    this._drawBackground(bgCtx, camX, camY, W, H);
+    bgCtx.restore();
+  };
+
+  Renderer.prototype._drawBackground = function(ctx, camX, camY, W, H) {
+    if (this.bgPattern) {
+      // 使用 setTransform 重置矩陣讓 pattern 以螢幕座標填充，
+      // 用 modulo 偏移模擬鏡頭平移的無限重複背景效果。
+      ctx.save();
+      ctx.fillStyle = this.bgPattern;
+      ctx.setTransform(1, 0, 0, 1, -camX % this.images.background.width, -camY % this.images.background.height);
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = this._overrideBgColor || (this.imgConfig.background && this.imgConfig.background.color) || '#1a1a2e';
+      ctx.fillRect(camX, camY, W, H);
+      // 格線
+      ctx.strokeStyle = GRID_COLOR;
+      ctx.lineWidth = 1;
+      var sx = Math.floor(camX / GRID_SIZE) * GRID_SIZE;
+      var sy = Math.floor(camY / GRID_SIZE) * GRID_SIZE;
+      for (var x = sx; x < camX + W; x += GRID_SIZE) {
+        ctx.beginPath(); ctx.moveTo(x, camY); ctx.lineTo(x, camY + H); ctx.stroke();
+      }
+      for (var y = sy; y < camY + H; y += GRID_SIZE) {
+        ctx.beginPath(); ctx.moveTo(camX, y); ctx.lineTo(camX + W, y); ctx.stroke();
+      }
+    }
+  };
+
+  Renderer.prototype._drawXPGems = function(gems, camX, camY) {
+    var ctx = this.ctx;
+    var gemColor = (this.imgConfig.xpGem && this.imgConfig.xpGem.color) || '#00ff88';
+    for (var i = 0; i < gems.length; i++) {
+      var g = gems[i];
+      if (!this._isVisible(g.x, g.y, camX, camY, CULL_MARGIN)) continue;
+      if (this.images.xpGem) {
+        ctx.drawImage(this.images.xpGem, g.x - GEM_DRAW_OFFSET, g.y - GEM_DRAW_OFFSET, GEM_DRAW_SIZE, GEM_DRAW_SIZE);
+      } else {
+        ctx.fillStyle = gemColor;
+        ctx.shadowColor = gemColor;
+        ctx.shadowBlur = GEM_GLOW;
+        ctx.beginPath(); ctx.arc(g.x, g.y, GEM_RADIUS, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+  };
+
+  Renderer.prototype._drawEnemies = function(enemies, camX, camY) {
+    var ctx = this.ctx;
+    for (var i = 0; i < enemies.length; i++) {
+      var e = enemies[i];
+      if (!this._isVisible(e.x, e.y, camX, camY, CULL_MARGIN)) continue;
+      if (e.animator && e.animator.isLoaded()) {
+        e.animator.draw(ctx, e.x, e.y, e.size, e.facingLeft);
+      } else {
+        var img = this.images['enemy_' + e.cfgIdx];
+        if (img) {
+          ctx.drawImage(img, e.x - e.size / 2, e.y - e.size / 2, e.size, e.size);
+        } else {
+          ctx.fillStyle = e.color;
+          ctx.shadowColor = e.color;
+          ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(e.x, e.y, e.size / 2, 0, Math.PI * 2); ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+      // 血條
+      var bw = e.size * 0.8;
+      ctx.fillStyle = '#333';
+      ctx.fillRect(e.x - bw / 2, e.y - e.size / 2 - 8, bw, HP_BAR_HEIGHT);
+      ctx.fillStyle = '#ff4444';
+      ctx.fillRect(e.x - bw / 2, e.y - e.size / 2 - 8, bw * (e.hp / e.maxHp), HP_BAR_HEIGHT);
+    }
+  };
+
+  Renderer.prototype._drawBosses = function(bosses, camX, camY) {
+    var ctx = this.ctx;
+    for (var i = 0; i < bosses.length; i++) {
+      var b = bosses[i];
+      if (!this._isVisible(b.x, b.y, camX, camY, CULL_MARGIN)) continue;
+      if (b.animator && b.animator.isLoaded()) {
+        b.animator.draw(ctx, b.x, b.y, b.size, b.facingLeft);
+      } else {
+        var img = this.images['boss_' + b.cfgIdx];
+        if (img) {
+          ctx.drawImage(img, b.x - b.size / 2, b.y - b.size / 2, b.size, b.size);
+        } else {
+          ctx.fillStyle = b.color;
+          ctx.shadowColor = b.color;
+          ctx.shadowBlur = 20;
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.size / 2, 0, Math.PI * 2); ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+      // Boss 血條
+      var bw = b.size;
+      ctx.fillStyle = '#333';
+      ctx.fillRect(b.x - bw / 2, b.y - b.size / 2 - 14, bw, BOSS_HP_BAR_HEIGHT);
+      ctx.fillStyle = '#ff0000';
+      ctx.fillRect(b.x - bw / 2, b.y - b.size / 2 - 14, bw * (b.hp / b.maxHp), BOSS_HP_BAR_HEIGHT);
+    }
+  };
+
+  Renderer.prototype._drawProjectiles = function(projectiles, camX, camY) {
+    var ctx = this.ctx;
+    var pSize = (this.imgConfig.projectile && this.imgConfig.projectile.size) || 12;
+    var pColor = (this.imgConfig.projectile && this.imgConfig.projectile.color) || '#ffff00';
+    for (var i = 0; i < projectiles.length; i++) {
+      var p = projectiles[i];
+      if (!this._isVisible(p.x, p.y, camX, camY, CULL_MARGIN)) continue;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.atan2(p.vy, p.vx));
+      if (this.images.projectile) {
+        ctx.drawImage(this.images.projectile, -pSize / 2, -pSize / 2, pSize, pSize);
+      } else {
+        ctx.fillStyle = pColor;
+        ctx.shadowColor = pColor;
+        ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.ellipse(0, 0, pSize / 2, pSize / 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+      ctx.restore();
+    }
+  };
+
+  Renderer.prototype._drawPlayer = function(player) {
+    var ctx = this.ctx;
+    var ps = (this.imgConfig.player && this.imgConfig.player.size) || 40;
+    if (player.animator && player.animator.isLoaded()) {
+      player.animator.draw(ctx, player.x, player.y, ps, player.facingAngle);
+    } else if (this.images.player) {
+      // 靜態圖旋轉繪製
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(player.facingAngle);
+      ctx.drawImage(this.images.player, -ps / 2, -ps / 2, ps, ps);
+      ctx.restore();
+    } else {
+      // 幾何 fallback + 方向指示三角形
+      ctx.fillStyle = player.invuln > 0 ? PLAYER_HIT_COLOR : PLAYER_COLOR;
+      ctx.shadowColor = PLAYER_COLOR;
+      ctx.shadowBlur = 15;
+      ctx.beginPath(); ctx.arc(player.x, player.y, ps / 2, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      // 方向指示
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(player.facingAngle);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(ps / 2, 0);
+      ctx.lineTo(ps / 4, -ps / 6);
+      ctx.lineTo(ps / 4, ps / 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    // 撿取範圍圓圈
+    ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.pickupRange, 0, Math.PI * 2);
+    ctx.stroke();
+  };
+
+  Renderer.prototype._drawParticles = function(particles, camX, camY) {
+    var ctx = this.ctx;
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      if (!this._isVisible(p.x, p.y, camX, camY, CULL_MARGIN)) continue;
+      ctx.globalAlpha = p.life * 2;
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, PARTICLE_RADIUS, 0, Math.PI * 2); ctx.fill();
+    }
+  };
+
+  // 繪製武器視覺效果（護盾、Nova、飛彈）
+  Renderer.prototype._drawWeapons = function(visuals, camX, camY) {
+    var ctx = this.ctx;
+
+    // 旋轉護盾
+    var shields = visuals.shieldPositions;
+    for (var i = 0; i < shields.length; i++) {
+      var s = shields[i];
+      if (!this._isVisible(s.x, s.y, camX, camY, CULL_MARGIN)) continue;
+      ctx.fillStyle = '#44aaff';
+      ctx.shadowColor = '#44aaff';
+      ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Nova 擴散波
+    var nova = visuals.novaVisual;
+    if (nova) {
+      ctx.strokeStyle = 'rgba(255, 200, 50, ' + nova.alpha + ')';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#ffcc33';
+      ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(nova.x, nova.y, nova.radius, 0, Math.PI * 2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // 追蹤飛彈
+    var missiles = visuals.missiles;
+    for (var i = 0; i < missiles.length; i++) {
+      var m = missiles[i];
+      if (!m.active) continue;
+      if (!this._isVisible(m.x, m.y, camX, camY, CULL_MARGIN)) continue;
+      // 拖尾
+      for (var j = 0; j < m.trail.length; j++) {
+        var t = m.trail[j];
+        ctx.globalAlpha = (j + 1) / m.trail.length * 0.5;
+        ctx.fillStyle = '#ff8844';
+        ctx.beginPath(); ctx.arc(t.x, t.y, 3, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // 飛彈本體
+      ctx.fillStyle = '#ff4400';
+      ctx.shadowColor = '#ff4400';
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(m.x, m.y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  };
+
+  SG.Renderer = Renderer;
+})();
