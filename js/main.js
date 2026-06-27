@@ -204,7 +204,8 @@
       projectiles: this.projectiles,
       particles: this.particles,
       xpGems: this.xpGems,
-      weaponVisuals: this.weaponManager.getVisuals()
+      weaponVisuals: this.weaponManager.getVisuals(),
+      dt: dt
     });
 
     var self = this;
@@ -301,8 +302,15 @@
     }
 
     // XP 寶石
+    var magnetRange = this._magnetAllXP ? 99999 : 0;
     for (var i = this.xpGems.length - 1; i >= 0; i--) {
       var g = this.xpGems[i];
+      // Boss 擊敗時強制吸取所有寶石
+      if (magnetRange) {
+        var a = Math.atan2(this.player.y - g.y, this.player.x - g.x);
+        g.x += Math.cos(a) * 8;
+        g.y += Math.sin(a) * 8;
+      }
       var result = g.update(this.player);
       if (result === 'picked') {
         var xpVal = g.value * (this.player.xpMultiplier || 1);
@@ -313,6 +321,8 @@
         if (leveled) this._showLevelUp();
       }
     }
+    // 全部吸完後關閉磁鐵
+    if (this._magnetAllXP && this.xpGems.length === 0) this._magnetAllXP = false;
 
     // 粒子
     for (var i = this.particles.length - 1; i >= 0; i--) {
@@ -360,6 +370,9 @@
         this.xpGems.push(gem);
       }
       this._removeFrom(this.bosses, e);
+      // Boss 擊敗特效：畫面震動 + 吸取所有經驗
+      this.renderer.shake(0.5, 12);
+      this._magnetAllXP = true;
     } else {
       var gem = this.xpGemPool.get();
       gem.init(e.x, e.y, 1);

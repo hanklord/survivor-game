@@ -28,9 +28,21 @@
     this._lastCamX = null;
     this._lastCamY = null;
 
+    // Screen shake
+    this._shakeTimer = 0;
+    this._shakeDuration = 0;
+    this._shakeIntensity = 0;
+
     this.W = 0;
     this.H = 0;
   }
+
+  // 觸發畫面震動
+  Renderer.prototype.shake = function(duration, intensity) {
+    this._shakeTimer = duration;
+    this._shakeDuration = duration;
+    this._shakeIntensity = intensity || 10;
+  };
 
   // 視窗大小改變時同步所有 canvas
   Renderer.prototype.onResize = function(W, H) {
@@ -85,6 +97,14 @@
     var player = state.player;
     var camX = player.x - W / 2;
     var camY = player.y - H / 2;
+
+    // Screen shake 偏移
+    if (this._shakeTimer > 0) {
+      this._shakeTimer -= state.dt || 0.016;
+      var intensity = this._shakeIntensity * (this._shakeTimer / this._shakeDuration);
+      camX += (Math.random() - 0.5) * intensity * 2;
+      camY += (Math.random() - 0.5) * intensity * 2;
+    }
 
     // 背景層：只在相機移動時重繪
     if (this.bgCtx) {
