@@ -5,7 +5,8 @@
   var BASE_RANGE = 80;
   var BASE_DAMAGE = 15;
   var BASE_CD = 0.8;
-  var SLASH_DURATION = 0.15;
+  var SLASH_DURATION = 0.3; // 延長以播放 4 幀動畫
+  var SLASH_FRAMES = 4;
 
   function MeleeAttack(player) {
     this.player = player;

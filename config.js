@@ -24,7 +24,7 @@ window.GAME_CONFIG = {
     { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 100, "color": "#ffcc00", "hp": 3000, "speed": 0.45, "damage": 50, "spawnTime": 300 },
     { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_evileye_idle_4f.png", "fps": 6 } }, "size": 120, "color": "#000000", "hp": 5000, "speed": 0.4, "damage": 60, "spawnTime": 360 }
   ],
-  "projectile": { "image": null, "color": "#ffff00", "size": 12 },
+  "projectile": { "image": "assets/projectile.png", "color": "#ffff00", "size": 24 },
   "xpGem": { "image": null, "color": "#00ff88" },
   "background": { "color": "#1a1a2e", "image": null },
   "audio": { "enabled": true, "volume": 0.5 },

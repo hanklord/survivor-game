@@ -141,6 +141,7 @@
     // 載入近戰角色 sprite strips
     load('melee_sprite_idle', 'assets/strips/knight_idle_10f.png');
     load('melee_sprite_run', 'assets/strips/knight_run_10f.png');
+    load('slash_effect', 'assets/strips/slash_effect_4f.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
       if (lv.bgImage) load('level_bg_' + i, lv.bgImage);

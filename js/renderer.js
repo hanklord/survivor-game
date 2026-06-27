@@ -133,20 +133,34 @@
     this._drawProjectiles(state.projectiles, camX, camY);
     this._drawPlayer(player);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
-    // 近戰斬擊視覺
+    // 近戰斬擊視覺（sprite strip 動畫）
     if (state.meleeVisual) {
       var mv = state.meleeVisual;
+      var slashImg = this.images.slash_effect;
       ctx.save();
       ctx.translate(mv.x, mv.y);
       ctx.rotate(mv.angle);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.lineWidth = 4;
-      ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 15;
-      ctx.beginPath();
-      ctx.arc(0, 0, mv.range, -0.6, 0.6);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      if (slashImg) {
+        // 計算當前幀（4 幀動畫，根據剩餘時間）
+        var progress = 1 - (mv.timer / 0.3);
+        var frameIdx = Math.min(3, Math.floor(progress * 4));
+        var fw = Math.floor(slashImg.width / 4);
+        var fh = slashImg.height;
+        var drawSize = mv.range * 2;
+        ctx.globalAlpha = 0.9;
+        ctx.drawImage(slashImg, frameIdx * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+        ctx.globalAlpha = 1;
+      } else {
+        // Fallback: 弧線
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(0, 0, mv.range, -0.6, 0.6);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
       ctx.restore();
     }
     this._drawParticles(state.particles, camX, camY);
