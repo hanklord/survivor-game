@@ -59,6 +59,18 @@
     this._lastCamX = null; // 強制重繪背景
   };
 
+  // 動態切換背景圖片（關卡系統用）
+  Renderer.prototype.setBgImage = function(img) {
+    if (img) {
+      this.bgPattern = (this.bgCtx || this.ctx).createPattern(img, 'repeat');
+      this._bgPatternImg = img;
+    } else {
+      this.bgPattern = null;
+      this._bgPatternImg = null;
+    }
+    this._lastCamX = null; // 強制重繪背景
+  };
+
   // 判斷物件是否在可見區域內
   Renderer.prototype._isVisible = function(x, y, camX, camY, margin) {
     return x >= camX - margin && x <= camX + this.W + margin &&
@@ -120,25 +132,17 @@
     if (this.bgPattern) {
       // 使用 setTransform 重置矩陣讓 pattern 以螢幕座標填充，
       // 用 modulo 偏移模擬鏡頭平移的無限重複背景效果。
+      var bgImg = this._bgPatternImg || (this.images && this.images.background);
+      var pw = bgImg ? bgImg.width : 256;
+      var ph = bgImg ? bgImg.height : 256;
       ctx.save();
       ctx.fillStyle = this.bgPattern;
-      ctx.setTransform(1, 0, 0, 1, -camX % this.images.background.width, -camY % this.images.background.height);
-      ctx.fillRect(0, 0, W, H);
+      ctx.setTransform(1, 0, 0, 1, -(camX % pw + pw) % pw, -(camY % ph + ph) % ph);
+      ctx.fillRect(0, 0, W + pw, H + ph);
       ctx.restore();
     } else {
       ctx.fillStyle = this._overrideBgColor || (this.imgConfig.background && this.imgConfig.background.color) || '#1a1a2e';
       ctx.fillRect(camX, camY, W, H);
-      // 格線
-      ctx.strokeStyle = GRID_COLOR;
-      ctx.lineWidth = 1;
-      var sx = Math.floor(camX / GRID_SIZE) * GRID_SIZE;
-      var sy = Math.floor(camY / GRID_SIZE) * GRID_SIZE;
-      for (var x = sx; x < camX + W; x += GRID_SIZE) {
-        ctx.beginPath(); ctx.moveTo(x, camY); ctx.lineTo(x, camY + H); ctx.stroke();
-      }
-      for (var y = sy; y < camY + H; y += GRID_SIZE) {
-        ctx.beginPath(); ctx.moveTo(camX, y); ctx.lineTo(camX + W, y); ctx.stroke();
-      }
     }
   };
 

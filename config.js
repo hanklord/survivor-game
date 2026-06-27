@@ -29,10 +29,10 @@ window.GAME_CONFIG = {
   "background": { "color": "#1a1a2e", "image": null },
   "audio": { "enabled": true, "volume": 0.5 },
   "levels": [
-    { "name": "草地", "bgColor": "#1a2e1a", "duration": 90, "enemySpeedMult": 1, "bossIndices": [0, 1] },
-    { "name": "洞窟", "bgColor": "#1a1a2e", "duration": 120, "enemySpeedMult": 1.2, "bossIndices": [2, 3] },
-    { "name": "沼澤", "bgColor": "#1a2e2a", "duration": 150, "enemySpeedMult": 1.3, "bossIndices": [4, 5] },
-    { "name": "火山", "bgColor": "#2e1a1a", "duration": 180, "enemySpeedMult": 1.5, "bossIndices": [6, 7] },
-    { "name": "地獄", "bgColor": "#1a0a0a", "duration": 240, "enemySpeedMult": 1.8, "bossIndices": [8, 9] }
+    { "name": "草地", "bgColor": "#1a2e1a", "bgImage": "assets/backgrounds/grass.png", "duration": 90, "enemySpeedMult": 1, "bossIndices": [0, 1] },
+    { "name": "洞窟", "bgColor": "#1a1a2e", "bgImage": "assets/backgrounds/cave.png", "duration": 120, "enemySpeedMult": 1.2, "bossIndices": [2, 3] },
+    { "name": "沼澤", "bgColor": "#1a2e2a", "bgImage": "assets/backgrounds/swamp.png", "duration": 150, "enemySpeedMult": 1.3, "bossIndices": [4, 5] },
+    { "name": "火山", "bgColor": "#2e1a1a", "bgImage": "assets/backgrounds/volcano.png", "duration": 180, "enemySpeedMult": 1.5, "bossIndices": [6, 7] },
+    { "name": "地獄", "bgColor": "#1a0a0a", "bgImage": "assets/backgrounds/hell.png", "duration": 240, "enemySpeedMult": 1.8, "bossIndices": [8, 9] }
   ]
 };

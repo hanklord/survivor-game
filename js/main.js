@@ -136,6 +136,10 @@
     load('projectile', cfg.projectile && cfg.projectile.image);
     load('xpGem', cfg.xpGem && cfg.xpGem.image);
     load('background', cfg.background && cfg.background.image);
+    // 載入各關卡背景圖
+    (cfg.levels || []).forEach(function(lv, i) {
+      if (lv.bgImage) load('level_bg_' + i, lv.bgImage);
+    });
     Promise.all(promises).then(function() { self._start(); });
   };
 
@@ -162,7 +166,7 @@
     this.regenTimer = 0;
 
     // 設定初始關卡背景
-    this.renderer.setBgColor(this.levelManager.getBgColor());
+    this._applyLevelBg();
     this.ui.updateLevelName(this.levelManager.getCurrent().name);
 
     var self = this;
@@ -381,6 +385,18 @@
     return false;
   };
 
+  // 套用當前關卡的背景圖片/顏色
+  Game.prototype._applyLevelBg = function() {
+    var idx = this.levelManager.currentLevel;
+    var bgImg = this.images['level_bg_' + idx];
+    if (bgImg) {
+      this.renderer.setBgImage(bgImg);
+    } else {
+      this.renderer.setBgImage(null);
+      this.renderer.setBgColor(this.levelManager.getBgColor());
+    }
+  };
+
   Game.prototype._onLevelClear = function() {
     var self = this;
     this.levelClearing = true;
@@ -396,7 +412,7 @@
 
     this.ui.showLevelClear(levelName, function() {
       self.levelClearing = false;
-      self.renderer.setBgColor(self.levelManager.getBgColor());
+      self._applyLevelBg();
       self.ui.updateLevelName(self.levelManager.getCurrent().name);
       // 清場
       self.enemies = [];
