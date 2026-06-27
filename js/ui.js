@@ -22,6 +22,11 @@
     { name: '⚡ 落雷', type: 'thunder' }
   ];
 
+  var MELEE_UPGRADES = [
+    { name: '⚔️ 攻擊頻率提升', type: 'meleeRate' },
+    { name: '🗡️ 攻擊範圍提升', type: 'meleeRange' }
+  ];
+
   function UI() {
     this.els = {
       hpFill: document.getElementById('hp-fill'),
@@ -89,7 +94,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -132,6 +137,19 @@
           action: function() { skillTree.applySkill(sc.skillId, player); }
         });
       })(skillChoices[s]);
+    }
+
+    // 近戰角色專屬升級（隨機 1 個）
+    if (meleeAttack) {
+      var mi = Math.floor(Math.random() * MELEE_UPGRADES.length);
+      var mup = MELEE_UPGRADES[mi];
+      allOptions.push({
+        name: mup.name,
+        action: function() {
+          if (mup.type === 'meleeRate') meleeAttack.upgradeRate();
+          else if (mup.type === 'meleeRange') meleeAttack.upgradeRange();
+        }
+      });
     }
 
     // 建立按鈕

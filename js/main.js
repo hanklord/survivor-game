@@ -80,6 +80,8 @@
     document.addEventListener('click', unlockAudio);
     document.addEventListener('keydown', unlockAudio);
 
+    this._selectedCharacter = null;
+    this._meleeAttack = null;
     this._loadImages();
   }
 
@@ -136,6 +138,9 @@
     load('projectile', cfg.projectile && cfg.projectile.image);
     load('xpGem', cfg.xpGem && cfg.xpGem.image);
     load('background', cfg.background && cfg.background.image);
+    // 載入近戰角色 sprite strips
+    load('melee_sprite_idle', 'assets/strips/warrior_idle_4f.png');
+    load('melee_sprite_run', 'assets/strips/warrior_walk_6f.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
       if (lv.bgImage) load('level_bg_' + i, lv.bgImage);
@@ -145,9 +150,29 @@
 
   Game.prototype._start = function() {
     this.renderer.init(this.images, this.imgConfig);
+    var self = this;
+    // 顯示角色選擇畫面
+    new SG.CharacterSelect(function(character) {
+      self._selectedCharacter = character;
+      self._initGame();
+    });
+  };
+
+  Game.prototype._initGame = function() {
+    var self = this;
     this.player = new SG.Player();
-    // 建立玩家動畫器
-    this.player.animator = this._buildAnimator('player', this.imgConfig.player);
+    this.player.attackType = this._selectedCharacter.attackType;
+
+    // 根據角色類型設定動畫
+    if (this._selectedCharacter.id === 'melee') {
+      var meleeCfg = { sprites: { idle: { file: 'assets/strips/warrior_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/warrior_walk_6f.png', fps: 10 } } };
+      this.player.animator = this._buildAnimator('melee', meleeCfg);
+      this._meleeAttack = new SG.MeleeAttack(this.player);
+    } else {
+      this.player.animator = this._buildAnimator('player', this.imgConfig.player);
+      this._meleeAttack = null;
+    }
+
     this.enemies = [];
     this.projectiles = [];
     this.particles = [];
@@ -169,7 +194,6 @@
     this._applyLevelBg();
     this.ui.updateLevelName(this.levelManager.getCurrent().name);
 
-    var self = this;
     requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
   };
 
@@ -205,6 +229,7 @@
       particles: this.particles,
       xpGems: this.xpGems,
       weaponVisuals: this.weaponManager.getVisuals(),
+      meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
       dt: dt
     });
 
@@ -235,17 +260,22 @@
     for (var i = 0; i < this.enemies.length; i++) this.spatialHash.insert(this.enemies[i]);
     for (var i = 0; i < this.bosses.length; i++) this.spatialHash.insert(this.bosses[i]);
 
-    // 自動射擊
-    this.player.fireTimer -= dt;
-    if (this.player.fireTimer <= 0) {
-      var allTargets = this.enemies.concat(this.bosses).sort(function(a, b) {
-        return SG.dist(self.player, a) - SG.dist(self.player, b);
-      });
-      if (allTargets.length) {
-        var bullets = SG.Projectile.fireAtTargets(this.player, allTargets, this.projectilePool);
-        for (var i = 0; i < bullets.length; i++) this.projectiles.push(bullets[i]);
-        this.player.triggerAttack();
-        this.audio.playShoot();
+    // 自動射擊（遠程角色）/ 近戰斬擊（近戰角色）
+    if (this.player.attackType === 'melee' && this._meleeAttack) {
+      var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
+      for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
+    } else {
+      this.player.fireTimer -= dt;
+      if (this.player.fireTimer <= 0) {
+        var allTargets = this.enemies.concat(this.bosses).sort(function(a, b) {
+          return SG.dist(self.player, a) - SG.dist(self.player, b);
+        });
+        if (allTargets.length) {
+          var bullets = SG.Projectile.fireAtTargets(this.player, allTargets, this.projectilePool);
+          for (var i = 0; i < bullets.length; i++) this.projectiles.push(bullets[i]);
+          this.player.triggerAttack();
+          this.audio.playShoot();
+        }
       }
     }
 
@@ -445,7 +475,7 @@
     var self = this;
     this.ui.showLevelUp(this.player, this.weaponManager, this.skillTree, function() {
       self.levelingUp = false;
-    });
+    }, this._meleeAttack);
   };
 
   Game.prototype._endGame = function() {

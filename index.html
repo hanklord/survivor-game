@@ -61,6 +61,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 <div id="pause-overlay">PAUSED</div>
 <div id="boss-warning">⚠ BOSS INCOMING! ⚠</div>
 <div id="skill-icons"></div>
+<div id="character-select" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#fff; font-family:Segoe UI,sans-serif; z-index:20; pointer-events:all;"></div>
 <div id="joystick"><div id="joystick-knob"></div></div>
 
 <!-- 依序載入模組（相容 file:// 協議） -->
@@ -82,6 +83,8 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 <script src="js/level-manager.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/leaderboard.js"></script>
+<script src="js/character-select.js"></script>
+<script src="js/melee-attack.js"></script>
 <script src="js/renderer.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>

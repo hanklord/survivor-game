@@ -133,6 +133,22 @@
     this._drawProjectiles(state.projectiles, camX, camY);
     this._drawPlayer(player);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
+    // 近戰斬擊視覺
+    if (state.meleeVisual) {
+      var mv = state.meleeVisual;
+      ctx.save();
+      ctx.translate(mv.x, mv.y);
+      ctx.rotate(mv.angle);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(0, 0, mv.range, -0.6, 0.6);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
     this._drawParticles(state.particles, camX, camY);
 
     ctx.globalAlpha = 1;
