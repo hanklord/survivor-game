@@ -167,6 +167,7 @@
     if (this._selectedCharacter.id === 'melee') {
       var meleeCfg = { sprites: { idle: { file: 'assets/strips/knight_idle_10f.png', fps: 10 }, run: { file: 'assets/strips/knight_run_10f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('melee', meleeCfg);
+      this.player.spriteDefaultRight = true;
       this._meleeAttack = new SG.MeleeAttack(this.player);
     } else {
       this.player.animator = this._buildAnimator('player', this.imgConfig.player);

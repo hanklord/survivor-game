@@ -34,6 +34,7 @@
     // 動畫相關
     this.animator = null;
     this.facingLeft = false;
+    this.spriteDefaultRight = false; // true 表示 sprite 預設面右
     this._attackTimer = 0;
   }
 
@@ -42,7 +43,7 @@
     if (dir.x || dir.y) {
       this.x += dir.x * this.speed;
       this.y += dir.y * this.speed;
-      if (dir.x !== 0) this.facingLeft = dir.x > 0;
+      if (dir.x !== 0) this.facingLeft = this.spriteDefaultRight ? dir.x < 0 : dir.x > 0;
       this._moving = true;
     } else {
       this._moving = false;
