@@ -441,6 +441,38 @@
       ctx.shadowBlur = 0;
       ctx.restore();
     }
+
+    // 連鎖閃電
+    var chain = visuals.chainVisual;
+    if (chain) {
+      ctx.save();
+      ctx.globalAlpha = 0.7 + Math.random() * 0.3;
+      ctx.strokeStyle = '#ffffff';
+      ctx.shadowColor = '#88ccff';
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 3;
+      for (var ci = 0; ci < chain.segments.length; ci++) {
+        var seg = chain.segments[ci];
+        ctx.beginPath();
+        ctx.moveTo(seg.x1, seg.y1);
+        // Z 字形鋸齒
+        var dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+        var steps = 5;
+        for (var si = 1; si < steps; si++) {
+          var t = si / steps;
+          var mx = seg.x1 + dx * t + (Math.random() - 0.5) * 20;
+          var my = seg.y1 + dy * t + (Math.random() - 0.5) * 20;
+          ctx.lineTo(mx, my);
+        }
+        ctx.lineTo(seg.x2, seg.y2);
+        ctx.stroke();
+        // 命中點光暈
+        ctx.fillStyle = 'rgba(200, 230, 255, 0.5)';
+        ctx.beginPath(); ctx.arc(seg.x2, seg.y2, 10, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
   };
 
   SG.Renderer = Renderer;

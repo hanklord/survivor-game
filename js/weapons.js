@@ -304,12 +304,78 @@
   Thunder.prototype.getVisual = function() {
     return this.visual;
   };
+
+  // === 連鎖閃電 (Chain Lightning) ===
+  var CHAIN_DAMAGE = 20;
+  var CHAIN_CD = 2.5;
+  var CHAIN_RANGE = 150;
+  var CHAIN_MAX = 8;
+  var CHAIN_VISUAL_DURATION = 0.25;
+
+  function ChainLightning(player) {
+    this.player = player;
+    this.damage = CHAIN_DAMAGE;
+    this.cd = CHAIN_CD;
+    this.timer = this.cd;
+    this.chains = 1; // 連鎖次數（Lv1=1, Lv2=2...）
+    this.visual = null; // { segments: [{x1,y1,x2,y2},...], timer }
+  }
+
+  ChainLightning.prototype.upgrade = function() {
+    this.chains = Math.min(this.chains + 1, CHAIN_MAX);
+  };
+
+  ChainLightning.prototype.update = function(dt, enemies, bosses) {
+    var hits = [];
+    if (this.visual) {
+      this.visual.timer -= dt;
+      if (this.visual.timer <= 0) this.visual = null;
+    }
+    this.timer -= dt;
+    if (this.timer <= 0) {
+      this.timer = this.cd;
+      var targets = enemies.concat(bosses);
+      if (targets.length === 0) return hits;
+
+      // 找最近敵人作為第一個目標
+      var current = { x: this.player.x, y: this.player.y };
+      var hitIds = {};
+      var segments = [];
+
+      for (var c = 0; c < this.chains; c++) {
+        var nearest = null, minD = Infinity;
+        for (var i = 0; i < targets.length; i++) {
+          if (targets[i].hp <= 0 || hitIds[targets[i].id]) continue;
+          var d = SG.dist(current, targets[i]);
+          if (d < minD && d <= CHAIN_RANGE) { minD = d; nearest = targets[i]; }
+        }
+        if (!nearest) break;
+
+        segments.push({ x1: current.x, y1: current.y, x2: nearest.x, y2: nearest.y });
+        nearest.hp -= this.damage;
+        hitIds[nearest.id] = true;
+        if (nearest.hp <= 0) hits.push(nearest);
+        current = { x: nearest.x, y: nearest.y };
+      }
+
+      if (segments.length > 0) {
+        this.visual = { segments: segments, timer: CHAIN_VISUAL_DURATION };
+      }
+    }
+    return hits;
+  };
+
+  ChainLightning.prototype.getVisual = function() {
+    return this.visual;
+  };
+
   function WeaponManager(player) {
     this.player = player;
     this.shield = null;
     this.nova = null;
     this.launcher = null;
     this.thunder = null;
+    this.chainLightning = null;
   }
 
   WeaponManager.prototype.unlockShield = function() {
@@ -333,6 +399,11 @@
     else this.thunder.upgrade();
   };
 
+  WeaponManager.prototype.unlockChainLightning = function() {
+    if (!this.chainLightning) this.chainLightning = new ChainLightning(this.player);
+    else this.chainLightning.upgrade();
+  };
+
   WeaponManager.prototype.update = function(dt, enemies, bosses) {
     var allHits = [];
     if (this.shield) {
@@ -341,6 +412,10 @@
     }
     if (this.nova) {
       var h = this.nova.update(dt, enemies, bosses);
+      for (var i = 0; i < h.length; i++) allHits.push(h[i]);
+    }
+    if (this.chainLightning) {
+      var h = this.chainLightning.update(dt, enemies, bosses);
       for (var i = 0; i < h.length; i++) allHits.push(h[i]);
     }
     if (this.thunder) {
@@ -360,7 +435,8 @@
       shieldPositions: this.shield ? this.shield.getPositions() : [],
       novaVisual: this.nova ? this.nova.getVisual() : null,
       missiles: this.launcher ? this.launcher.missiles : [],
-      thunderVisual: this.thunder ? this.thunder.getVisual() : null
+      thunderVisual: this.thunder ? this.thunder.getVisual() : null,
+      chainVisual: this.chainLightning ? this.chainLightning.getVisual() : null
     };
   };
 

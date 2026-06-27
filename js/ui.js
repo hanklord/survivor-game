@@ -19,7 +19,8 @@
     { name: '🔵 旋轉護盾', type: 'shield' },
     { name: '💫 範圍爆炸', type: 'nova' },
     { name: '🚀 追蹤飛彈', type: 'missile' },
-    { name: '⚡ 落雷', type: 'thunder' }
+    { name: '⚡ 落雷', type: 'thunder' },
+    { name: '🔗 連鎖閃電', type: 'chainLightning' }
   ];
 
   var MELEE_UPGRADES = [
@@ -125,6 +126,7 @@
         else if (wup.type === 'nova') weaponManager.unlockNova();
         else if (wup.type === 'missile') weaponManager.unlockMissile();
         else if (wup.type === 'thunder') weaponManager.unlockThunder();
+        else if (wup.type === 'chainLightning') weaponManager.unlockChainLightning();
       }
     });
 
