@@ -145,7 +145,7 @@
     load('background', cfg.background && cfg.background.image);
     // 載入近戰角色 sprite strips
     load('melee_sprite_idle', 'assets/strips/zero_idle_5f.png');
-    load('melee_sprite_run', 'assets/strips/zero_walk_8f.png');
+    load('melee_sprite_run', 'assets/strips/zero_walk_16f.png');
     load('shield_icon', 'assets/shield_icon.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
@@ -171,7 +171,7 @@
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
-      var meleeCfg = { sprites: { idle: { file: 'assets/strips/zero_idle_5f.png', fps: 6 }, run: { file: 'assets/strips/zero_walk_8f.png', fps: 10 } } };
+      var meleeCfg = { sprites: { idle: { file: 'assets/strips/zero_idle_5f.png', fps: 6 }, run: { file: 'assets/strips/zero_walk_16f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('melee', meleeCfg);
       this.player.spriteDefaultRight = true;
       this._meleeAttack = new SG.MeleeAttack(this.player);
