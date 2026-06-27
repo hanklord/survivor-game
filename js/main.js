@@ -59,6 +59,11 @@
     this.levelClearing = false;
     this.lastTime = 0;
     this.regenTimer = 0;
+    this._damageNumbers = new SG.DamageNumbers();
+    this._damageNumbers = new SG.DamageNumbers();
+    this._magnetDelay = 0;
+    this._magnetDelay = 0;
+    this._magnetAllXP = false;
 
     // 綁定
     var self = this;
@@ -142,6 +147,7 @@
     load('melee_sprite_idle', 'assets/strips/knight_idle_10f.png');
     load('melee_sprite_run', 'assets/strips/knight_run_10f.png');
     load('slash_effect', 'assets/strips/slash_effect_4f.png');
+    load('shield_icon', 'assets/shield_icon.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
       if (lv.bgImage) load('level_bg_' + i, lv.bgImage);
@@ -191,6 +197,11 @@
     this.levelingUp = false;
     this.levelClearing = false;
     this.regenTimer = 0;
+    this._damageNumbers = new SG.DamageNumbers();
+    this._damageNumbers = new SG.DamageNumbers();
+    this._magnetDelay = 0;
+    this._magnetDelay = 0;
+    this._magnetAllXP = false;
 
     // 設定初始關卡背景
     this._applyLevelBg();
@@ -232,6 +243,7 @@
       xpGems: this.xpGems,
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
+      damageNumbers: this._damageNumbers,
       dt: dt
     });
 
@@ -248,6 +260,11 @@
       this.regenTimer += dt;
       if (this.regenTimer >= REGEN_INTERVAL) {
         this.regenTimer = 0;
+    this._damageNumbers = new SG.DamageNumbers();
+    this._damageNumbers = new SG.DamageNumbers();
+    this._magnetDelay = 0;
+    this._magnetDelay = 0;
+    this._magnetAllXP = false;
         this.player.hp = Math.min(this.player.hp + this.player.regen, this.player.maxHp);
       }
     }
@@ -266,6 +283,8 @@
     if (this.player.attackType === 'melee' && this._meleeAttack) {
       var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
+      var mhits = this._meleeAttack.getLastHits();
+      for (var i = 0; i < mhits.length; i++) this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, false);
     } else {
       this.player.fireTimer -= dt;
       if (this.player.fireTimer <= 0) {
@@ -294,8 +313,11 @@
         if (SG.dist(p, e) < (e.size / 2 + pSize / 2)) {
           // 暴擊判定
           var dmg = p.damage * (this.player.damageMultiplier || 1);
-          if (this.player.critChance && Math.random() < this.player.critChance) dmg *= 2;
+          var isCrit = this.player.critChance && Math.random() < this.player.critChance;
+          if (isCrit) dmg *= 2;
+          dmg = Math.round(dmg);
           e.hp -= dmg;
+          this._damageNumbers.add(e.x, e.y, dmg, isCrit);
           hit = true;
           if (e.hp <= 0) this._handleKill(e);
           break;
@@ -334,6 +356,11 @@
     }
 
     // XP 寶石
+    // Boss 死亡延遲吸取
+    if (this._magnetDelay > 0) {
+      this._magnetDelay -= dt;
+      if (this._magnetDelay <= 0) { this._magnetAllXP = true; this._magnetDelay = 0; }
+    }
     var magnetRange = this._magnetAllXP ? 99999 : 0;
     for (var i = this.xpGems.length - 1; i >= 0; i--) {
       var g = this.xpGems[i];
@@ -384,6 +411,7 @@
 
     // 無敵 + HUD
     this.player.updateInvuln(dt);
+    this._damageNumbers.update(dt);
     this.ui.updateHUD(this.player, this.gameTime, this.kills);
     this.ui.updateSkillIcons(this.skillTree);
   };
@@ -404,7 +432,7 @@
       this._removeFrom(this.bosses, e);
       // Boss 擊敗特效：畫面震動 + 吸取所有經驗
       this.renderer.shake(0.5, 12);
-      this._magnetAllXP = true;
+      this._magnetDelay = 0.5;
     } else {
       var gem = this.xpGemPool.get();
       gem.init(e.x, e.y, 1);

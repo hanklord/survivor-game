@@ -165,6 +165,9 @@
     }
     this._drawParticles(state.particles, camX, camY);
 
+    // 傷害數字
+    if (state.damageNumbers) state.damageNumbers.draw(ctx);
+
     ctx.globalAlpha = 1;
     ctx.restore();
   };
@@ -342,14 +345,19 @@
 
     // 旋轉護盾
     var shields = visuals.shieldPositions;
+    var shieldImg = this.images.shield_icon;
     for (var i = 0; i < shields.length; i++) {
       var s = shields[i];
       if (!this._isVisible(s.x, s.y, camX, camY, CULL_MARGIN)) continue;
-      ctx.fillStyle = '#44aaff';
-      ctx.shadowColor = '#44aaff';
-      ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
+      if (shieldImg) {
+        ctx.drawImage(shieldImg, s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
+      } else {
+        ctx.fillStyle = '#44aaff';
+        ctx.shadowColor = '#44aaff';
+        ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
     }
 
     // Nova 擴散波

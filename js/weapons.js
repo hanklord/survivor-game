@@ -16,6 +16,7 @@
     this.damage = SHIELD_DAMAGE;
     this.angle = 0;
     this.hitTimers = {};  // 避免連續傷害
+    this.ballSize = SHIELD_BALL_SIZE;
     this.active = true;
   }
 
@@ -58,7 +59,7 @@
       positions.push({
         x: this.player.x + Math.cos(a) * SHIELD_ORBIT_RADIUS,
         y: this.player.y + Math.sin(a) * SHIELD_ORBIT_RADIUS,
-        size: SHIELD_BALL_SIZE
+        size: this.ballSize
       });
     }
     return positions;
@@ -77,6 +78,7 @@
     this.timer = NOVA_BASE_CD;
     this.damage = NOVA_DAMAGE;
     this.radius = NOVA_RADIUS;
+    this.ballSize = SHIELD_BALL_SIZE;
     this.active = true;
     // 視覺狀態
     this.expanding = false;
@@ -148,6 +150,7 @@
     this.angle = Math.atan2(target.y - y, target.x - x);
     this.target = target;
     this.life = MISSILE_LIFE;
+    this.ballSize = SHIELD_BALL_SIZE;
     this.active = true;
     this.trail = [];
   };
@@ -205,7 +208,9 @@
     this.cd = MISSILE_CD;
     this.timer = 0;
     this.missiles = [];
+    this.ballSize = SHIELD_BALL_SIZE;
     this.active = true;
+    this.missileCount = 1;
     this.pool = new SG.ObjectPool(function() { return new HomingMissile(); });
   }
 
@@ -223,9 +228,13 @@
         var d = SG.dist(this.player, targets[i]);
         if (d > maxD) { maxD = d; farthest = targets[i]; }
       }
-      var m = this.pool.get();
-      m.init(this.player.x, this.player.y, farthest);
-      this.missiles.push(m);
+      // 發射 missileCount 顆飛彈
+      for (var mc = 0; mc < this.missileCount; mc++) {
+        var tgt = targets[mc % targets.length];
+        var m = this.pool.get();
+        m.init(this.player.x, this.player.y, tgt);
+        this.missiles.push(m);
+      }
     }
 
     // 更新飛彈
@@ -305,7 +314,8 @@
 
   WeaponManager.prototype.unlockShield = function() {
     if (!this.shield) this.shield = new OrbitingShield(this.player);
-    else this.shield.count = Math.min(this.shield.count + 1, 3);
+    else if (this.shield.count < 6) this.shield.count++;
+    else this.shield.ballSize = Math.min(this.shield.ballSize + 4, 40);
   };
 
   WeaponManager.prototype.unlockNova = function() {
@@ -315,7 +325,7 @@
 
   WeaponManager.prototype.unlockMissile = function() {
     if (!this.launcher) this.launcher = new MissileLauncher(this.player);
-    else { this.launcher.cd *= 0.8; }
+    else { this.launcher.missileCount = Math.min(this.launcher.missileCount + 1, 5); }
   };
 
   WeaponManager.prototype.unlockThunder = function() {

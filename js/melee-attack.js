@@ -14,7 +14,8 @@
     this.damage = BASE_DAMAGE;
     this.cd = BASE_CD;
     this.timer = 0;
-    this.slashVisual = null; // { x, y, angle, timer, range }
+    this.slashVisual = null;
+    this._lastHits = []; // { x, y, angle, timer, range }
   }
 
   MeleeAttack.prototype.update = function(dt, enemies, bosses) {
@@ -23,6 +24,7 @@
     if (this.slashVisual) {
       this.slashVisual.timer -= dt;
       if (this.slashVisual.timer <= 0) this.slashVisual = null;
+    this._lastHits = [];
     }
     // 攻擊計時
     this.timer -= dt;
@@ -33,7 +35,7 @@
       for (var i = 0; i < targets.length; i++) {
         var t = targets[i];
         if (SG.dist(this.player, t) <= this.range + t.size / 2) {
-          t.hp -= this.damage;
+          var mDmg = this.damage; t.hp -= mDmg; this._lastHits.push({x: t.x, y: t.y, dmg: mDmg});
           hitAny = true;
           if (t.hp <= 0) hits.push(t);
         }
@@ -58,6 +60,8 @@
   MeleeAttack.prototype.getVisual = function() {
     return this.slashVisual;
   };
+
+  MeleeAttack.prototype.getLastHits = function() { var h = this._lastHits; this._lastHits = []; return h; };
 
   SG.MeleeAttack = MeleeAttack;
 })();
