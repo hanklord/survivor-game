@@ -165,7 +165,7 @@
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
-      var meleeCfg = { sprites: { idle: { file: 'assets/strips/warrior_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/warrior_walk_6f.png', fps: 10 } } };
+      var meleeCfg = { sprites: { idle: { file: 'assets/strips/knight_idle_10f.png', fps: 10 }, run: { file: 'assets/strips/knight_run_10f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('melee', meleeCfg);
       this._meleeAttack = new SG.MeleeAttack(this.player);
     } else {
