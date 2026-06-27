@@ -133,14 +133,12 @@
     this._drawProjectiles(state.projectiles, camX, camY);
     this._drawPlayer(player);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
-    // 近戰斬擊視覺（anime-style 大型新月弧形 Canvas 繪製）
+    // 近戰斬擊視覺（薄弧形刀光軌跡）
     if (state.meleeVisual) {
       var mv = state.meleeVisual;
       var progress = 1 - (mv.timer / 0.35);  // 0→1
-      var size = mv.range * 2.5;  // 大型弧形
-      // 動畫：先大後小，最後散碎片
-      var scale = progress < 0.3 ? progress / 0.3 : 1 - (progress - 0.3) * 0.7;
       var alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3;
+      var r = mv.range * 1.2;
 
       ctx.save();
       ctx.translate(mv.x, mv.y);
@@ -148,41 +146,45 @@
       ctx.globalCompositeOperation = 'lighter';
       ctx.globalAlpha = alpha;
 
-      // 外層灰色光暈
+      // 薄弧形刀光（arc stroke，120° 弧）
+      var arcStart = -1.05;  // ~-60°
+      var arcEnd = 1.05;     // ~+60°
+
+      // 外層光暈（粗、半透明）
       ctx.beginPath();
-      var r = size * scale;
-      ctx.moveTo(r * 0.1, 0);
-      ctx.bezierCurveTo(r * 0.5, -r * 0.55, r * 0.9, -r * 0.35, r, 0);
-      ctx.bezierCurveTo(r * 0.9, r * 0.35, r * 0.5, r * 0.55, r * 0.1, 0);
-      ctx.fillStyle = 'rgba(180,180,180,0.3)';
-      ctx.fill();
+      ctx.arc(0, 0, r, arcStart, arcEnd);
+      ctx.strokeStyle = 'rgba(200,200,200,0.3)';
+      ctx.lineWidth = 18;
+      ctx.lineCap = 'round';
+      ctx.stroke();
 
       // 中層白色弧
       ctx.beginPath();
-      ctx.moveTo(r * 0.15, 0);
-      ctx.bezierCurveTo(r * 0.5, -r * 0.4, r * 0.85, -r * 0.25, r * 0.95, 0);
-      ctx.bezierCurveTo(r * 0.85, r * 0.25, r * 0.5, r * 0.4, r * 0.15, 0);
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.fill();
+      ctx.arc(0, 0, r, arcStart, arcEnd);
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.stroke();
 
-      // 核心白色（更窄的新月）
+      // 核心亮白（最細）
       ctx.beginPath();
-      ctx.moveTo(r * 0.2, 0);
-      ctx.bezierCurveTo(r * 0.5, -r * 0.22, r * 0.8, -r * 0.12, r * 0.9, 0);
-      ctx.bezierCurveTo(r * 0.8, r * 0.12, r * 0.5, r * 0.22, r * 0.2, 0);
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.fill();
+      ctx.arc(0, 0, r, arcStart, arcEnd);
+      ctx.strokeStyle = 'rgba(255,255,255,1)';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
 
-      // 散碎片粒子（後半段）
+      // 白色小碎片（後半段飛散）
       if (progress > 0.5) {
-        var fragAlpha = (progress - 0.5) * 2;
-        for (var fi = 0; fi < 6; fi++) {
-          var fa = (fi / 6) * Math.PI * 2 + progress * 3;
-          var fd = r * 0.3 * fragAlpha + fi * 5;
-          var fx = Math.cos(fa) * fd + r * 0.5;
+        var frag = (progress - 0.5) * 2;
+        for (var fi = 0; fi < 5; fi++) {
+          var fa = arcStart + (arcEnd - arcStart) * (fi / 4);
+          var fd = r + frag * 30 + fi * 4;
+          var fx = Math.cos(fa) * fd;
           var fy = Math.sin(fa) * fd;
-          ctx.fillStyle = 'rgba(255,255,255,' + (0.6 * (1 - fragAlpha)) + ')';
-          ctx.fillRect(fx - 3, fy - 1, 6, 2);
+          ctx.globalAlpha = alpha * (1 - frag);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(fx - 4, fy - 1, 8, 2);
         }
       }
 
