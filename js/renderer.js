@@ -243,33 +243,25 @@
     var ctx = this.ctx;
     var ps = (this.imgConfig.player && this.imgConfig.player.size) || 40;
     if (player.animator && player.animator.isLoaded()) {
-      player.animator.draw(ctx, player.x, player.y, ps, player.facingAngle);
+      player.animator.draw(ctx, player.x, player.y, ps, player.facingLeft);
     } else if (this.images.player) {
-      // 靜態圖旋轉繪製
-      ctx.save();
-      ctx.translate(player.x, player.y);
-      ctx.rotate(player.facingAngle);
-      ctx.drawImage(this.images.player, -ps / 2, -ps / 2, ps, ps);
-      ctx.restore();
+      // 靜態圖左右翻轉
+      if (player.facingLeft) {
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        ctx.scale(-1, 1);
+        ctx.drawImage(this.images.player, -ps / 2, -ps / 2, ps, ps);
+        ctx.restore();
+      } else {
+        ctx.drawImage(this.images.player, player.x - ps / 2, player.y - ps / 2, ps, ps);
+      }
     } else {
-      // 幾何 fallback + 方向指示三角形
+      // 幾何 fallback
       ctx.fillStyle = player.invuln > 0 ? PLAYER_HIT_COLOR : PLAYER_COLOR;
       ctx.shadowColor = PLAYER_COLOR;
       ctx.shadowBlur = 15;
       ctx.beginPath(); ctx.arc(player.x, player.y, ps / 2, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
-      // 方向指示
-      ctx.save();
-      ctx.translate(player.x, player.y);
-      ctx.rotate(player.facingAngle);
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.moveTo(ps / 2, 0);
-      ctx.lineTo(ps / 4, -ps / 6);
-      ctx.lineTo(ps / 4, ps / 6);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
     }
     // 撿取範圍圓圈
     ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';

@@ -34,7 +34,6 @@
     // 動畫相關
     this.animator = null;
     this.facingLeft = false;
-    this.facingAngle = 0;
     this._attackTimer = 0;
   }
 
@@ -43,8 +42,7 @@
     if (dir.x || dir.y) {
       this.x += dir.x * this.speed;
       this.y += dir.y * this.speed;
-      this.facingAngle = Math.atan2(dir.y, dir.x);
-      this.facingLeft = Math.abs(this.facingAngle) > Math.PI / 2;
+      if (dir.x !== 0) this.facingLeft = dir.x < 0;
       this._moving = true;
     } else {
       this._moving = false;
