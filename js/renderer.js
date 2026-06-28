@@ -448,7 +448,7 @@
       ctx.save();
       ctx.globalAlpha = 0.7 + Math.random() * 0.3;
       ctx.strokeStyle = '#ffffff';
-      ctx.shadowColor = '#88ccff';
+      ctx.shadowColor = '#aa44ff';
       ctx.shadowBlur = 12;
       ctx.lineWidth = 3;
       for (var ci = 0; ci < chain.segments.length; ci++) {
