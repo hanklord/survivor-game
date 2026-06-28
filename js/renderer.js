@@ -150,7 +150,7 @@
           ctx.globalAlpha = 0.15 * ti;
           ctx.beginPath();
           ctx.arc(-ti * 12, 0, 23, -0.8, 0.8);
-          ctx.strokeStyle = '#ffffff';
+          ctx.strokeStyle = 'rgba(180,50,255,0.8)';
           ctx.lineWidth = 4;
           ctx.lineCap = 'round';
           ctx.stroke();
@@ -158,23 +158,23 @@
 
         // 主體新月弧形
         ctx.globalAlpha = 0.9;
-        // 外層
+        // 外層（暗紫）
         ctx.beginPath();
         ctx.arc(0, 0, 26, -0.9, 0.9);
-        ctx.strokeStyle = 'rgba(200,200,200,0.5)';
+        ctx.strokeStyle = 'rgba(100,0,150,0.5)';
         ctx.lineWidth = 12;
         ctx.lineCap = 'round';
         ctx.stroke();
-        // 中層
+        // 中層（紫）
         ctx.beginPath();
         ctx.arc(0, 0, 26, -0.9, 0.9);
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+        ctx.strokeStyle = 'rgba(180,50,255,0.8)';
         ctx.lineWidth = 6;
         ctx.stroke();
-        // 核心
+        // 核心（亮紫粉）
         ctx.beginPath();
         ctx.arc(0, 0, 26, -0.9, 0.9);
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = 'rgba(230,150,255,1)';
         ctx.lineWidth = 2;
         ctx.stroke();
 
