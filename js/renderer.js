@@ -297,14 +297,24 @@
     var ctx = this.ctx;
     var pSize = (this.imgConfig.projectile && this.imgConfig.projectile.size) || 12;
     var pColor = (this.imgConfig.projectile && this.imgConfig.projectile.color) || '#ffff00';
+    var projImg = this.images.projectile;
+    var projFrames = (this.imgConfig.projectile && this.imgConfig.projectile.frames) || 1;
+    var projFW = projImg ? Math.floor(projImg.width / projFrames) : 0;
+    var projFH = projImg ? projImg.height : 0;
+
     for (var i = 0; i < projectiles.length; i++) {
       var p = projectiles[i];
       if (!this._isVisible(p.x, p.y, camX, camY, CULL_MARGIN)) continue;
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(Math.atan2(p.vy, p.vx));
-      if (this.images.projectile) {
-        ctx.drawImage(this.images.projectile, -pSize / 2, -pSize / 2, pSize, pSize);
+      if (projImg && projFrames > 1) {
+        // 動畫子彈：用 life 計算當前幀
+        var frameIdx = Math.floor((1 - p.life / 2) * projFrames * 3) % projFrames;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(projImg, frameIdx * projFW, 0, projFW, projFH, -pSize / 2, -pSize / 2, pSize, pSize);
+      } else if (projImg) {
+        ctx.drawImage(projImg, -pSize / 2, -pSize / 2, pSize, pSize);
       } else {
         ctx.fillStyle = pColor;
         ctx.shadowColor = pColor;
