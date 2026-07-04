@@ -21,6 +21,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 #level-up h2 { font-size: 28px; margin-bottom: 20px; color: #ffdd44; text-shadow: 0 0 10px #ffdd44; }
 .upgrade-btn { display: block; width: 280px; margin: 10px auto; padding: 15px; background: rgba(30,30,60,0.95); border: 2px solid #5555ff; border-radius: 10px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s; }
 .upgrade-btn:hover { background: rgba(50,50,100,0.95); border-color: #8888ff; transform: scale(1.05); }
+.upgrade-btn { touch-action: manipulation; -webkit-tap-highlight-color: rgba(255,255,255,0.2); user-select: none; -webkit-user-select: none; }
 #game-over { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: all; z-index: 10; }
 #game-over h1 { font-size: 48px; color: #ff4444; text-shadow: 0 0 20px #ff0000; }
 #game-over p { font-size: 20px; margin: 15px 0; }

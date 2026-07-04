@@ -205,24 +205,42 @@
         var btn = document.createElement('button');
         btn.className = 'upgrade-btn';
         btn.textContent = opt.name;
-        btn.onclick = function() {
+        var handled = false;
+        var doAction = function(e) {
+          if (handled) return;
+          handled = true;
+          if (e) e.preventDefault();
           opt.action();
           self.els.levelUp.style.display = 'none';
           callback();
         };
+        btn.onclick = doAction;
+        btn.addEventListener('touchend', doAction);
         self.els.choices.appendChild(btn);
       })(allOptions[o]);
     }
-    this.els.levelUp.style.display = "block";
-    // Failsafe: 30秒後自動關閉（防止卡住）
-    var failsafe = setTimeout(function() { self.els.levelUp.style.display = "none"; callback(); }, 30000);
-    // 修改所有按鈕的 onclick 清除 failsafe
-    var btns = self.els.choices.getElementsByTagName("button");
-    for (var bi = 0; bi < btns.length; bi++) {
-      (function(origClick, btn) {
-        btn.onclick = function() { clearTimeout(failsafe); origClick.call(this); };
-      })(btns[bi].onclick, btns[bi]);
+    // Failsafe: 15秒後自動關閉（防止觸控卡住）
+    var failsafe = setTimeout(function() {
+      if (self.els.levelUp.style.display !== 'none') {
+        self.els.levelUp.style.display = 'none';
+        callback();
+      }
+    }, 15000);
+    // 每個按鈕動作前先清 failsafe（已在 doAction 中處理 handled flag）
+    var origButtons = self.els.choices.getElementsByTagName('button');
+    for (var bi = 0; bi < origButtons.length; bi++) {
+      (function(btn) {
+        var origTouch = btn.ontouchend;
+        var origClick = btn.onclick;
+        var wrap = function(e) {
+          clearTimeout(failsafe);
+          if (origClick) origClick.call(btn, e);
+        };
+        btn.onclick = wrap;
+        btn.ontouchend = function(e) { clearTimeout(failsafe); if (origTouch) origTouch.call(btn, e); };
+      })(origButtons[bi]);
     }
+    this.els.levelUp.style.display = 'block';
   };
 
   // Game Over（含排行榜）
