@@ -179,6 +179,11 @@
         name: '💥 爆炸箭 (範圍' + (ea.level ? ea.radius + 20 : 50) + ')',
         action: function() { archerAttack.getExplosiveArrow().upgrade(); }
       });
+      var pa = archerAttack.getPiercingArrow();
+      allOptions.push({
+        name: '🔱 貫通箭 (Lv' + pa.level + ')',
+        action: function() { archerAttack.getPiercingArrow().upgrade(); }
+      });
     }
 
     // 建立按鈕

@@ -20,12 +20,14 @@
   }
 
   ArcherAttack.prototype.upgrade = function() {
+    if (this.level >= 15) return;
     this.level++;
     // 奇數等級加數量，偶數等級加頻率
     if (this.level % 2 === 0) {
       this.cd = Math.max(0.2, this.cd - 0.08);
     } else {
       this.arrowCount = Math.min(this.arrowCount + 1, 9);
+    if (this.level >= 15) return;
     }
   };
 
@@ -106,6 +108,11 @@
     return h;
   };
 
+  ArcherAttack.prototype.getPiercingArrow = function() {
+    if (!this._piercing) this._piercing = new SG.PiercingArrow(this.player);
+    return this._piercing;
+  };
+
   ArcherAttack.prototype.getExplosiveArrow = function() {
     if (!this._explosive) this._explosive = new SG.ExplosiveArrow(this.player);
     return this._explosive;
@@ -134,6 +141,7 @@
   }
 
   ExplosiveArrow.prototype.upgrade = function() {
+    if (this.level >= 15) return;
     this.level++;
     this.radius = EXPLODE_RADIUS + this.level * EXPLODE_RADIUS_PER_LVL;
     if (!this.active) this.active = true;
@@ -208,3 +216,81 @@
   };
 
   SG.ExplosiveArrow = ExplosiveArrow;
+
+  // === 貫通箭 (Piercing Arrow) ===
+  var PIERCE_CD = 2.5;
+  var PIERCE_DAMAGE = 18;
+  var PIERCE_SPEED = 600;
+  var PIERCE_SPEED_PER_LVL = 50;
+  var PIERCE_RANGE = 600;
+  var MAX_SKILL_LEVEL = 15;
+
+  function PiercingArrow(player) {
+    this.player = player;
+    this.cd = PIERCE_CD;
+    this.damage = PIERCE_DAMAGE;
+    this.speed = PIERCE_SPEED;
+    this.timer = this.cd;
+    this.level = 0;
+    this.arrows = [];
+  }
+
+  PiercingArrow.prototype.upgrade = function() {
+    if (this.level >= MAX_SKILL_LEVEL) return;
+    this.level++;
+    this.speed = PIERCE_SPEED + this.level * PIERCE_SPEED_PER_LVL;
+    if (!this.active) this.active = true;
+  };
+
+  PiercingArrow.prototype.update = function(dt, enemies, bosses) {
+    var hits = [];
+    if (!this.level) return hits;
+
+    // 發射
+    this.timer -= dt;
+    if (this.timer <= 0) {
+      var targets = enemies.concat(bosses);
+      if (targets.length > 0) {
+        this.timer = this.cd;
+        var nearest = null, minD = Infinity;
+        for (var k = 0; k < targets.length; k++) {
+          var dd = SG.dist(this.player, targets[k]);
+          if (dd < minD) { minD = dd; nearest = targets[k]; }
+        }
+        var angle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
+        this.arrows.push({
+          x: this.player.x, y: this.player.y,
+          vx: Math.cos(angle) * this.speed, vy: Math.sin(angle) * this.speed,
+          angle: angle, dist: 0, time: 0
+        });
+      }
+    }
+
+    // 更新箭矢（貫穿所有敵人）
+    for (var i = this.arrows.length - 1; i >= 0; i--) {
+      var ar = this.arrows[i];
+      ar.x += ar.vx * dt;
+      ar.y += ar.vy * dt;
+      ar.dist += this.speed * dt;
+      ar.time += dt;
+      if (ar.dist > PIERCE_RANGE) { this.arrows.splice(i, 1); continue; }
+
+      // 穿透碰撞（每幀都能命中新敵人）
+      var targets = enemies.concat(bosses);
+      for (var j = 0; j < targets.length; j++) {
+        var t = targets[j];
+        if (t.hp <= 0) continue;
+        if (SG.dist(ar, t) < 15 + t.size / 2) {
+          t.hp -= this.damage;
+          if (t.hp <= 0) hits.push(t);
+        }
+      }
+    }
+    return hits;
+  };
+
+  PiercingArrow.prototype.getVisual = function() {
+    return this.arrows.length > 0 ? this.arrows : null;
+  };
+
+  SG.PiercingArrow = PiercingArrow;

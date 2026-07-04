@@ -81,10 +81,12 @@
   };
 
   MeleeAttack.prototype.upgradeRate = function() {
+    if (this.cd <= 0.3) return;
     this.cd = Math.max(0.3, this.cd - 0.1);
   };
 
   MeleeAttack.prototype.upgradeRange = function() {
+    if (this.range >= 350) return;
     this.range += 50;
   };
 

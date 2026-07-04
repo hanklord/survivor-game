@@ -256,6 +256,7 @@
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
+      piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,
       damageNumbers: this._damageNumbers,
       dt: dt
     });
@@ -305,6 +306,10 @@
       // 爆炸箭
       var ea = this._archerAttack.getExplosiveArrow();
       var eaHits = ea.update(dt, this.enemies, this.bosses);
+      // 貫通箭
+      var pa = this._archerAttack.getPiercingArrow();
+      var paHits = pa.update(dt, this.enemies, this.bosses);
+      for (var i = 0; i < paHits.length; i++) this._handleKill(paHits[i]);
       for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
       for (var i = 0; i < ahits.length; i++) this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, false);
     } else {

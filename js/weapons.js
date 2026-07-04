@@ -271,6 +271,7 @@
   }
 
   Thunder.prototype.upgrade = function() {
+    if (this.level >= 15) return;
     this.level++;
     this.cd = Math.max(THUNDER_MIN_CD, THUNDER_BASE_CD - (this.level - 1) * THUNDER_CD_REDUCE);
     this.damage = THUNDER_BASE_DAMAGE + (this.level - 1) * THUNDER_DMG_PER_LVL;
@@ -322,7 +323,8 @@
   }
 
   ChainLightning.prototype.upgrade = function() {
-    this.chains = Math.min(this.chains + 1, CHAIN_MAX);
+    if (this.chains >= 15) return;
+    this.chains = Math.min(this.chains + 1, 15);
   };
 
   ChainLightning.prototype.update = function(dt, enemies, bosses) {
@@ -379,19 +381,22 @@
   }
 
   WeaponManager.prototype.unlockShield = function() {
+    var totalLvl = this.shield ? this.shield.count + (this.shield.ballSize > 14 ? Math.floor((this.shield.ballSize - 14) / 4) : 0) : 0;
+    if (totalLvl >= 15) return;
     if (!this.shield) this.shield = new OrbitingShield(this.player);
     else if (this.shield.count < 6) this.shield.count++;
     else this.shield.ballSize = Math.min(this.shield.ballSize + 4, 40);
   };
 
   WeaponManager.prototype.unlockNova = function() {
+    if (this.nova && this.nova._level >= 15) return;
     if (!this.nova) this.nova = new Nova(this.player);
-    else { this.nova.cd *= 0.8; this.nova.damage *= 1.2; }
+    else { this.nova.cd *= 0.8; this.nova.damage *= 1.2; this.nova._level = (this.nova._level || 1) + 1; }
   };
 
   WeaponManager.prototype.unlockMissile = function() {
     if (!this.launcher) this.launcher = new MissileLauncher(this.player);
-    else { this.launcher.missileCount = Math.min(this.launcher.missileCount + 1, 5); }
+    else { this.launcher.missileCount = Math.min(this.launcher.missileCount + 1, 15); }
   };
 
   WeaponManager.prototype.unlockThunder = function() {

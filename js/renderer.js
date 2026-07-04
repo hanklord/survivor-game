@@ -237,6 +237,49 @@
         ctx.restore();
       }
     }
+    // 貫通箭視覺（含空氣擾動特效）
+    if (state.piercingVisual) {
+      var parrows = state.piercingVisual;
+      for (var pi = 0; pi < parrows.length; pi++) {
+        var pa = parrows[pi];
+        if (!this._isVisible(pa.x, pa.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(pa.x, pa.y);
+        ctx.rotate(pa.angle);
+        // 空氣擾動波紋（衝擊波紋）
+        var numWaves = 4;
+        for (var wi = 0; wi < numWaves; wi++) {
+          var wOffset = -wi * 15 - (pa.time * 200) % 15;
+          ctx.globalAlpha = 0.3 * (1 - wi / numWaves);
+          ctx.strokeStyle = 'rgba(200,220,255,0.6)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(wOffset, 0, 8 + wi * 3, -1.2, 1.2);
+          ctx.stroke();
+        }
+        // 箭身（亮白色，更長）
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#aaddff';
+        ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(14, 0); ctx.stroke();
+        // 箭頭
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(12, -4); ctx.lineTo(12, 4); ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        // 速度線拖尾
+        ctx.globalAlpha = 0.2;
+        ctx.strokeStyle = '#aaddff';
+        ctx.lineWidth = 1;
+        for (var sl = 0; sl < 3; sl++) {
+          var sy = (sl - 1) * 6;
+          ctx.beginPath(); ctx.moveTo(-20 - sl * 10, sy); ctx.lineTo(-35 - sl * 10, sy); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+    }
     this._drawParticles(state.particles, camX, camY);
 
     // 傷害數字
