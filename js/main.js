@@ -255,6 +255,7 @@
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
+      explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
       damageNumbers: this._damageNumbers,
       dt: dt
     });
@@ -301,6 +302,10 @@
       var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < archerHits.length; i++) this._handleKill(archerHits[i]);
       var ahits = this._archerAttack.getLastHits();
+      // 爆炸箭
+      var ea = this._archerAttack.getExplosiveArrow();
+      var eaHits = ea.update(dt, this.enemies, this.bosses);
+      for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
       for (var i = 0; i < ahits.length; i++) this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, false);
     } else {
       this.player.fireTimer -= dt;

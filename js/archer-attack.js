@@ -106,5 +106,105 @@
     return h;
   };
 
+  ArcherAttack.prototype.getExplosiveArrow = function() {
+    if (!this._explosive) this._explosive = new SG.ExplosiveArrow(this.player);
+    return this._explosive;
+  };
+
   SG.ArcherAttack = ArcherAttack;
 })();
+
+  // === 爆炸箭 (Explosive Arrow) ===
+  var EXPLODE_CD = 3;
+  var EXPLODE_DAMAGE = 20;
+  var EXPLODE_RADIUS = 50;
+  var EXPLODE_RADIUS_PER_LVL = 20;
+  var EXPLODE_ARROW_SPEED = 400;
+  var EXPLODE_VISUAL_DURATION = 0.3;
+
+  function ExplosiveArrow(player) {
+    this.player = player;
+    this.cd = EXPLODE_CD;
+    this.damage = EXPLODE_DAMAGE;
+    this.radius = EXPLODE_RADIUS;
+    this.timer = this.cd;
+    this.level = 0;
+    this.arrow = null; // { x, y, vx, vy, angle }
+    this.explosion = null; // { x, y, radius, timer }
+  }
+
+  ExplosiveArrow.prototype.upgrade = function() {
+    this.level++;
+    this.radius = EXPLODE_RADIUS + this.level * EXPLODE_RADIUS_PER_LVL;
+    if (!this.active) this.active = true;
+  };
+
+  ExplosiveArrow.prototype.update = function(dt, enemies, bosses) {
+    var hits = [];
+    if (!this.level) return hits;
+
+    // 更新爆炸視覺
+    if (this.explosion) {
+      this.explosion.timer -= dt;
+      if (this.explosion.timer <= 0) this.explosion = null;
+    }
+
+    // 更新飛行中的爆炸箭
+    if (this.arrow) {
+      this.arrow.x += this.arrow.vx * dt;
+      this.arrow.y += this.arrow.vy * dt;
+      this.arrow.dist += EXPLODE_ARROW_SPEED * dt;
+      if (this.arrow.dist > 500) { this.arrow = null; return hits; }
+
+      // 碰撞檢測
+      var targets = enemies.concat(bosses);
+      for (var i = 0; i < targets.length; i++) {
+        var t = targets[i];
+        if (t.hp <= 0) continue;
+        if (SG.dist(this.arrow, t) < 20 + t.size / 2) {
+          // 爆炸！
+          this.explosion = { x: this.arrow.x, y: this.arrow.y, radius: this.radius, timer: EXPLODE_VISUAL_DURATION };
+          // 範圍傷害
+          for (var j = 0; j < targets.length; j++) {
+            if (targets[j].hp <= 0) continue;
+            if (SG.dist(this.arrow, targets[j]) <= this.radius) {
+              targets[j].hp -= this.damage;
+              if (targets[j].hp <= 0) hits.push(targets[j]);
+            }
+          }
+          this.arrow = null;
+          break;
+        }
+      }
+    }
+
+    // 發射新爆炸箭
+    if (!this.arrow) {
+      this.timer -= dt;
+      if (this.timer <= 0) {
+        var targets = enemies.concat(bosses);
+        if (targets.length > 0) {
+          this.timer = this.cd;
+          var nearest = null, minD = Infinity;
+          for (var k = 0; k < targets.length; k++) {
+            var dd = SG.dist(this.player, targets[k]);
+            if (dd < minD) { minD = dd; nearest = targets[k]; }
+          }
+          var angle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
+          this.arrow = {
+            x: this.player.x, y: this.player.y,
+            vx: Math.cos(angle) * EXPLODE_ARROW_SPEED,
+            vy: Math.sin(angle) * EXPLODE_ARROW_SPEED,
+            angle: angle, dist: 0
+          };
+        }
+      }
+    }
+    return hits;
+  };
+
+  ExplosiveArrow.prototype.getVisual = function() {
+    return { arrow: this.arrow, explosion: this.explosion };
+  };
+
+  SG.ExplosiveArrow = ExplosiveArrow;

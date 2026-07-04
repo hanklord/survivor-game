@@ -174,6 +174,11 @@
         name: '🏹 弓術精進 (Lv' + archerAttack.level + ')',
         action: function() { archerAttack.upgrade(); }
       });
+      var ea = archerAttack.getExplosiveArrow();
+      allOptions.push({
+        name: '💥 爆炸箭 (範圍' + (ea.level ? ea.radius + 20 : 50) + ')',
+        action: function() { archerAttack.getExplosiveArrow().upgrade(); }
+      });
     }
 
     // 建立按鈕

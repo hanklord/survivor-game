@@ -206,6 +206,37 @@
         ctx.restore();
       }
     }
+    // 爆炸箭視覺
+    if (state.explosiveVisual) {
+      var ev = state.explosiveVisual;
+      // 飛行中的爆炸箭（紅色箭頭）
+      if (ev.arrow) {
+        var ea = ev.arrow;
+        ctx.save();
+        ctx.translate(ea.x, ea.y);
+        ctx.rotate(ea.angle);
+        ctx.strokeStyle = '#ff4400';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.stroke();
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(8, -4); ctx.lineTo(8, 4); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      // 爆炸效果
+      if (ev.explosion) {
+        var ex = ev.explosion;
+        var progress = 1 - ex.timer / 0.3;
+        ctx.save();
+        ctx.globalAlpha = 1 - progress;
+        ctx.strokeStyle = 'rgba(255, 100, 0, 0.8)';
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(ex.x, ex.y, ex.radius * progress, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 200, 50, ' + (0.3 * (1 - progress)) + ')';
+        ctx.beginPath(); ctx.arc(ex.x, ex.y, ex.radius * progress * 0.6, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+    }
     this._drawParticles(state.particles, camX, camY);
 
     // 傷害數字
