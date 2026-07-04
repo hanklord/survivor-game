@@ -304,7 +304,9 @@
       this._lowQuality = this._currentFps < LOW_FPS_THRESHOLD;
     }
 
-    if (!this.paused && !this.levelingUp && !this.levelClearing) this._update(dt);
+    if (!this.paused && !this.levelingUp && !this.levelClearing) {
+      try { this._update(dt); } catch(err) { console.error('[Game] _update error:', err); }
+    }
     this.renderer.render({
       player: this.player,
       enemies: this.enemies,

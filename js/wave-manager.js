@@ -69,9 +69,8 @@
       var ecfg = elist[Math.floor(Math.random() * Math.min(3, elist.length))];
       var angle = Math.random() * Math.PI * 2;
       var d = Math.max(W, H) * 0.6;
-      var e = new SG.Enemy(ecfg, Math.floor(Math.random() * elist.length));
-      e.x = player.x + Math.cos(angle) * d;
-      e.y = player.y + Math.sin(angle) * d;
+      var idx = Math.floor(Math.random() * elist.length);
+      var e = new SG.Enemy(player.x + Math.cos(angle) * d, player.y + Math.sin(angle) * d, ecfg, idx);
       spawned.push(e);
     }
     return spawned;

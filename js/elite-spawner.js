@@ -31,9 +31,10 @@
       var ecfg = elist[Math.min(4, elist.length - 1)] || { hp: 10, speed: 1, damage: 10, size: 40, color: '#ff00ff' };
       var angle = Math.random() * Math.PI * 2;
       var d = Math.max(W, H) * 0.5;
-      var elite = new SG.Enemy(ecfg, Math.min(4, elist.length - 1));
-      elite.x = this.player.x + Math.cos(angle) * d;
-      elite.y = this.player.y + Math.sin(angle) * d;
+      var eIdx = Math.min(4, elist.length - 1);
+      var ex = this.player.x + Math.cos(angle) * d;
+      var ey = this.player.y + Math.sin(angle) * d;
+      var elite = new SG.Enemy(ex, ey, ecfg, eIdx);
       elite.hp = ecfg.hp * ELITE_HP_MULT;
       elite.maxHp = elite.hp;
       elite.size = (ecfg.size || 40) * ELITE_SIZE_MULT;
