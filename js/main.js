@@ -86,6 +86,7 @@
     document.addEventListener('keydown', unlockAudio);
 
     this._selectedCharacter = null;
+    this._archerAttack = null;
     this._meleeAttack = null;
     this._loadImages();
   }
@@ -146,6 +147,8 @@
     // 載入近戰角色 sprite strips
     load('melee_sprite_idle', 'assets/strips/zero_idle_5f.png');
     load('melee_sprite_run', 'assets/strips/zero_walk_8f.png');
+    load('archer_sprite_idle', 'assets/strips/archer_idle_4f.png');
+    load('archer_sprite_run', 'assets/strips/archer_walk_6f.png');
     load('shield_icon', 'assets/shield_icon.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
@@ -175,10 +178,18 @@
       this.player.animator = this._buildAnimator('melee', meleeCfg);
       this.player.spriteDefaultRight = true;
       this._meleeAttack = new SG.MeleeAttack(this.player);
+      this._archerAttack = null;
+    } else if (this._selectedCharacter.id === 'archer') {
+      var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_walk_6f.png', fps: 10 } } };
+      this.player.animator = this._buildAnimator('archer', archerCfg);
+      this.player.spriteDefaultRight = true;
+      this._archerAttack = new SG.ArcherAttack(this.player);
+      this._meleeAttack = null;
     } else {
       this.player.animator = this._buildAnimator('player', this.imgConfig.player);
       this.player.spriteDefaultRight = true; // X4 面向右
       this._meleeAttack = null;
+      this._archerAttack = null;
     }
 
     this.enemies = [];
@@ -243,6 +254,7 @@
       xpGems: this.xpGems,
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
+      archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
       damageNumbers: this._damageNumbers,
       dt: dt
     });
@@ -285,6 +297,11 @@
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
       var mhits = this._meleeAttack.getLastHits();
       for (var i = 0; i < mhits.length; i++) this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, false);
+    } else if (this.player.attackType === 'archer' && this._archerAttack) {
+      var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
+      for (var i = 0; i < archerHits.length; i++) this._handleKill(archerHits[i]);
+      var ahits = this._archerAttack.getLastHits();
+      for (var i = 0; i < ahits.length; i++) this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, false);
     } else {
       this.player.fireTimer -= dt;
       if (this.player.fireTimer <= 0) {
@@ -505,7 +522,7 @@
     var self = this;
     this.ui.showLevelUp(this.player, this.weaponManager, this.skillTree, function() {
       self.levelingUp = false;
-    }, this._meleeAttack);
+    }, this._meleeAttack, this._archerAttack);
   };
 
   Game.prototype._endGame = function() {

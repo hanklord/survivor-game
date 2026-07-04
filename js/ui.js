@@ -28,6 +28,11 @@
     { name: '🗡️ 攻擊範圍提升', type: 'meleeRange' }
   ];
 
+  var ARCHER_UPGRADES = [
+    { name: '🏹 弓箭數量+1', type: 'archerCount' },
+    { name: '💨 射擊頻率提升', type: 'archerRate' }
+  ];
+
   function UI() {
     this.els = {
       hpFill: document.getElementById('hp-fill'),
@@ -95,7 +100,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -160,6 +165,14 @@
           if (mup.type === 'meleeRate') meleeAttack.upgradeRate();
           else if (mup.type === 'meleeRange') meleeAttack.upgradeRange();
         }
+      });
+    }
+
+    // 弓手角色專屬升級
+    if (archerAttack) {
+      allOptions.push({
+        name: '🏹 弓術精進 (Lv' + archerAttack.level + ')',
+        action: function() { archerAttack.upgrade(); }
       });
     }
 

@@ -183,6 +183,29 @@
         ctx.restore();
       }
     }
+    // 弓箭投射物
+    if (state.archerVisual) {
+      var arrows = state.archerVisual;
+      for (var ai = 0; ai < arrows.length; ai++) {
+        var ar = arrows[ai];
+        if (!this._isVisible(ar.x, ar.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(ar.x, ar.y);
+        ctx.rotate(ar.angle);
+        // 箭身（棕色線 + 白色箭頭）
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(8, 0); ctx.stroke();
+        // 箭頭
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(6, -3); ctx.lineTo(6, 3); ctx.closePath(); ctx.fill();
+        // 尾羽
+        ctx.fillStyle = '#44cc44';
+        ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(-15, -3); ctx.lineTo(-14, 0); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(-15, 3); ctx.lineTo(-14, 0); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
     this._drawParticles(state.particles, camX, camY);
 
     // 傷害數字
