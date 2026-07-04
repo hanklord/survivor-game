@@ -100,7 +100,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -186,6 +186,18 @@
       });
     }
 
+    // 被動道具選項（1個）
+    if (passiveItems) {
+      var passiveChoices = passiveItems.getChoices(1);
+      for (var pi = 0; pi < passiveChoices.length; pi++) {
+        (function(pc) {
+          allOptions.push({
+            name: pc.name,
+            action: function() { passiveItems.apply(pc.id, player); }
+          });
+        })(passiveChoices[pi]);
+      }
+    }
     // 建立按鈕
     for (var o = 0; o < allOptions.length; o++) {
       (function(opt) {

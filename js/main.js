@@ -87,6 +87,9 @@
 
     this._selectedCharacter = null;
     this._archerAttack = null;
+    this._passiveItems = new SG.PassiveItems();
+    this._rushWave = new SG.RushWave();
+    this.meta = new SG.MetaProgression();
     this._meleeAttack = null;
     this._loadImages();
   }
@@ -160,17 +163,45 @@
   Game.prototype._start = function() {
     this.renderer.init(this.images, this.imgConfig);
     var self = this;
-    // 顯示角色選擇畫面
-    new SG.CharacterSelect(function(character) {
-      self._selectedCharacter = character;
-      self._initGame();
+    // 顯示商店 → 角色選擇
+    self._showMetaShop(function() {
+      new SG.CharacterSelect(function(character) {
+        self._selectedCharacter = character;
+        self._initGame();
+      });
     });
+  };
+
+  // 永久升級商店
+  Game.prototype._showMetaShop = function(callback) {
+    var self = this;
+    var el = document.getElementById('meta-shop');
+    var coins = this.meta.getCoins();
+    if (coins === 0 && Object.keys(this.meta.upgrades).length === 0) { callback(); return; }
+    el.innerHTML = '<h2 style="color:#ffcc00;">💰 永久升級商店</h2>' +
+      '<p style="color:#ffcc00;">金幣: ' + coins + '</p><div id="meta-items"></div>' +
+      '<button id="meta-start" style="margin-top:15px;padding:10px 25px;font-size:16px;background:#4444ff;border:none;color:#fff;border-radius:8px;cursor:pointer;">開始遊戲</button>';
+    var itemsEl = document.getElementById('meta-items');
+    var list = this.meta.getUpgradeList();
+    for (var i = 0; i < list.length; i++) {
+      (function(u) {
+        var btn = document.createElement('button');
+        btn.style.cssText = 'display:block;width:260px;margin:8px auto;padding:10px;background:rgba(30,30,60,0.95);border:1px solid #888;border-radius:8px;color:#fff;font-size:14px;cursor:pointer;';
+        btn.textContent = u.name + ' [Lv' + u.level + '/' + u.maxLevel + '] - ' + (u.maxed ? 'MAX' : u.cost + '💰');
+        btn.disabled = u.maxed || self.meta.getCoins() < u.cost;
+        btn.onclick = function() { if (self.meta.buyUpgrade(u.id)) self._showMetaShop(callback); };
+        itemsEl.appendChild(btn);
+      })(list[i]);
+    }
+    document.getElementById('meta-start').onclick = function() { el.style.display = 'none'; callback(); };
+    el.style.display = 'block';
   };
 
   Game.prototype._initGame = function() {
     var self = this;
     this.player = new SG.Player();
     this.player.attackType = this._selectedCharacter.attackType;
+    this.meta.applyToPlayer(this.player);
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -179,6 +210,9 @@
       this.player.spriteDefaultRight = true;
       this._meleeAttack = new SG.MeleeAttack(this.player);
       this._archerAttack = null;
+    this._passiveItems = new SG.PassiveItems();
+    this._rushWave = new SG.RushWave();
+    this.meta = new SG.MetaProgression();
     } else if (this._selectedCharacter.id === 'archer') {
       var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_walk_6f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('archer', archerCfg);
@@ -190,6 +224,9 @@
       this.player.spriteDefaultRight = true; // X4 面向右
       this._meleeAttack = null;
       this._archerAttack = null;
+    this._passiveItems = new SG.PassiveItems();
+    this._rushWave = new SG.RushWave();
+    this.meta = new SG.MetaProgression();
     }
 
     this.enemies = [];
@@ -424,6 +461,24 @@
 
     // Boss 排程
     var bossResult = this.waveManager.updateBoss(dt, this.gameTime, this.player, this.W, this.H);
+    // Rush Wave
+    var rushEvent = this._rushWave.update(dt);
+    if (rushEvent === "rush_start") {
+      document.getElementById("rush-warning").style.display = "block";
+    } else if (rushEvent === "rush_spawn") {
+      var rushSpawned = this.waveManager.spawnRushWave(this._rushWave.getSpawnCount(), this.player, this.W, this.H, this.imgConfig);
+      if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
+        rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
+        this.enemies.push(rushSpawned[ri]);
+      }
+    } else if (rushEvent === "rush_end") {
+      document.getElementById("rush-warning").style.display = "none";
+      for (var rx = 0; rx < this._rushWave.getRewardXP(); rx++) {
+        if (this.player.addXP(this.player.xpNeeded)) this._showLevelUp();
+      }
+    } else if (!this._rushWave.active) {
+      document.getElementById("rush-warning").style.display = "none";
+    }
     if (bossResult.showWarning) { this.ui.showBossWarning(); this.audio.playBossWarning(); }
     if (bossResult.hideWarning) this.ui.hideBossWarning();
     if (bossResult.boss) {
@@ -532,13 +587,14 @@
     var self = this;
     this.ui.showLevelUp(this.player, this.weaponManager, this.skillTree, function() {
       self.levelingUp = false;
-    }, this._meleeAttack, this._archerAttack);
+    }, this._meleeAttack, this._archerAttack, this._passiveItems);
   };
 
   Game.prototype._endGame = function() {
     this.gameOver = true;
     this.audio.stopBGM();
-    this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard);
+    var earned = this.meta.earnCoins(this.kills, this.gameTime);
+    this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins());
   };
 
   SG.Game = Game;
