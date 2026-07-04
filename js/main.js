@@ -476,7 +476,7 @@
         this.xpGemPool.release(g);
         this.xpGems.splice(i, 1);
         this.audio.playPickup();
-        if (leveled) this._showLevelUp();
+        if (leveled && !this.levelingUp) this._showLevelUp();
       }
     }
     // 全部吸完後關閉磁鐵
@@ -508,9 +508,12 @@
       }
     } else if (rushEvent === "rush_end") {
       document.getElementById("rush-warning").style.display = "none";
+      // Rush 獎勵：給予經驗但只觸發一次升級（避免多次 _showLevelUp 衝突）
+      var rushLeveled = false;
       for (var rx = 0; rx < this._rushWave.getRewardXP(); rx++) {
-        if (this.player.addXP(this.player.xpNeeded)) this._showLevelUp();
+        if (this.player.addXP(this.player.xpNeeded)) rushLeveled = true;
       }
+      if (rushLeveled && !this.levelingUp) this._showLevelUp();
     } else if (!this._rushWave.active) {
       document.getElementById("rush-warning").style.display = "none";
     }
@@ -520,7 +523,7 @@
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
       this.enemies.push(eliteResult.elite);
     }
-    if (eliteResult.triggerLevelUp) this._showLevelUp();
+    if (eliteResult.triggerLevelUp && !this.levelingUp) this._showLevelUp();
     // 磁鐵效果：吸取所有 XP
     if (this._eliteSpawner.isMagnetActive()) this._magnetAllXP = true;
     if (bossResult.showWarning) { this.ui.showBossWarning(); this.audio.playBossWarning(); }
@@ -628,6 +631,7 @@
   };
 
   Game.prototype._showLevelUp = function() {
+    if (this.levelingUp) return; // 防止重複觸發
     this.levelingUp = true;
     this.audio.playLevelUp();
     var self = this;

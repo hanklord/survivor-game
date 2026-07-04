@@ -198,6 +198,7 @@
         })(passiveChoices[pi]);
       }
     }
+    if (allOptions.length === 0) { callback(); return; }
     // 建立按鈕
     for (var o = 0; o < allOptions.length; o++) {
       (function(opt) {
@@ -212,7 +213,16 @@
         self.els.choices.appendChild(btn);
       })(allOptions[o]);
     }
-    this.els.levelUp.style.display = 'block';
+    this.els.levelUp.style.display = "block";
+    // Failsafe: 30秒後自動關閉（防止卡住）
+    var failsafe = setTimeout(function() { self.els.levelUp.style.display = "none"; callback(); }, 30000);
+    // 修改所有按鈕的 onclick 清除 failsafe
+    var btns = self.els.choices.getElementsByTagName("button");
+    for (var bi = 0; bi < btns.length; bi++) {
+      (function(origClick, btn) {
+        btn.onclick = function() { clearTimeout(failsafe); origClick.call(this); };
+      })(btns[bi].onclick, btns[bi]);
+    }
   };
 
   // Game Over（含排行榜）
