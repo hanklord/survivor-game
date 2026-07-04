@@ -4,8 +4,8 @@
 
   var RUSH_INTERVAL = 60; // 每60秒一次
   var RUSH_DURATION = 8;  // rush 持續秒數
-  var RUSH_SPAWN_RATE = 0.3; // 每0.3秒生一批
-  var RUSH_SPAWN_COUNT = 8;  // 每批數量
+  var RUSH_SPAWN_RATE = 0.5; // 每0.3秒生一批
+  var RUSH_SPAWN_COUNT = 4;  // 每批數量
   var RUSH_REWARD_XP = 5;   // 存活獎勵（直接升級次數）
 
   function RushWave() {

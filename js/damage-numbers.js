@@ -22,6 +22,7 @@
 
   // 新增傷害數字
   DamageNumbers.prototype.add = function(x, y, damage, crit) {
+    if (this.numbers.length >= 20) this.numbers.shift();
     this.numbers.push({
       x: x + (Math.random() - 0.5) * 20,
       y: y - 10,

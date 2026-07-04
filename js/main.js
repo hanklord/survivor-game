@@ -3,6 +3,9 @@
   window.SG = window.SG || {};
 
   var MAX_DT = 0.05;
+  var MAX_ENEMIES = 50;
+  var MAX_XP_GEMS = 100;
+  var MAX_DAMAGE_NUMBERS = 20;
   var PLAYER_HITBOX = 20;
   var BOSS_XP_DROP_COUNT = 10;
   var BOSS_XP_SPREAD = 40;
@@ -419,7 +422,16 @@
       }
     }
 
-    // XP 寶石
+    // XP 寶石數量限制（超出上限移除最遠的）
+    while (this.xpGems.length > MAX_XP_GEMS) {
+      var farthest = 0, farthestD = 0;
+      for (var gi = 0; gi < this.xpGems.length; gi++) {
+        var gd = SG.dist(this.player, this.xpGems[gi]);
+        if (gd > farthestD) { farthestD = gd; farthest = gi; }
+      }
+      this.xpGemPool.release(this.xpGems[farthest]);
+      this.xpGems.splice(farthest, 1);
+    }
     // Boss 死亡延遲吸取
     if (this._magnetDelay > 0) {
       this._magnetDelay -= dt;
@@ -456,7 +468,7 @@
     var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime);
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
-      this.enemies.push(spawned[i]);
+      if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
     // Boss 排程
@@ -469,7 +481,7 @@
       var rushSpawned = this.waveManager.spawnRushWave(this._rushWave.getSpawnCount(), this.player, this.W, this.H, this.imgConfig);
       if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
         rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
-        this.enemies.push(rushSpawned[ri]);
+        if (this.enemies.length < MAX_ENEMIES) this.enemies.push(rushSpawned[ri]);
       }
     } else if (rushEvent === "rush_end") {
       document.getElementById("rush-warning").style.display = "none";
