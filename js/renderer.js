@@ -318,10 +318,17 @@
         ctx.restore();
       }
     }
-    this._drawParticles(state.particles, camX, camY);
+    if (!state.lowQuality) this._drawParticles(state.particles, camX, camY);
 
-    // 傷害數字
-    if (state.damageNumbers) state.damageNumbers.draw(ctx);
+    // 傷害數字（低效能時跳過）
+    if (state.damageNumbers && !state.lowQuality) state.damageNumbers.draw(ctx);
+
+    // FPS 顯示
+    if (state.fps !== undefined) {
+      ctx.fillStyle = state.lowQuality ? '#ff4444' : '#44ff44';
+      ctx.font = '12px monospace';
+      ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
+    }
 
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -383,7 +390,7 @@
         ctx.strokeStyle = 'rgba(255,200,0,0.6)';
         ctx.lineWidth = 3;
         ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 0;
         ctx.beginPath(); ctx.arc(e.x, e.y, e.size / 2 + 8, 0, Math.PI * 2); ctx.stroke();
         ctx.shadowBlur = 0;
         ctx.restore();
@@ -492,7 +499,7 @@
       // 幾何 fallback
       ctx.fillStyle = player.invuln > 0 ? PLAYER_HIT_COLOR : PLAYER_COLOR;
       ctx.shadowColor = PLAYER_COLOR;
-      ctx.shadowBlur = 15;
+      ctx.shadowBlur = 0;
       ctx.beginPath(); ctx.arc(player.x, player.y, ps / 2, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
     }

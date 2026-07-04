@@ -3,9 +3,11 @@
   window.SG = window.SG || {};
 
   var MAX_DT = 0.05;
-  var MAX_ENEMIES = 50;
-  var MAX_XP_GEMS = 100;
+  var MAX_ENEMIES = 30;
+  var MAX_XP_GEMS = 50;
   var MAX_DAMAGE_NUMBERS = 20;
+  var LOW_FPS_THRESHOLD = 20;
+  var FPS_SAMPLE_INTERVAL = 1; // 每秒計算一次
   var PLAYER_HITBOX = 20;
   var BOSS_XP_DROP_COUNT = 10;
   var BOSS_XP_SPREAD = 40;
@@ -61,6 +63,10 @@
     this.levelingUp = false;
     this.levelClearing = false;
     this.lastTime = 0;
+    this._fpsFrames = 0;
+    this._fpsTimer = 0;
+    this._currentFps = 60;
+    this._lowQuality = false;
     this.regenTimer = 0;
     this._damageNumbers = new SG.DamageNumbers();
     this._damageNumbers = new SG.DamageNumbers();
@@ -288,6 +294,16 @@
     var dt = Math.min((ts - this.lastTime) / 1000, MAX_DT);
     this.lastTime = ts;
 
+    // FPS 監控 + 自動降質
+    this._fpsFrames++;
+    this._fpsTimer += dt;
+    if (this._fpsTimer >= FPS_SAMPLE_INTERVAL) {
+      this._currentFps = Math.round(this._fpsFrames / this._fpsTimer);
+      this._fpsFrames = 0;
+      this._fpsTimer = 0;
+      this._lowQuality = this._currentFps < LOW_FPS_THRESHOLD;
+    }
+
     if (!this.paused && !this.levelingUp && !this.levelClearing) this._update(dt);
     this.renderer.render({
       player: this.player,
@@ -303,6 +319,8 @@
       eliteVisuals: this._eliteSpawner.getVisuals(),
       piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,
       damageNumbers: this._damageNumbers,
+      lowQuality: this._lowQuality,
+      fps: this._currentFps,
       dt: dt
     });
 
@@ -343,7 +361,7 @@
       var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
       var mhits = this._meleeAttack.getLastHits();
-      for (var i = 0; i < mhits.length; i++) this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, false);
+      for (var i = 0; i < mhits.length; i++) if (!this._lowQuality) this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, false);
     } else if (this.player.attackType === 'archer' && this._archerAttack) {
       var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < archerHits.length; i++) this._handleKill(archerHits[i]);
@@ -356,7 +374,7 @@
       var paHits = pa.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < paHits.length; i++) this._handleKill(paHits[i]);
       for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
-      for (var i = 0; i < ahits.length; i++) this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, false);
+      for (var i = 0; i < ahits.length; i++) if (!this._lowQuality) this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, false);
     } else {
       this.player.fireTimer -= dt;
       if (this.player.fireTimer <= 0) {
@@ -389,7 +407,7 @@
           if (isCrit) dmg *= 2;
           dmg = Math.round(dmg);
           e.hp -= dmg;
-          this._damageNumbers.add(e.x, e.y, dmg, isCrit);
+          if (!this._lowQuality) this._damageNumbers.add(e.x, e.y, dmg, isCrit);
           hit = true;
           if (e.hp <= 0) this._handleKill(e);
           break;
@@ -529,7 +547,7 @@
     var isBoss = e.type === 'boss';
     var pCount = isBoss ? BOSS_PARTICLE_COUNT : undefined;
     var parts = SG.Particle.spawn(e.x, e.y, e.color, pCount, this.particlePool);
-    for (var k = 0; k < parts.length; k++) this.particles.push(parts[k]);
+    for (var k = 0; k < parts.length && this.particles.length < 100; k++) this.particles.push(parts[k]);
 
     if (isBoss) {
       for (var k = 0; k < BOSS_XP_DROP_COUNT; k++) {
