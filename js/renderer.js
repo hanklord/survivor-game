@@ -128,6 +128,44 @@
     ctx.translate(-camX, -camY);
 
     this._drawXPGems(state.xpGems, camX, camY);
+    // 磁鐵道具 + 寶箱
+    if (state.eliteVisuals) {
+      var ev = state.eliteVisuals;
+      // 磁鐵
+      for (var mi = 0; mi < ev.magnets.length; mi++) {
+        var mg = ev.magnets[mi];
+        if (!this._isVisible(mg.x, mg.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(mg.x, mg.y);
+        ctx.fillStyle = '#ff2222';
+        ctx.beginPath(); ctx.arc(-6, -5, 5, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = '#2222ff';
+        ctx.beginPath(); ctx.arc(6, -5, 5, Math.PI, 0); ctx.fill();
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(0, -5, 10, Math.PI, 0); ctx.stroke();
+        ctx.restore();
+      }
+      // 寶箱
+      for (var ci = 0; ci < ev.chests.length; ci++) {
+        var ch = ev.chests[ci];
+        if (!this._isVisible(ch.x, ch.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(ch.x, ch.y);
+        ctx.fillStyle = '#cc8800';
+        ctx.fillRect(-12, -6, 24, 16);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillRect(-10, -4, 20, 12);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-3, 0, 6, 4);
+        // 光暈
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(0, 2, 14, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    }
     this._drawEnemies(state.enemies, camX, camY);
     this._drawBosses(state.bosses, camX, camY);
     this._drawProjectiles(state.projectiles, camX, camY);
@@ -339,6 +377,17 @@
     for (var i = 0; i < enemies.length; i++) {
       var e = enemies[i];
       if (!this._isVisible(e.x, e.y, camX, camY, CULL_MARGIN)) continue;
+      // 精英怪光圈
+      if (e.isElite) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,200,0,0.6)';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 15;
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.size / 2 + 8, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
       if (e.animator && e.animator.isLoaded()) {
         e.animator.draw(ctx, e.x, e.y, e.size, e.facingLeft);
       } else {

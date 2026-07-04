@@ -92,6 +92,7 @@
     this._archerAttack = null;
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
+    this._eliteSpawner = new SG.EliteSpawner(null);
     this.meta = new SG.MetaProgression();
     this._meleeAttack = null;
     this._loadImages();
@@ -205,6 +206,7 @@
     this.player = new SG.Player();
     this.player.attackType = this._selectedCharacter.attackType;
     this.meta.applyToPlayer(this.player);
+    this._eliteSpawner = new SG.EliteSpawner(this.player);
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -215,6 +217,7 @@
       this._archerAttack = null;
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
+    this._eliteSpawner = new SG.EliteSpawner(null);
     this.meta = new SG.MetaProgression();
     } else if (this._selectedCharacter.id === 'archer') {
       var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_walk_6f.png', fps: 10 } } };
@@ -229,6 +232,7 @@
       this._archerAttack = null;
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
+    this._eliteSpawner = new SG.EliteSpawner(null);
     this.meta = new SG.MetaProgression();
     }
 
@@ -296,6 +300,7 @@
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
+      eliteVisuals: this._eliteSpawner.getVisuals(),
       piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,
       damageNumbers: this._damageNumbers,
       dt: dt
@@ -491,6 +496,15 @@
     } else if (!this._rushWave.active) {
       document.getElementById("rush-warning").style.display = "none";
     }
+    // 精英怪 + 磁鐵道具
+    var eliteResult = this._eliteSpawner.update(dt, this.W, this.H, this.imgConfig);
+    if (eliteResult.elite && this.enemies.length < MAX_ENEMIES) {
+      eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
+      this.enemies.push(eliteResult.elite);
+    }
+    if (eliteResult.triggerLevelUp) this._showLevelUp();
+    // 磁鐵效果：吸取所有 XP
+    if (this._eliteSpawner.isMagnetActive()) this._magnetAllXP = true;
     if (bossResult.showWarning) { this.ui.showBossWarning(); this.audio.playBossWarning(); }
     if (bossResult.hideWarning) this.ui.hideBossWarning();
     if (bossResult.boss) {
@@ -532,6 +546,8 @@
       gem.init(e.x, e.y, 1);
       this.xpGems.push(gem);
       this._removeFrom(this.enemies, e);
+      // 精英怪掉落寶箱
+      if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
     }
     this.kills++;
     this.audio.playEnemyDeath();
