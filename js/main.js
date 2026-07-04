@@ -82,6 +82,18 @@
       self.ui.updateMute(enabled);
     };
     this._resize();
+    // 炸彈按鈕
+    var bombBtn = document.getElementById("bomb-btn");
+    var self2 = this;
+    var doBomb = function(e) {
+      if (e) e.preventDefault();
+      if (!self2._bomb || !self2._bomb.ready) return;
+      var killed = self2._bomb.activate(self2.enemies);
+      for (var i = 0; i < killed.length; i++) self2._handleKill(killed[i]);
+      self2.enemies = [];
+    };
+    bombBtn.onclick = doBomb;
+    bombBtn.addEventListener("touchend", doBomb);
     window.addEventListener('resize', function() { self._resize(); });
 
     // 首次互動解鎖音頻 + 播放 BGM
@@ -99,6 +111,8 @@
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
     this._eliteSpawner = new SG.EliteSpawner(null);
+    this._combo = new SG.ComboSystem();
+    this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
     this._meleeAttack = null;
     this._loadImages();
@@ -213,6 +227,8 @@
     this.player.attackType = this._selectedCharacter.attackType;
     this.meta.applyToPlayer(this.player);
     this._eliteSpawner = new SG.EliteSpawner(this.player);
+    this._combo = new SG.ComboSystem();
+    this._bomb = new SG.BombSystem();
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -224,6 +240,8 @@
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
     this._eliteSpawner = new SG.EliteSpawner(null);
+    this._combo = new SG.ComboSystem();
+    this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
     } else if (this._selectedCharacter.id === 'archer') {
       var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_walk_6f.png', fps: 10 } } };
@@ -239,6 +257,8 @@
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
     this._eliteSpawner = new SG.EliteSpawner(null);
+    this._combo = new SG.ComboSystem();
+    this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
     }
 
@@ -323,6 +343,10 @@
       damageNumbers: this._damageNumbers,
       lowQuality: this._lowQuality,
       fps: this._currentFps,
+      comboVisual: this._combo.getVisual(),
+      bombFlash: this._bomb.isFlashing(),
+      bombProgress: this._bomb.getProgress(),
+      bombReady: this._bomb.ready,
       dt: dt
     });
 
@@ -473,7 +497,7 @@
       }
       var result = g.update(this.player);
       if (result === 'picked') {
-        var xpVal = g.value * (this.player.xpMultiplier || 1);
+        var xpVal = g.value * (this.player.xpMultiplier || 1) * this._combo.getXPMultiplier();
         var leveled = this.player.addXP(xpVal);
         this.xpGemPool.release(g);
         this.xpGems.splice(i, 1);
@@ -542,6 +566,8 @@
 
     // 無敵 + HUD
     this.player.updateInvuln(dt);
+    this._combo.update(dt);
+    this._bomb.update(dt);
     this._damageNumbers.update(dt);
     this.ui.updateHUD(this.player, this.gameTime, this.kills);
     this.ui.updateSkillIcons(this.skillTree);
@@ -573,6 +599,7 @@
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
     }
     this.kills++;
+    this._combo.addKill();
     this.audio.playEnemyDeath();
   };
 

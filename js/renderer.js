@@ -323,11 +323,42 @@
     // 傷害數字（低效能時跳過）
     if (state.damageNumbers && !state.lowQuality) state.damageNumbers.draw(ctx);
 
+    // Combo 顯示
+    if (state.comboVisual) {
+      var cv = state.comboVisual;
+      var fontSize = Math.min(36, 18 + cv.count);
+      ctx.font = 'bold ' + fontSize + 'px Segoe UI, sans-serif';
+      ctx.fillStyle = cv.flash ? '#ffff00' : (cv.count >= 20 ? '#ff4400' : cv.count >= 10 ? '#ffaa00' : '#ffffff');
+      ctx.textAlign = 'center';
+      ctx.fillText(cv.count + ' COMBO!', state.player.x, state.player.y - 50);
+      if (cv.count >= 10) {
+        ctx.font = '12px Segoe UI';
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), state.player.x, state.player.y - 35);
+      }
+      ctx.textAlign = 'left';
+    }
+
+    // 炸彈全屏閃爍
+    if (state.bombFlash) {
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillRect(camX, camY, W, H);
+    }
+
     // FPS 顯示
     if (state.fps !== undefined) {
       ctx.fillStyle = state.lowQuality ? '#ff4444' : '#44ff44';
       ctx.font = '12px monospace';
       ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
+    }
+
+    // 炸彈充能進度（右下角）
+    if (state.bombProgress !== undefined) {
+      var bx = camX + W - 50, by = camY + H - 50;
+      ctx.beginPath(); ctx.arc(bx, by, 22, 0, Math.PI * 2);
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 4; ctx.stroke();
+      ctx.beginPath(); ctx.arc(bx, by, 22, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * state.bombProgress);
+      ctx.strokeStyle = state.bombReady ? '#ff4400' : '#ff8800'; ctx.lineWidth = 4; ctx.stroke();
     }
 
     ctx.globalAlpha = 1;
