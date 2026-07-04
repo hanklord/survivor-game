@@ -8,10 +8,13 @@
   var UPGRADES = [
     { name: '⚔️ Damage +25%', apply: function(p) { p.damage *= 1.25; } },
     { name: '💨 Speed +15%', apply: function(p) { p.speed *= 1.15; } },
-    { name: '🔫 +1 Projectile', apply: function(p) { p.projectileCount++; } },
-    { name: '⚡ Fire Rate +20%', apply: function(p) { p.fireRate *= 0.8; } },
     { name: '🧲 Pickup Range +30%', apply: function(p) { p.pickupRange *= 1.3; } },
     { name: '❤️ Max HP +25', apply: function(p) { p.maxHp += 25; p.hp = Math.min(p.hp + 25, p.maxHp); } }
+  ];
+
+  var RANGED_UPGRADES = [
+    { name: '🔫 +1 Projectile', apply: function(p) { p.projectileCount++; } },
+    { name: '⚡ Fire Rate +20%', apply: function(p) { p.fireRate *= 0.8; } }
   ];
 
   // 武器升級選項
@@ -107,9 +110,16 @@
     // 建立所有可選技能池（未滿級的）
     var pool = [];
 
-    // 基礎升級（6 種，永遠可選）
+    // 基礎升級（共通，所有角色可選）
     for (var i = 0; i < UPGRADES.length; i++) {
       (function(idx) { pool.push({ name: UPGRADES[idx].name, action: function() { UPGRADES[idx].apply(player); } }); })(i);
+    }
+
+    // 遠程角色專屬升級（+Projectile, Fire Rate）
+    if (player.attackType === 'ranged') {
+      for (var ri = 0; ri < RANGED_UPGRADES.length; ri++) {
+        (function(idx) { pool.push({ name: RANGED_UPGRADES[idx].name, action: function() { RANGED_UPGRADES[idx].apply(player); } }); })(ri);
+      }
     }
 
     // 通用武器技能
