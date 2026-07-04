@@ -104,102 +104,60 @@
     var self = this;
     this.els.choices.innerHTML = '';
 
-    // 基礎升級選項（隨機 3 個）
-    var picks = [];
-    while (picks.length < Math.min(UPGRADE_CHOICES, UPGRADES.length)) {
-      var i = Math.floor(Math.random() * UPGRADES.length);
-      if (picks.indexOf(i) === -1) picks.push(i);
+    // 建立所有可選技能池（未滿級的）
+    var pool = [];
+
+    // 基礎升級（6 種，永遠可選）
+    for (var i = 0; i < UPGRADES.length; i++) {
+      (function(idx) { pool.push({ name: UPGRADES[idx].name, action: function() { UPGRADES[idx].apply(player); } }); })(i);
     }
 
-    var allOptions = [];
-    for (var p = 0; p < picks.length; p++) {
-      (function(idx) {
-        allOptions.push({
-          name: UPGRADES[idx].name,
-          action: function() { UPGRADES[idx].apply(player); }
-        });
-      })(picks[p]);
-    }
+    // 通用武器技能
+    var cl = weaponManager.chainLightning;
+    if (!cl || cl.chains < 15) pool.push({ name: '🔗 連鎖閃電' + (cl ? ' Lv' + cl.chains : ''), action: function() { weaponManager.unlockChainLightning(); } });
+    if (!weaponManager.shield || (weaponManager.shield.count < 6 || weaponManager.shield.ballSize < 40)) pool.push({ name: '🔵 旋轉護盾', action: function() { weaponManager.unlockShield(); } });
+    if (!weaponManager.nova || (weaponManager.nova._level || 1) < 15) pool.push({ name: '💫 範圍爆炸', action: function() { weaponManager.unlockNova(); } });
+    if (!weaponManager.launcher || weaponManager.launcher.missileCount < 15) pool.push({ name: '🚀 追蹤飛彈', action: function() { weaponManager.unlockMissile(); } });
+    if (!weaponManager.thunder || (weaponManager.thunder.level || 1) < 15) pool.push({ name: '⚡ 落雷', action: function() { weaponManager.unlockThunder(); } });
 
-    // 連鎖閃電必定出現（若未滿級）
-    var chainMaxed = weaponManager.chainLightning && weaponManager.chainLightning.chains >= 8;
-    if (!chainMaxed) {
-      allOptions.push({
-        name: '🔗 連鎖閃電',
-        action: function() { weaponManager.unlockChainLightning(); }
-      });
-    }
-
-    // 其他武器選項（隨機 1 個，排除連鎖閃電）
-    var otherWeapons = WEAPON_UPGRADES.filter(function(w) { return w.type !== 'chainLightning'; });
-    var wi = Math.floor(Math.random() * otherWeapons.length);
-    var wup = otherWeapons[wi];
-    allOptions.push({
-      name: wup.name,
-      action: function() {
-        if (wup.type === 'shield') weaponManager.unlockShield();
-        else if (wup.type === 'nova') weaponManager.unlockNova();
-        else if (wup.type === 'missile') weaponManager.unlockMissile();
-        else if (wup.type === 'thunder') weaponManager.unlockThunder();
-      }
-    });
-
-    // 被動技能選項（1~2 個）
-    var skillChoices = skillTree.getRandomChoices();
+    // 被動技能樹
+    var skillChoices = skillTree.getRandomChoices ? skillTree.getRandomChoices() : [];
     for (var s = 0; s < skillChoices.length; s++) {
-      (function(sc) {
-        allOptions.push({
-          name: sc.name,
-          action: function() { skillTree.applySkill(sc.skillId, player); }
-        });
-      })(skillChoices[s]);
+      (function(sc) { pool.push({ name: sc.name, action: function() { skillTree.applySkill(sc.skillId, player); } }); })(skillChoices[s]);
     }
 
-    // 近戰角色專屬升級（隨機 1 個）
+    // 近戰專屬
     if (meleeAttack) {
-      var mi = Math.floor(Math.random() * MELEE_UPGRADES.length);
-      var mup = MELEE_UPGRADES[mi];
-      allOptions.push({
-        name: mup.name,
-        action: function() {
-          if (mup.type === 'meleeRate') meleeAttack.upgradeRate();
-          else if (mup.type === 'meleeRange') meleeAttack.upgradeRange();
-        }
-      });
+      if (meleeAttack.cd > 0.3) pool.push({ name: '⚔️ 攻擊頻率提升', action: function() { meleeAttack.upgradeRate(); } });
+      if (meleeAttack.range < 350) pool.push({ name: '🗡️ 劍氣距離提升', action: function() { meleeAttack.upgradeRange(); } });
     }
 
-    // 弓手角色專屬升級
+    // 弓手專屬
     if (archerAttack) {
-      allOptions.push({
-        name: '🏹 弓術精進 (Lv' + archerAttack.level + ')',
-        action: function() { archerAttack.upgrade(); }
-      });
+      if (archerAttack.level < 15) pool.push({ name: '🏹 弓術精進 Lv' + archerAttack.level, action: function() { archerAttack.upgrade(); } });
       var ea = archerAttack.getExplosiveArrow();
-      allOptions.push({
-        name: '💥 爆炸箭 (範圍' + (ea.level ? ea.radius + 20 : 50) + ')',
-        action: function() { archerAttack.getExplosiveArrow().upgrade(); }
-      });
+      if (ea.level < 15) pool.push({ name: '💥 爆炸箭 Lv' + ea.level, action: function() { archerAttack.getExplosiveArrow().upgrade(); } });
       var pa = archerAttack.getPiercingArrow();
-      allOptions.push({
-        name: '🔱 貫通箭 (Lv' + pa.level + ')',
-        action: function() { archerAttack.getPiercingArrow().upgrade(); }
-      });
+      if (pa.level < 15) pool.push({ name: '🔱 貫通箭 Lv' + pa.level, action: function() { archerAttack.getPiercingArrow().upgrade(); } });
     }
 
-    // 被動道具選項（1個）
+    // 被動道具
     if (passiveItems) {
-      var passiveChoices = passiveItems.getChoices(1);
-      for (var pi = 0; pi < passiveChoices.length; pi++) {
-        (function(pc) {
-          allOptions.push({
-            name: pc.name,
-            action: function() { passiveItems.apply(pc.id, player); }
-          });
-        })(passiveChoices[pi]);
+      var pc = passiveItems.getChoices(3);
+      for (var pi = 0; pi < pc.length; pi++) {
+        (function(p) { pool.push({ name: p.name, action: function() { passiveItems.apply(p.id, player); } }); })(pc[pi]);
       }
+    }
+
+    // 從 pool 隨機挑 3 個（3 選 1）
+    var allOptions = [];
+    while (allOptions.length < 3 && pool.length > 0) {
+      var idx = Math.floor(Math.random() * pool.length);
+      allOptions.push(pool.splice(idx, 1)[0]);
     }
     if (allOptions.length === 0) { callback(); return; }
-    // 建立按鈕
+
+    // 建立按鈕（支援觸控）
     for (var o = 0; o < allOptions.length; o++) {
       (function(opt) {
         var btn = document.createElement('button');
@@ -210,6 +168,7 @@
           if (handled) return;
           handled = true;
           if (e) e.preventDefault();
+          clearTimeout(failsafe);
           opt.action();
           self.els.levelUp.style.display = 'none';
           callback();
@@ -219,27 +178,14 @@
         self.els.choices.appendChild(btn);
       })(allOptions[o]);
     }
-    // Failsafe: 15秒後自動關閉（防止觸控卡住）
+
+    // Failsafe 15秒自動關閉
     var failsafe = setTimeout(function() {
       if (self.els.levelUp.style.display !== 'none') {
         self.els.levelUp.style.display = 'none';
         callback();
       }
     }, 15000);
-    // 每個按鈕動作前先清 failsafe（已在 doAction 中處理 handled flag）
-    var origButtons = self.els.choices.getElementsByTagName('button');
-    for (var bi = 0; bi < origButtons.length; bi++) {
-      (function(btn) {
-        var origTouch = btn.ontouchend;
-        var origClick = btn.onclick;
-        var wrap = function(e) {
-          clearTimeout(failsafe);
-          if (origClick) origClick.call(btn, e);
-        };
-        btn.onclick = wrap;
-        btn.ontouchend = function(e) { clearTimeout(failsafe); if (origTouch) origTouch.call(btn, e); };
-      })(origButtons[bi]);
-    }
     this.els.levelUp.style.display = 'block';
   };
 
