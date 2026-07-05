@@ -159,8 +159,33 @@
       }
     }
 
-    // 從 pool 隨機挑 3 個（3 選 1）
+    // 角色基礎技能必定佔第一位（未滿級時）
+    var baseSkill = null;
+    if (player.attackType === 'ranged') {
+      // 從 pool 中找 +1 Projectile 或 Fire Rate
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('Projectile') >= 0 || pool[bi].name.indexOf('Fire Rate') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
+    } else if (player.attackType === 'melee') {
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('攻擊頻率') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
+    } else if (player.attackType === 'archer') {
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('弓術精進') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
+    }
+
+    // 組合選項：基礎技能(1) + 隨機(2)
     var allOptions = [];
+    if (baseSkill) allOptions.push(baseSkill);
+    var remaining = 3 - allOptions.length;
     while (allOptions.length < 3 && pool.length > 0) {
       var idx = Math.floor(Math.random() * pool.length);
       allOptions.push(pool.splice(idx, 1)[0]);
