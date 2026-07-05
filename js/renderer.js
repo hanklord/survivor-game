@@ -171,55 +171,43 @@
     this._drawProjectiles(state.projectiles, camX, camY);
     this._drawPlayer(player);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
-    // 劍氣投射物視覺
+    // 近戰揮砍視覺（綁定角色位置的紫色弧形斬擊）
     if (state.meleeVisual) {
-      var qis = state.meleeVisual; // 陣列
-      for (var qi = 0; qi < qis.length; qi++) {
-        var p = qis[qi];
-        if (!this._isVisible(p.x, p.y, camX, camY, CULL_MARGIN)) continue;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.angle);
-        ctx.globalCompositeOperation = 'lighter';
+      var mv = state.meleeVisual;
+      var alpha = 1 - mv.progress;
+      ctx.save();
+      ctx.translate(mv.x, mv.y);
+      ctx.rotate(mv.angle);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = alpha;
 
-        // 拖尾（淡化的弧形殘影）
-        var trail = 3;
-        for (var ti = trail; ti > 0; ti--) {
-          ctx.globalAlpha = 0.15 * ti;
-          ctx.beginPath();
-          ctx.arc(-ti * 12, 0, 23, -0.8, 0.8);
-          ctx.strokeStyle = 'rgba(180,50,255,0.8)';
-          ctx.lineWidth = 4;
-          ctx.lineCap = 'round';
-          ctx.stroke();
-        }
+      // 外層光暈（暗紫）
+      ctx.beginPath();
+      ctx.arc(0, 0, mv.range, -1.0, 1.0);
+      ctx.strokeStyle = 'rgba(100,0,150,0.5)';
+      ctx.lineWidth = 14;
+      ctx.lineCap = 'round';
+      ctx.stroke();
 
-        // 主體新月弧形
-        ctx.globalAlpha = 0.9;
-        // 外層（暗紫）
-        ctx.beginPath();
-        ctx.arc(0, 0, 26, -0.9, 0.9);
-        ctx.strokeStyle = 'rgba(100,0,150,0.5)';
-        ctx.lineWidth = 12;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-        // 中層（紫）
-        ctx.beginPath();
-        ctx.arc(0, 0, 26, -0.9, 0.9);
-        ctx.strokeStyle = 'rgba(180,50,255,0.8)';
-        ctx.lineWidth = 6;
-        ctx.stroke();
-        // 核心（亮紫粉）
-        ctx.beginPath();
-        ctx.arc(0, 0, 26, -0.9, 0.9);
-        ctx.strokeStyle = 'rgba(230,150,255,1)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+      // 中層（紫）
+      ctx.beginPath();
+      ctx.arc(0, 0, mv.range * 0.9, -0.9, 0.9);
+      ctx.strokeStyle = 'rgba(180,50,255,0.7)';
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.stroke();
 
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 1;
-        ctx.restore();
-      }
+      // 核心（亮紫粉）
+      ctx.beginPath();
+      ctx.arc(0, 0, mv.range * 0.8, -0.8, 0.8);
+      ctx.strokeStyle = 'rgba(230,150,255,1)';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.restore();
     }
     // 弓箭投射物
     if (state.archerVisual) {

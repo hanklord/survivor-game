@@ -1,12 +1,12 @@
-// melee-attack.js — 劍氣投射物系統
+// melee-attack.js — 近戰揮砍系統（攻擊判定綁定角色位置）
 (function() {
   window.SG = window.SG || {};
 
-  var BASE_RANGE = 100;     // 飛行距離
+  var BASE_RANGE = 80;
   var BASE_DAMAGE = 15;
-  var BASE_CD = 0.8;
-  var SWORD_QI_SPEED = 350; // px/s
-  var SWORD_QI_WIDTH = 40;  // 碰撞寬度
+  var BASE_CD = 0.6;
+  var HITBOX_DURATION = 0.25;
+  var ARC_ANGLE = 1.2; // ±60° 扇形
 
   function MeleeAttack(player) {
     this.player = player;
@@ -14,7 +14,7 @@
     this.damage = BASE_DAMAGE;
     this.cd = BASE_CD;
     this.timer = 0;
-    this.projectiles = []; // 劍氣投射物列表
+    this._activeHitbox = null; // { timer, angle, hitIds }
     this._lastHits = [];
   }
 
@@ -22,76 +22,63 @@
     var hits = [];
     this._lastHits = [];
 
-    // 發射劍氣
-    this.timer -= dt;
-    if (this.timer <= 0) {
+    // 更新活躍的攻擊判定
+    if (this._activeHitbox) {
+      this._activeHitbox.timer -= dt;
+      // 持續判定範圍內敵人（跟隨角色位置）
       var targets = enemies.concat(bosses);
-      if (targets.length > 0) {
-        this.timer = this.cd;
-        // 朝最近敵人
-        var nearest = null, minD = Infinity;
-        for (var k = 0; k < targets.length; k++) {
-          var dd = SG.dist(this.player, targets[k]);
-          if (dd < minD) { minD = dd; nearest = targets[k]; }
-        }
-        var angle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
-        this.projectiles.push({
-          x: this.player.x,
-          y: this.player.y,
-          angle: angle,
-          vx: Math.cos(angle) * SWORD_QI_SPEED,
-          vy: Math.sin(angle) * SWORD_QI_SPEED,
-          dist: 0,
-          maxDist: this.range,
-          damage: this.damage,
-          hitSet: {} // 已命中的敵人 id（穿透不重複傷害同一隻）
-        });
-      }
-    }
-
-    // 更新劍氣
-    for (var i = this.projectiles.length - 1; i >= 0; i--) {
-      var p = this.projectiles[i];
-      var dx = p.vx * dt, dy = p.vy * dt;
-      p.x += dx;
-      p.y += dy;
-      p.dist += Math.sqrt(dx * dx + dy * dy);
-
-      // 超出飛行距離則消失
-      if (p.dist >= p.maxDist) {
-        this.projectiles.splice(i, 1);
-        continue;
-      }
-
-      // 穿透碰撞
-      var targets = enemies.concat(bosses);
-      for (var j = 0; j < targets.length; j++) {
-        var t = targets[j];
-        if (t.hp <= 0) continue;
-        if (p.hitSet[t.id]) continue;
-        if (SG.dist(p, t) < SWORD_QI_WIDTH / 2 + t.size / 2) {
-          t.hp -= p.damage;
-          p.hitSet[t.id] = true;
-          this._lastHits.push({ x: t.x, y: t.y, dmg: p.damage });
+      var angle = this.player.facingLeft ? Math.PI : 0;
+      for (var i = 0; i < targets.length; i++) {
+        var t = targets[i];
+        if (t.hp <= 0 || this._activeHitbox.hitIds[t.id]) continue;
+        var d = SG.dist(this.player, t);
+        if (d > this.range + t.size / 2) continue;
+        // 扇形角度檢查
+        var a = Math.atan2(t.y - this.player.y, t.x - this.player.x);
+        var diff = a - angle;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        if (Math.abs(diff) <= ARC_ANGLE) {
+          t.hp -= this.damage;
+          this._activeHitbox.hitIds[t.id] = true;
+          this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
           if (t.hp <= 0) hits.push(t);
         }
       }
+      if (this._activeHitbox.timer <= 0) this._activeHitbox = null;
     }
+
+    // 攻擊冷卻
+    this.timer -= dt;
+    if (this.timer <= 0 && !this._activeHitbox) {
+      var targets = enemies.concat(bosses);
+      if (targets.length > 0) {
+        this.timer = this.cd;
+        this._activeHitbox = { timer: HITBOX_DURATION, hitIds: {} };
+      }
+    }
+
     return hits;
   };
 
   MeleeAttack.prototype.upgradeRate = function() {
-    if (this.cd <= 0.3) return;
-    this.cd = Math.max(0.3, this.cd - 0.1);
+    this.cd = Math.max(0.2, this.cd - 0.05);
   };
 
   MeleeAttack.prototype.upgradeRange = function() {
-    if (this.range >= 350) return;
-    this.range += 50;
+    this.range += 20;
   };
 
   MeleeAttack.prototype.getVisual = function() {
-    return this.projectiles.length > 0 ? this.projectiles : null;
+    if (!this._activeHitbox) return null;
+    var angle = this.player.facingLeft ? Math.PI : 0;
+    return {
+      x: this.player.x,
+      y: this.player.y,
+      angle: angle,
+      range: this.range,
+      progress: 1 - (this._activeHitbox.timer / HITBOX_DURATION)
+    };
   };
 
   MeleeAttack.prototype.getLastHits = function() {
