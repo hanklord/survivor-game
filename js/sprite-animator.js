@@ -71,8 +71,6 @@
     var sx = Math.round(this._frameIndex * fw); // 整數確保不跨格
 
     // 關閉 smoothing 防止邊緣取樣
-    var prevSmoothing = ctx.imageSmoothingEnabled;
-    ctx.imageSmoothingEnabled = false;
 
     if (typeof angleOrFlip === 'number') {
       ctx.save();
@@ -90,7 +88,6 @@
       ctx.drawImage(anim.image, sx, 0, fw, fh, x - size / 2, y - size / 2, size, size);
     }
 
-    ctx.imageSmoothingEnabled = prevSmoothing;
   };
 
   /** 圖片是否全部載入完成 */
