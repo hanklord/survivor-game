@@ -329,12 +329,12 @@
       var fontSize = Math.min(36, 18 + cv.count);
       ctx.font = 'bold ' + fontSize + 'px Segoe UI, sans-serif';
       ctx.fillStyle = cv.flash ? '#ffff00' : (cv.count >= 20 ? '#ff4400' : cv.count >= 10 ? '#ffaa00' : '#ffffff');
-      ctx.textAlign = 'center';
-      ctx.fillText(cv.count + ' COMBO!', state.player.x, state.player.y - 50);
+      ctx.textAlign = 'right';
+      ctx.fillText(cv.count + ' COMBO!', camX + W - 80, camY + 60);
       if (cv.count >= 10) {
         ctx.font = '12px Segoe UI';
         ctx.fillStyle = '#ffcc00';
-        ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), state.player.x, state.player.y - 35);
+        ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + W - 80, camY + 78);
       }
       ctx.textAlign = 'left';
     }
