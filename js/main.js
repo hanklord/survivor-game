@@ -175,7 +175,7 @@
     load('melee_sprite_idle', 'assets/strips/zero_idle_5f.png');
     load('melee_sprite_run', 'assets/strips/zero_walk_8f.png');
     load('archer_sprite_idle', 'assets/strips/archer_idle_4f.png');
-    load('archer_sprite_run', 'assets/strips/archer_walk_8f.png');
+    load('archer_sprite_run', 'assets/strips/archer_run_8f.png');
     load('shield_icon', 'assets/shield_icon.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
@@ -244,7 +244,7 @@
     this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
     } else if (this._selectedCharacter.id === 'archer') {
-      var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_walk_8f.png', fps: 10 } } };
+      var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_run_8f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('archer', archerCfg);
       this.player.spriteDefaultRight = true;
       this._archerAttack = new SG.ArcherAttack(this.player);
