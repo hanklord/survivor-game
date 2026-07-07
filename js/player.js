@@ -5,7 +5,7 @@
   // 玩家初始數值常數
   var DEFAULTS = {
     HP: 100,
-    SPEED: 3,
+    SPEED: 180,
     DAMAGE: 10,
     FIRE_RATE: 0.5,
     PROJECTILE_COUNT: 1,
@@ -41,8 +41,8 @@
   // 移動玩家
   Player.prototype.move = function(dir, dt) {
     if (dir.x || dir.y) {
-      this.x += dir.x * this.speed;
-      this.y += dir.y * this.speed;
+      this.x += dir.x * this.speed * dt;
+      this.y += dir.y * this.speed * dt;
       if (dir.x !== 0) this.facingLeft = this.spriteDefaultRight ? dir.x < 0 : dir.x > 0;
       this._moving = true;
     } else {

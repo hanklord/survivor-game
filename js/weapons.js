@@ -126,7 +126,7 @@
   };
 
   // === 追蹤飛彈 (Homing Missile) ===
-  var MISSILE_SPEED = 4;
+  var MISSILE_SPEED = 240;
   var MISSILE_TURN_RATE = 3; // rad/s
   var MISSILE_DAMAGE = 20;
   var MISSILE_AOE_RADIUS = 50;
@@ -172,8 +172,8 @@
       else this.angle += (diff > 0 ? maxTurn : -maxTurn);
     }
 
-    this.x += Math.cos(this.angle) * this.speed;
-    this.y += Math.sin(this.angle) * this.speed;
+    this.x += Math.cos(this.angle) * this.speed * dt;
+    this.y += Math.sin(this.angle) * this.speed * dt;
 
     // 拖尾
     this.trail.push({x: this.x, y: this.y});

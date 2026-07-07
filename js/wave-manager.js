@@ -64,7 +64,7 @@
   // Rush Wave 快速生成
   WaveManager.prototype.spawnRushWave = function(count, player, W, H, imgConfig) {
     var spawned = [];
-    var elist = (imgConfig && imgConfig.enemies) || [{ hp: 3, speed: 1.5, damage: 5, size: 36, color: '#ff4444' }];
+    var elist = (imgConfig && imgConfig.enemies) || [{ hp: 3, speed: 90, damage: 5, size: 36, color: '#ff4444' }];
     for (var i = 0; i < count; i++) {
       var ecfg = elist[Math.floor(Math.random() * Math.min(3, elist.length))];
       var angle = Math.random() * Math.PI * 2;

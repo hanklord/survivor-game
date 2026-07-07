@@ -25,7 +25,7 @@
     var cfg = window.GAME_CONFIG || null;
     this.imgConfig = cfg || {
       player: { size: 40 },
-      enemies: [{ level: 1, size: 36, color: '#ff4444', hp: 3, speed: 1.5, damage: 5 }],
+      enemies: [{ level: 1, size: 36, color: '#ff4444', hp: 3, speed: 90, damage: 5 }],
       bosses: [],
       projectile: { color: '#ffff00', size: 12 },
       xpGem: { color: '#00ff88' },
@@ -453,7 +453,7 @@
       // 套用關卡速度倍率
       var origSpeed = e.speed;
       e.speed *= speedMult;
-      e.moveToward(this.player);
+      e.moveToward(this.player, dt);
       e.speed = origSpeed;
       e.updateAnimation(dt);
       if (SG.dist(this.player, e) < (PLAYER_HITBOX + e.size / 2)) {
@@ -464,7 +464,7 @@
     // Boss 移動 + 碰撞
     for (var i = 0; i < this.bosses.length; i++) {
       var b = this.bosses[i];
-      b.moveToward(this.player);
+      b.moveToward(this.player, dt);
       b.updateAnimation(dt);
       if (SG.dist(this.player, b) < (PLAYER_HITBOX + b.size / 2)) {
         if (this._playerTakeDamage(b.damage, b)) return;
@@ -492,10 +492,10 @@
       // Boss 擊敗時強制吸取所有寶石
       if (magnetRange) {
         var a = Math.atan2(this.player.y - g.y, this.player.x - g.x);
-        g.x += Math.cos(a) * 8;
-        g.y += Math.sin(a) * 8;
+        g.x += Math.cos(a) * 480 * dt;
+        g.y += Math.sin(a) * 480 * dt;
       }
-      var result = g.update(this.player);
+      var result = g.update(this.player, dt);
       if (result === 'picked') {
         var xpVal = g.value * (this.player.xpMultiplier || 1) * this._combo.getXPMultiplier();
         var leveled = this.player.addXP(xpVal);

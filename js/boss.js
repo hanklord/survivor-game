@@ -20,10 +20,10 @@
   }
 
   // 朝目標移動
-  Boss.prototype.moveToward = function(target) {
+  Boss.prototype.moveToward = function(target, dt) {
     var a = Math.atan2(target.y - this.y, target.x - this.x);
-    this.x += Math.cos(a) * this.speed;
-    this.y += Math.sin(a) * this.speed;
+    this.x += Math.cos(a) * this.speed * dt;
+    this.y += Math.sin(a) * this.speed * dt;
     this.facingLeft = target.x < this.x;
   };
 

@@ -18,7 +18,7 @@
   // 初始化（重用時呼叫）
   Particle.prototype.init = function(x, y, color) {
     var a = Math.random() * Math.PI * 2;
-    var s = 1 + Math.random() * 3;
+    var s = (1 + Math.random() * 3) * 60;
     this.x = x;
     this.y = y;
     this.vx = Math.cos(a) * s;
@@ -30,8 +30,8 @@
 
   // 更新位置，回傳 false 表示已消失
   Particle.prototype.update = function(dt) {
-    this.x += this.vx;
-    this.y += this.vy;
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
     this.life -= dt;
     if (this.life <= 0) this.active = false;
     return this.active;

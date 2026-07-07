@@ -28,7 +28,7 @@
     if (this.eliteTimer <= 0) {
       this.eliteTimer = ELITE_INTERVAL;
       var elist = (imgConfig && imgConfig.enemies) || [];
-      var ecfg = elist[Math.min(4, elist.length - 1)] || { hp: 10, speed: 1, damage: 10, size: 40, color: '#ff00ff' };
+      var ecfg = elist[Math.min(4, elist.length - 1)] || { hp: 10, speed: 60, damage: 10, size: 40, color: '#ff00ff' };
       var angle = Math.random() * Math.PI * 2;
       var d = Math.max(W, H) * 0.5;
       var eIdx = Math.min(4, elist.length - 1);

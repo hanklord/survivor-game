@@ -2,7 +2,7 @@
 (function() {
   window.SG = window.SG || {};
 
-  var PROJECTILE_SPEED = 6;
+  var PROJECTILE_SPEED = 360;
   var PROJECTILE_LIFE = 2;
   var SPREAD_ANGLE = 0.3; // 多發散射角度
 
@@ -29,8 +29,8 @@
 
   // 更新位置，回傳 false 表示已過期
   Projectile.prototype.update = function(dt) {
-    this.x += this.vx;
-    this.y += this.vy;
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
     this.life -= dt;
     if (this.life <= 0) this.active = false;
     return this.active;

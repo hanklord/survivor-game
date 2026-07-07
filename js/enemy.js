@@ -23,10 +23,10 @@
   }
 
   // 朝目標移動
-  Enemy.prototype.moveToward = function(target) {
+  Enemy.prototype.moveToward = function(target, dt) {
     var a = Math.atan2(target.y - this.y, target.x - this.x);
-    this.x += Math.cos(a) * this.speed;
-    this.y += Math.sin(a) * this.speed;
+    this.x += Math.cos(a) * this.speed * dt;
+    this.y += Math.sin(a) * this.speed * dt;
     this.facingLeft = target.x < this.x;
   };
 
@@ -39,7 +39,7 @@
 
   // 根據遊戲時間選擇敵人設定
   Enemy.pickConfig = function(imgConfig, gameTime) {
-    var elist = imgConfig.enemies || [{ level: 1, size: 36, color: '#ff4444', hp: 3, speed: 1.5, damage: 5 }];
+    var elist = imgConfig.enemies || [{ level: 1, size: 36, color: '#ff4444', hp: 3, speed: 90, damage: 5 }];
     var maxLevel = 1;
     if (gameTime > LEVEL_UNLOCK_START) maxLevel = Math.min(elist.length, 1 + Math.floor((gameTime - LEVEL_UNLOCK_START) / LEVEL_UNLOCK_INTERVAL));
     var idx = Math.floor(Math.random() * maxLevel);
