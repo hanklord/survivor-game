@@ -1,7 +1,7 @@
 window.GAME_CONFIG = {
   "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/x4_idle_4f.png", "fps": 6 }, "run": { "file": "assets/strips/x4_walk_8f.png", "fps": 12 } }, "size": 66 },
   "enemies": [
-    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 54, "color": "#44ff44", "hp": 12, "speed": 90, "damage": 5 },
+    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/dragon_8f.png", "fps": 8 } }, "size": 54, "color": "#44ff44", "hp": 12, "speed": 90, "damage": 5 },
     { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/monster2_idle_6f.png", "fps": 8 } }, "size": 38, "color": "#8844aa", "hp": 16, "speed": 108, "damage": 6 },
     { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_machine_dragon_idle_4f.png", "fps": 8 } }, "size": 44, "color": "#cccccc", "hp": 6, "speed": 72, "damage": 8 },
     { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 40, "color": "#88ccff", "hp": 40, "speed": 96, "damage": 7 },
