@@ -25,7 +25,7 @@ window.GAME_CONFIG = {
     { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_evileye_idle_4f.png", "fps": 6 } }, "size": 120, "color": "#000000", "hp": 5000, "speed": 24, "damage": 60, "spawnTime": 360 }
   ],
   "projectile": { "image": "assets/projectile.png", "color": "#ffff00", "size": 72, "frames": 4 },
-  "xpGem": { "image": null, "color": "#00ff88" },
+  "xpGem": { "image": "assets/xp_gem.png", "color": "#00ff88" },
   "background": { "color": "#1a1a2e", "image": null },
   "audio": { "enabled": true, "volume": 0.5 },
   "levels": [
