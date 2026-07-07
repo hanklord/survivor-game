@@ -252,6 +252,7 @@
     } else {
       this.player.animator = this._buildAnimator('player', this.imgConfig.player);
       this.player.spriteDefaultRight = true; // X4 面向右
+      this.player.spriteWidthRatio = 0.75; // X4 較寬，縮窄顯示
       this._meleeAttack = null;
       this._archerAttack = null;
     this._passiveItems = new SG.PassiveItems();
@@ -287,6 +288,7 @@
     // 設定初始關卡背景
     this._applyLevelBg();
     this.ui.updateLevelName(this.levelManager.getCurrent().name);
+    this.audio.playAmbient(this.levelManager.getCurrent().name);
 
     requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
   };
@@ -390,6 +392,7 @@
       for (var i = 0; i < mhits.length; i++) if (!this._lowQuality) this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, false);
     } else if (this.player.attackType === 'archer' && this._archerAttack) {
       var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
+      if (this._archerAttack.didFire()) { this.audio.playArrowShoot(); this.player.triggerAttack(); }
       for (var i = 0; i < archerHits.length; i++) this._handleKill(archerHits[i]);
       var ahits = this._archerAttack.getLastHits();
       // 爆炸箭
@@ -647,6 +650,7 @@
       self.levelClearing = false;
       self._applyLevelBg();
       self.ui.updateLevelName(self.levelManager.getCurrent().name);
+      self.audio.playAmbient(self.levelManager.getCurrent().name);
       // 清場
       self.enemies = [];
       self.bosses = [];

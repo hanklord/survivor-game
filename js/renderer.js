@@ -502,7 +502,7 @@
     var ctx = this.ctx;
     var ps = (this.imgConfig.player && this.imgConfig.player.size) || 40;
     if (player.animator && player.animator.isLoaded()) {
-      player.animator.draw(ctx, player.x, player.y, ps, player.facingLeft);
+      player.animator.draw(ctx, player.x, player.y, ps, player.facingLeft, player.spriteWidthRatio);
     } else if (this.images.player) {
       // 靜態圖左右翻轉
       if (player.facingLeft) {

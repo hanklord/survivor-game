@@ -16,6 +16,7 @@
     this.timer = 0;
     this.arrows = [];
     this._lastHits = [];
+    this._firedThisFrame = false;
     this.level = 1;
   }
 
@@ -34,6 +35,7 @@
   ArcherAttack.prototype.update = function(dt, enemies, bosses) {
     var hits = [];
     this._lastHits = [];
+    this._firedThisFrame = false;
 
     // 發射箭矢
     this.timer -= dt;
@@ -41,6 +43,7 @@
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {
         this.timer = this.cd;
+        this._firedThisFrame = true;
         // 瞄準最近敵人
         var nearest = null, minD = Infinity;
         for (var k = 0; k < targets.length; k++) {
@@ -107,6 +110,8 @@
     this._lastHits = [];
     return h;
   };
+
+  ArcherAttack.prototype.didFire = function() { return this._firedThisFrame; };
 
   ArcherAttack.prototype.getPiercingArrow = function() {
     if (!this._piercing) this._piercing = new SG.PiercingArrow(this.player);

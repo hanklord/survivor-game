@@ -55,8 +55,8 @@
     }
   };
 
-  /** 繪製當前幀，支援翻轉（boolean）或旋轉（number） */
-  SpriteAnimator.prototype.draw = function(ctx, x, y, size, angleOrFlip) {
+  /** 繪製當前幀，支援翻轉（boolean）或旋轉（number），可選 widthRatio */
+  SpriteAnimator.prototype.draw = function(ctx, x, y, size, angleOrFlip, widthRatio) {
     var anim = this._anims[this._state];
     if (!anim || !anim.image || !anim.image.complete) return;
 
@@ -70,22 +70,25 @@
     var fh = anim.frameHeight;
     var sx = Math.round(this._frameIndex * fw); // 整數確保不跨格
 
+    var drawW = size * (widthRatio || 1);
+    var drawH = size;
+
     // 關閉 smoothing 防止邊緣取樣
 
     if (typeof angleOrFlip === 'number') {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(angleOrFlip);
-      ctx.drawImage(anim.image, sx, 0, fw, fh, -size / 2, -size / 2, size, size);
+      ctx.drawImage(anim.image, sx, 0, fw, fh, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
     } else if (angleOrFlip) {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(-1, 1);
-      ctx.drawImage(anim.image, sx, 0, fw, fh, -size / 2, -size / 2, size, size);
+      ctx.drawImage(anim.image, sx, 0, fw, fh, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
     } else {
-      ctx.drawImage(anim.image, sx, 0, fw, fh, x - size / 2, y - size / 2, size, size);
+      ctx.drawImage(anim.image, sx, 0, fw, fh, x - drawW / 2, y - drawH / 2, drawW, drawH);
     }
 
   };
