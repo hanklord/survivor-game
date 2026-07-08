@@ -4,7 +4,7 @@ window.GAME_CONFIG = {
     { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/dragon_8f.png", "fps": 8 } }, "size": 54, "color": "#44ff44", "hp": 12, "speed": 90, "damage": 5 },
     { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/monster2_idle_6f.png", "fps": 8 } }, "size": 38, "color": "#8844aa", "hp": 16, "speed": 108, "damage": 6 },
     { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f.png", "fps": 8 } }, "size": 46, "color": "#2244aa", "hp": 10, "speed": 84, "damage": 8 },
-    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 40, "color": "#88ccff", "hp": 40, "speed": 96, "damage": 7 },
+    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_spearman_idle_8f.png", "fps": 8 } }, "size": 48, "color": "#336633", "hp": 20, "speed": 102, "damage": 9 },
     { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_imp_idle_4f.png", "fps": 8 } }, "size": 42, "color": "#448844", "hp": 8, "speed": 78, "damage": 10 },
     { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_skeleton_idle_8f.png", "fps": 8 } }, "size": 44, "color": "#666666", "hp": 14, "speed": 120, "damage": 9 },
     { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_zombie_idle_8f.png", "fps": 8 } }, "size": 66, "color": "#442200", "hp": 10, "speed": 66, "damage": 12 },
