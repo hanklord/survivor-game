@@ -36,6 +36,19 @@ func _ready():
 	level_config = GameConfig.LEVELS[current_level]
 	_apply_level_bg()
 	wave_timer = 1.0  # 第一波延遲
+	_start_bgm()
+
+func _start_bgm():
+	var bgm_player = AudioStreamPlayer.new()
+	bgm_player.name = "BGM"
+	var stream = load("res://assets/audio/bgm.mp3")
+	if stream:
+		bgm_player.stream = stream
+		bgm_player.volume_db = -6.0
+		bgm_player.autoplay = true
+		# MP3 loop 設定需在 import 或手動設 loop
+		add_child(bgm_player)
+		bgm_player.play()
 
 func setup(character_id: String):
 	selected_character = GameConfig.CHARACTERS[character_id]
