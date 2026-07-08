@@ -14,7 +14,7 @@ window.GAME_CONFIG = {
   ],
   "bosses": [
     { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 80, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 60 },
-    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dragon_8f_4c2r.png", "fps": 8 } }, "size": 150, "color": "#6600cc", "hp": 600, "speed": 30, "damage": 20, "spawnTime": 90 },
+    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gorilla_idle_8f.png", "fps": 7 } }, "size": 130, "color": "#553311", "hp": 800, "speed": 24, "damage": 22, "spawnTime": 90 },
     { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage2_idle_4f.png", "fps": 6 } }, "size": 100, "color": "#ccccaa", "hp": 1000, "speed": 24, "damage": 25, "spawnTime": 120 },
     { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage1_idle_4f.png", "fps": 6 } }, "size": 90, "color": "#ff0066", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 150 },
     { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage3_idle_4f.png", "fps": 6 } }, "size": 95, "color": "#ff4400", "hp": 1500, "speed": 33, "damage": 30, "spawnTime": 180 },
