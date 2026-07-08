@@ -7,7 +7,7 @@
     HP: 100,
     SPEED: 180,
     DAMAGE: 10,
-    FIRE_RATE: 0.5,
+    FIRE_RATE: 1.0,
     PROJECTILE_COUNT: 1,
     PICKUP_RANGE: 60,
     INVULN_DURATION: 0.5,
