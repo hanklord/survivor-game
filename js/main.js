@@ -251,8 +251,7 @@
       this._meleeAttack = null;
     } else {
       this.player.animator = this._buildAnimator('player', this.imgConfig.player);
-      this.player.spriteDefaultRight = true; // X4 面向右
-      this.player.spriteWidthRatio = 0.75; // X4 較寬，縮窄顯示
+      this.player.spriteDefaultRight = true; // 法師面向右
       this._meleeAttack = null;
       this._archerAttack = null;
     this._passiveItems = new SG.PassiveItems();

@@ -13,8 +13,7 @@
   ];
 
   var RANGED_UPGRADES = [
-    { name: '🔫 +1 Projectile', apply: function(p) { p.projectileCount++; } },
-    { name: '⚡ Fire Rate +20%', apply: function(p) { p.fireRate *= 0.8; } }
+    { name: '🔥 火球+1', apply: function(p) { p.projectileCount++; p.fireRate = Math.max(0.2, p.fireRate * 0.95); } }
   ];
 
   // 武器升級選項
@@ -115,11 +114,10 @@
       (function(idx) { pool.push({ name: UPGRADES[idx].name, action: function() { UPGRADES[idx].apply(player); } }); })(i);
     }
 
-    // 遠程角色專屬升級（+Projectile, Fire Rate）
-    if (player.attackType === 'ranged') {
-      for (var ri = 0; ri < RANGED_UPGRADES.length; ri++) {
-        (function(idx) { pool.push({ name: RANGED_UPGRADES[idx].name, action: function() { RANGED_UPGRADES[idx].apply(player); } }); })(ri);
-      }
+    // 遠程角色（法師）專屬：火球升級必定出現（未滿 9 顆時）
+    var fireballUpgrade = null;
+    if (player.attackType === 'ranged' && player.projectileCount < 9) {
+      fireballUpgrade = { name: '🔥 火球+1 (Lv' + (player.projectileCount + 1) + ')', action: function() { RANGED_UPGRADES[0].apply(player); } };
     }
 
     // 通用武器技能
@@ -162,11 +160,9 @@
     // 角色基礎技能必定佔第一位（未滿級時）
     var baseSkill = null;
     if (player.attackType === 'ranged') {
-      // 從 pool 中找 +1 Projectile 或 Fire Rate
-      for (var bi = 0; bi < pool.length; bi++) {
-        if (pool[bi].name.indexOf('Projectile') >= 0 || pool[bi].name.indexOf('Fire Rate') >= 0) {
-          baseSkill = pool.splice(bi, 1)[0]; break;
-        }
+      // 法師：火球升級必定第一位
+      if (fireballUpgrade) {
+        baseSkill = fireballUpgrade;
       }
     } else if (player.attackType === 'melee') {
       for (var bi = 0; bi < pool.length; bi++) {

@@ -102,7 +102,22 @@
 
   // 射擊（短促高頻 beep）
   AudioManager.prototype.playShoot = function() {
-    this._play(880, 'square', 0.05, 0.2, true);
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+    // 火球音效：低頻嗡 + 高頻爆發
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+    gain.gain.setValueAtTime(0.15 * this.volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    osc.start(now);
+    osc.stop(now + 0.15);
   };
 
   // 弓箭手射箭（咻～ swoosh：高頻→低頻快速下滑）

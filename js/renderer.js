@@ -488,10 +488,23 @@
       } else if (projImg) {
         ctx.drawImage(projImg, -pSize / 2, -pSize / 2, pSize, pSize);
       } else {
-        ctx.fillStyle = pColor;
-        ctx.shadowColor = pColor;
-        ctx.shadowBlur = 8;
-        ctx.beginPath(); ctx.ellipse(0, 0, pSize / 2, pSize / 3, 0, 0, Math.PI * 2); ctx.fill();
+        // 火球視覺：橘紅色發光球體 + 火焰拖尾
+        // 拖尾
+        ctx.globalAlpha = 0.4;
+        ctx.fillStyle = '#ff4400';
+        ctx.beginPath(); ctx.ellipse(-pSize * 0.4, 0, pSize * 0.5, pSize * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.25;
+        ctx.fillStyle = '#ffaa00';
+        ctx.beginPath(); ctx.ellipse(-pSize * 0.7, 0, pSize * 0.35, pSize * 0.15, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1.0;
+        // 核心火球
+        ctx.fillStyle = '#ff6600';
+        ctx.shadowColor = '#ff4400';
+        ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.arc(0, 0, pSize / 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffcc00';
+        ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.arc(0, 0, pSize / 4, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0;
       }
       ctx.restore();
