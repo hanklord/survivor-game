@@ -3,11 +3,45 @@
   window.SG = window.SG || {};
 
   /**
-   * 從檔名解析幀數（格式：{name}_{action}_{N}f.png）
+   * 從檔名解析 sprite 資訊（frames、cols、rows）
+   * 支援格式：
+   *   name_4f.png         → 4 frames, cols=4, rows=1（向後相容）
+   *   name_12f_4c3r.png   → 12 frames, cols=4, rows=3
+   *   name_8f_4c2r.png    → 8 frames, cols=4, rows=2
+   *   name_4c2r.png       → cols=4, rows=2, frames=8（自動計算）
    */
+  function parseSpriteInfo(filename) {
+    var result = { frames: 1, cols: 0, rows: 0 };
+    if (!filename) return result;
+
+    var mf = filename.match(/(\d+)f/);
+    var mc = filename.match(/(\d+)c/);
+    var mr = filename.match(/(\d+)r/);
+
+    if (mf) result.frames = Math.max(1, parseInt(mf[1], 10));
+    if (mc) result.cols = Math.max(1, parseInt(mc[1], 10));
+    if (mr) result.rows = Math.max(1, parseInt(mr[1], 10));
+
+    // 自動推算
+    if (result.cols > 0 && result.rows > 0) {
+      // 明確指定 cols 和 rows，確保 frames 至少 = cols * rows
+      if (!mf) result.frames = result.cols * result.rows;
+    } else if (result.cols > 0 && !result.rows) {
+      result.rows = Math.ceil(result.frames / result.cols);
+    } else if (result.rows > 0 && !result.cols) {
+      result.cols = Math.ceil(result.frames / result.rows);
+    } else {
+      // 只有 frames（或都沒有）→ 單排
+      result.cols = result.frames;
+      result.rows = 1;
+    }
+
+    return result;
+  }
+
+  // 向後相容：保留 parseFrameCount 作為 alias
   function parseFrameCount(filename) {
-    var m = filename.match(/_(\d+)f\.\w+$/);
-    return m ? Math.max(1, parseInt(m[1], 10)) : 1;
+    return parseSpriteInfo(filename).frames;
   }
 
   /**
@@ -133,5 +167,6 @@
   };
 
   SG.SpriteAnimator = SpriteAnimator;
+  SG.parseSpriteInfo = parseSpriteInfo;
   SG.parseFrameCount = parseFrameCount;
 })();

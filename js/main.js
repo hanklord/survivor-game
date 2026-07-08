@@ -301,13 +301,14 @@
       var s = cfg.sprites[action];
       var img = this.images[prefix + '_sprite_' + action];
       if (!img) continue;
-      var frames = s.frames || (s.file ? SG.parseFrameCount(s.file) : 1);
+      // 從檔名解析 frames/cols/rows（config 中的 cols/rows 可覆蓋）
+      var info = s.file ? SG.parseSpriteInfo(s.file) : { frames: 1, cols: 1, rows: 1 };
       animConfig[action] = {
         image: img,
         fps: s.fps || 8,
-        frames: frames,
-        cols: s.cols || 0,
-        rows: s.rows || 0
+        frames: s.frames || info.frames,
+        cols: s.cols || info.cols,
+        rows: s.rows || info.rows
       };
     }
     if (!Object.keys(animConfig).length) return null;
