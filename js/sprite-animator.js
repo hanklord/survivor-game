@@ -1,4 +1,4 @@
-// sprite-animator.js — Sprite Strip 動畫模組
+// sprite-animator.js — Sprite Strip 動畫模組（支援 N×M grid）
 (function() {
   window.SG = window.SG || {};
 
@@ -11,8 +11,16 @@
   }
 
   /**
-   * SpriteAnimator — 管理一個實體的多動作 sprite strip 動畫
-   * @param {Object} config - { idle: { image, fps, frames }, run: { ... }, ... }
+   * SpriteAnimator — 管理一個實體的多動作 sprite 動畫
+   * 支援單排（1×N）和多排（rows×cols）grid 排列。
+   *
+   * @param {Object} config - { idle: { image, fps, frames, cols?, rows? }, run: { ... }, ... }
+   *   - frames: 總幀數
+   *   - cols: 每排幾格（可選，預設 = frames，即單排）
+   *   - rows: 幾排（可選，預設 = 1）
+   *   - 如果只提供 cols，rows 自動計算為 ceil(frames / cols)
+   *   - 如果只提供 rows，cols 自動計算為 ceil(frames / rows)
+   *   - 幀播放順序：左到右、上到下（row-major）
    */
   function SpriteAnimator(config) {
     this._anims = {};
@@ -22,10 +30,27 @@
 
     for (var action in config) {
       var entry = config[action];
+      var frames = entry.frames || 1;
+      var cols = entry.cols || 0;
+      var rows = entry.rows || 0;
+
+      // 自動推算 cols/rows
+      if (cols && !rows) {
+        rows = Math.ceil(frames / cols);
+      } else if (rows && !cols) {
+        cols = Math.ceil(frames / rows);
+      } else if (!cols && !rows) {
+        // 預設：單排（向後相容）
+        cols = frames;
+        rows = 1;
+      }
+
       this._anims[action] = {
         image: entry.image,
         fps: entry.fps || 8,
-        frames: entry.frames || 1,
+        frames: frames,
+        cols: cols,
+        rows: rows,
         frameWidth: 0,
         frameHeight: 0
       };
@@ -60,37 +85,39 @@
     var anim = this._anims[this._state];
     if (!anim || !anim.image || !anim.image.complete) return;
 
-    // 動態計算格子寬度（只算一次）
+    // 動態計算格子尺寸（只算一次）
     if (!anim.frameWidth) {
-      anim.frameWidth = Math.floor(anim.image.width / anim.frames);
-      anim.frameHeight = anim.image.height;
+      anim.frameWidth = Math.floor(anim.image.width / anim.cols);
+      anim.frameHeight = Math.floor(anim.image.height / anim.rows);
     }
 
     var fw = anim.frameWidth;
     var fh = anim.frameHeight;
-    var sx = Math.round(this._frameIndex * fw); // 整數確保不跨格
+
+    // Row-major: 左到右、上到下
+    var col = this._frameIndex % anim.cols;
+    var row = Math.floor(this._frameIndex / anim.cols);
+    var sx = col * fw;
+    var sy = row * fh;
 
     var drawW = size * (widthRatio || 1);
     var drawH = size;
-
-    // 關閉 smoothing 防止邊緣取樣
 
     if (typeof angleOrFlip === 'number') {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(angleOrFlip);
-      ctx.drawImage(anim.image, sx, 0, fw, fh, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.drawImage(anim.image, sx, sy, fw, fh, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
     } else if (angleOrFlip) {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(-1, 1);
-      ctx.drawImage(anim.image, sx, 0, fw, fh, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.drawImage(anim.image, sx, sy, fw, fh, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
     } else {
-      ctx.drawImage(anim.image, sx, 0, fw, fh, x - drawW / 2, y - drawH / 2, drawW, drawH);
+      ctx.drawImage(anim.image, sx, sy, fw, fh, x - drawW / 2, y - drawH / 2, drawW, drawH);
     }
-
   };
 
   /** 圖片是否全部載入完成 */

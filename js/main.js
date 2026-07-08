@@ -304,7 +304,9 @@
       animConfig[action] = {
         image: img,
         fps: s.fps || 8,
-        frames: SG.parseFrameCount(s.file)
+        frames: s.frames || SG.parseFrameCount(s.file),
+        cols: s.cols || 0,
+        rows: s.rows || 0
       };
     }
     if (!Object.keys(animConfig).length) return null;
