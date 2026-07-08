@@ -9,7 +9,7 @@ window.GAME_CONFIG = {
     { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_skeleton_idle_8f.png", "fps": 8 } }, "size": 44, "color": "#666666", "hp": 14, "speed": 120, "damage": 9 },
     { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_zombie_idle_8f.png", "fps": 8 } }, "size": 66, "color": "#442200", "hp": 10, "speed": 66, "damage": 12 },
     { "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_witch_idle_8f.png", "fps": 8 } }, "size": 44, "color": "#220044", "hp": 18, "speed": 114, "damage": 14 },
-    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_spider_idle_4f.png", "fps": 8 } }, "size": 52, "color": "#ff4400", "hp": 30, "speed": 60, "damage": 16 },
+    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_spider_idle_12f.png", "fps": 8 } }, "size": 52, "color": "#ff4400", "hp": 30, "speed": 60, "damage": 16 },
     { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_minion_idle_3f.png", "fps": 6 } }, "size": 56, "color": "#440044", "hp": 20, "speed": 54, "damage": 20 }
   ],
   "bosses": [

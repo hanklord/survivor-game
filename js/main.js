@@ -301,10 +301,11 @@
       var s = cfg.sprites[action];
       var img = this.images[prefix + '_sprite_' + action];
       if (!img) continue;
+      var frames = s.frames || (s.file ? SG.parseFrameCount(s.file) : 1);
       animConfig[action] = {
         image: img,
         fps: s.fps || 8,
-        frames: s.frames || SG.parseFrameCount(s.file),
+        frames: frames,
         cols: s.cols || 0,
         rows: s.rows || 0
       };

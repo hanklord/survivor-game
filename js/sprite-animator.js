@@ -35,11 +35,14 @@
       var rows = entry.rows || 0;
 
       // 自動推算 cols/rows
-      if (cols && !rows) {
+      if (cols > 0 && rows > 0) {
+        // 明確指定 cols 和 rows
+        frames = Math.max(frames, cols * rows);
+      } else if (cols > 0 && !rows) {
         rows = Math.ceil(frames / cols);
-      } else if (rows && !cols) {
+      } else if (rows > 0 && !cols) {
         cols = Math.ceil(frames / rows);
-      } else if (!cols && !rows) {
+      } else {
         // 預設：單排（向後相容）
         cols = frames;
         rows = 1;
