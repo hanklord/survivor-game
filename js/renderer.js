@@ -383,6 +383,40 @@
 
     ctx.globalAlpha = 1;
     ctx.restore();
+
+    // Boss 指示箭頭（螢幕空間，在 restore 之後繪製）
+    if (state.bosses && state.bosses.length > 0 && state.player) {
+      var px = state.player.x - camX; // 玩家螢幕座標
+      var py = state.player.y - camY;
+      var arrowDist = 55; // 箭頭離玩家中心的距離
+      for (var bi = 0; bi < state.bosses.length; bi++) {
+        var boss = state.bosses[bi];
+        var bsx = boss.x - camX; // Boss 螢幕座標
+        var bsy = boss.y - camY;
+        // Boss 在螢幕內時不顯示
+        if (bsx > -30 && bsx < W + 30 && bsy > -30 && bsy < H + 30) continue;
+        // 計算方向
+        var adir = Math.atan2(bsy - py, bsx - px);
+        var ax = px + Math.cos(adir) * arrowDist;
+        var ay = py + Math.sin(adir) * arrowDist;
+        // 繪製箭頭
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(adir);
+        ctx.fillStyle = '#ff4400';
+        ctx.shadowColor = '#ff6600';
+        ctx.shadowBlur = 8;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(14, 0);
+        ctx.lineTo(-8, -9);
+        ctx.lineTo(-4, 0);
+        ctx.lineTo(-8, 9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
   };
 
   // 背景層繪製（分層 canvas）

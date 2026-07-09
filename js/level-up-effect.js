@@ -53,9 +53,9 @@
   LevelUpEffect.prototype.draw = function(ctx, camX, camY, W, H) {
     if (!this.active) return;
 
-    // 取得玩家當前位置
+    // 取得玩家當前位置（中心下移到腳底，讓光柱覆蓋全身）
     var cx = this.player ? this.player.x : 0;
-    var cy = this.player ? this.player.y : 0;
+    var cy = this.player ? this.player.y + 30 : 0; // 下移 30px 對齊腳底
 
     var progress = 1 - (this.timer / DURATION); // 0→1
     var fadeOut = Math.max(0, this.timer / DURATION); // 1→0
