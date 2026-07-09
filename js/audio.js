@@ -153,10 +153,54 @@
   AudioManager.prototype.playLevelUp = function() {
     if (!this.enabled || !this.ctx) return;
     var self = this;
-    var notes = [523, 659, 784]; // C5, E5, G5
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+    var vol = this.volume;
+
+    // 主旋律和弦（C5, E5, G5, C6）加強版
+    var notes = [523, 659, 784, 1047];
     notes.forEach(function(f, i) {
-      setTimeout(function() { self._play(f, 'sine', 0.15, 0.3, true); }, i * 100);
+      setTimeout(function() {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0.4 * vol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      }, i * 120);
     });
+
+    // 低頻底音強化（迴響感）
+    setTimeout(function() {
+      var bass = ctx.createOscillator();
+      var bg = ctx.createGain();
+      bass.connect(bg);
+      bg.connect(ctx.destination);
+      bass.type = 'sine';
+      bass.frequency.value = 262; // C4
+      bg.gain.setValueAtTime(0.3 * vol, ctx.currentTime);
+      bg.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      bass.start(ctx.currentTime);
+      bass.stop(ctx.currentTime + 0.6);
+    }, 50);
+
+    // 高頻 shimmer（閃爍感）
+    setTimeout(function() {
+      var shimmer = ctx.createOscillator();
+      var sg = ctx.createGain();
+      shimmer.connect(sg);
+      sg.connect(ctx.destination);
+      shimmer.type = 'triangle';
+      shimmer.frequency.value = 2093; // C7
+      sg.gain.setValueAtTime(0.15 * vol, ctx.currentTime);
+      sg.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      shimmer.start(ctx.currentTime);
+      shimmer.stop(ctx.currentTime + 0.5);
+    }, 200);
   };
 
   // Boss 出現（警告低音）

@@ -4,8 +4,8 @@
 
   var DURATION = 1.3; // 總持續時間
   var FLASH_DURATION = 0.15; // 閃白持續
-  var PILLAR_MAX_HEIGHT = 200;
-  var RING_MAX_RADIUS = 120;
+  var PILLAR_MAX_HEIGHT = 400;
+  var RING_MAX_RADIUS = 240;
   var PARTICLE_COUNT = 20;
 
   function LevelUpEffect() {
@@ -23,7 +23,7 @@
     this.particles = [];
     for (var i = 0; i < PARTICLE_COUNT; i++) {
       this.particles.push({
-        ox: (Math.random() - 0.5) * 40, // 相對偏移
+        ox: (Math.random() - 0.5) * 80, // 相對偏移
         oy: 0,
         vx: (Math.random() - 0.5) * 60,
         vy: -(60 + Math.random() * 120),
@@ -74,7 +74,7 @@
     // 2. 金色光柱（從角色中心向上）
     var pillarHeight = PILLAR_MAX_HEIGHT * Math.min(1, progress * 3);
     var pillarAlpha = fadeOut * 0.6;
-    var pillarWidth = 20 + progress * 10;
+    var pillarWidth = 40 + progress * 20;
 
     ctx.save();
     var grad = ctx.createLinearGradient(cx, cy, cx, cy - pillarHeight);
