@@ -687,7 +687,7 @@
     this._levelUpPending = true;
     this.audio.playLevelUp();
     // 觸發聖光特效（遊戲不暫停，繼續跑）
-    if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y);
+    if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y, this.player);
     var self = this;
     // 聖光 1.3s + 間隔 0.2s 後才暫停並跳選單
     setTimeout(function() {
