@@ -177,21 +177,27 @@
       var alpha = 1 - mv.progress;
       ctx.save();
       ctx.translate(mv.x, mv.y);
-      ctx.rotate(mv.angle);
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = alpha;
 
       // 黃金騎士：用 sprite strip 斬擊特效
       var slashImg = this.images.slash_effect;
       if (state.meleeIsKnight && slashImg) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = alpha;
         var slashFrames = 4;
         var frameIdx = Math.min(Math.floor(mv.progress * slashFrames), slashFrames - 1);
         var fw = slashImg.width / slashFrames;
         var fh = slashImg.height;
         var drawSize = mv.range * 2.2;
+        // 向左時只做水平翻轉，不旋轉
+        var facingLeft = (Math.abs(mv.angle) > Math.PI / 2);
+        if (facingLeft) {
+          ctx.scale(-1, 1);
+        }
         ctx.drawImage(slashImg, frameIdx * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
       } else {
-        // 預設：紫色弧形斬擊
+        ctx.rotate(mv.angle);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.arc(0, 0, mv.range, -1.0, 1.0);
         ctx.strokeStyle = 'rgba(100,0,150,0.5)';
