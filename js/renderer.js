@@ -513,7 +513,7 @@
 
   Renderer.prototype._drawPlayer = function(player) {
     var ctx = this.ctx;
-    var ps = (this.imgConfig.player && this.imgConfig.player.size) || 40;
+    var ps = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * (player.scale || 1.0);
     if (player.animator && player.animator.isLoaded()) {
       player.animator.draw(ctx, player.x, player.y, ps, player.facingLeft, player.spriteWidthRatio);
     } else if (this.images.player) {

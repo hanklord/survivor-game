@@ -35,6 +35,8 @@
     this.animator = null;
     this.facingLeft = false;
     this.spriteDefaultRight = false; // true 表示 sprite 預設面右
+    this.spriteWidthRatio = 1.0;
+    this.scale = 1.0; // 角色顯示縮放（影響渲染和碰撞框）
     this._attackTimer = 0;
   }
 

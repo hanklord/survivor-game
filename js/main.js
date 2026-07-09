@@ -227,6 +227,7 @@
     var self = this;
     this.player = new SG.Player();
     this.player.attackType = this._selectedCharacter.attackType;
+    this.player.scale = this._selectedCharacter.scale || 1.0;
     this.meta.applyToPlayer(this.player);
     this._eliteSpawner = new SG.EliteSpawner(this.player);
     this._combo = new SG.ComboSystem();
@@ -472,7 +473,7 @@
       e.moveToward(this.player, dt);
       e.speed = origSpeed;
       e.updateAnimation(dt);
-      if (SG.dist(this.player, e) < (PLAYER_HITBOX + e.size / 2)) {
+      if (SG.dist(this.player, e) < (PLAYER_HITBOX * (this.player.scale || 1) + e.size / 2)) {
         if (this._playerTakeDamage(e.damage, e)) return;
       }
     }
@@ -482,7 +483,7 @@
       var b = this.bosses[i];
       b.moveToward(this.player, dt);
       b.updateAnimation(dt);
-      if (SG.dist(this.player, b) < (PLAYER_HITBOX + b.size / 2)) {
+      if (SG.dist(this.player, b) < (PLAYER_HITBOX * (this.player.scale || 1) + b.size / 2)) {
         if (this._playerTakeDamage(b.damage, b)) return;
       }
     }
