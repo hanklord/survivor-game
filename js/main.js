@@ -684,12 +684,14 @@
     if (this.levelingUp) return; // 防止重複觸發
     this.levelingUp = true;
     this.audio.playLevelUp();
-    // 觸發聖光特效
+    // 觸發聖光特效，演出結束後才顯示技能選單
     if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y);
     var self = this;
-    this.ui.showLevelUp(this.player, this.weaponManager, this.skillTree, function() {
-      self.levelingUp = false;
-    }, this._meleeAttack, this._archerAttack, this._passiveItems);
+    setTimeout(function() {
+      self.ui.showLevelUp(self.player, self.weaponManager, self.skillTree, function() {
+        self.levelingUp = false;
+      }, self._meleeAttack, self._archerAttack, self._passiveItems);
+    }, 1300); // 等聖光效果結束（1.3s）
   };
 
   Game.prototype._endGame = function() {
