@@ -172,8 +172,8 @@
     load('xpGem', cfg.xpGem && cfg.xpGem.image);
     load('background', cfg.background && cfg.background.image);
     // 載入近戰角色 sprite strips
-    load('melee_sprite_idle', 'assets/strips/zero_idle_8f.png');
-    load('melee_sprite_run', 'assets/strips/zero_run_8f.png');
+    load('melee_sprite_idle', 'assets/strips/dark_knight_idle_5f.png');
+    load('melee_sprite_run', 'assets/strips/dark_knight_walk_8f.png');
     load('archer_sprite_idle', 'assets/strips/archer_idle_4f.png');
     load('archer_sprite_run', 'assets/strips/archer_run_8f.png');
     load('knight_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
@@ -235,7 +235,7 @@
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
-      var meleeCfg = { sprites: { idle: { file: 'assets/strips/zero_idle_8f.png', fps: 8 }, run: { file: 'assets/strips/zero_run_8f.png', fps: 10 } } };
+      var meleeCfg = { sprites: { idle: { file: 'assets/strips/dark_knight_idle_5f.png', fps: 8 }, run: { file: 'assets/strips/dark_knight_walk_8f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('melee', meleeCfg);
       this.player.spriteDefaultRight = true;
       this._meleeAttack = new SG.MeleeAttack(this.player);
