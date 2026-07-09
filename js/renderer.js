@@ -181,29 +181,38 @@
       ctx.globalCompositeOperation = 'lighter';
       ctx.globalAlpha = alpha;
 
-      // 外層光暈（暗紫）
-      ctx.beginPath();
-      ctx.arc(0, 0, mv.range, -1.0, 1.0);
-      ctx.strokeStyle = 'rgba(100,0,150,0.5)';
-      ctx.lineWidth = 14;
-      ctx.lineCap = 'round';
-      ctx.stroke();
+      // 黃金騎士：用 sprite strip 斬擊特效
+      var slashImg = this.images.slash_effect;
+      if (state.meleeIsKnight && slashImg) {
+        var slashFrames = 4;
+        var frameIdx = Math.min(Math.floor(mv.progress * slashFrames), slashFrames - 1);
+        var fw = slashImg.width / slashFrames;
+        var fh = slashImg.height;
+        var drawSize = mv.range * 2.2;
+        ctx.drawImage(slashImg, frameIdx * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+      } else {
+        // 預設：紫色弧形斬擊
+        ctx.beginPath();
+        ctx.arc(0, 0, mv.range, -1.0, 1.0);
+        ctx.strokeStyle = 'rgba(100,0,150,0.5)';
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.stroke();
 
-      // 中層（紫）
-      ctx.beginPath();
-      ctx.arc(0, 0, mv.range * 0.9, -0.9, 0.9);
-      ctx.strokeStyle = 'rgba(180,50,255,0.7)';
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-      ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, mv.range * 0.9, -0.9, 0.9);
+        ctx.strokeStyle = 'rgba(180,50,255,0.7)';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.stroke();
 
-      // 核心（亮紫粉）
-      ctx.beginPath();
-      ctx.arc(0, 0, mv.range * 0.8, -0.8, 0.8);
-      ctx.strokeStyle = 'rgba(230,150,255,1)';
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, mv.range * 0.8, -0.8, 0.8);
+        ctx.strokeStyle = 'rgba(230,150,255,1)';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
 
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;

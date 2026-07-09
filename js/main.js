@@ -181,6 +181,7 @@
     load('knight_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
     load('knight_sprite_run', 'assets/strips/golden_knight_run_8f.png');
     load('shield_icon', 'assets/shield_icon.png');
+    load('slash_effect', 'assets/strips/slash_effect_4f.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
       if (lv.bgImage) load('level_bg_' + i, lv.bgImage);
@@ -356,6 +357,7 @@
       xpGems: this.xpGems,
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
+      meleeIsKnight: this._selectedCharacter && this._selectedCharacter.id === 'knight',
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
       eliteVisuals: this._eliteSpawner.getVisuals(),
