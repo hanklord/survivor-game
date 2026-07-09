@@ -333,6 +333,11 @@
       ctx.fillRect(camX, camY, W, H);
     }
 
+    // 升級聖光特效
+    if (state.levelUpEffect && state.levelUpEffect.active) {
+      state.levelUpEffect.draw(ctx, camX, camY, W, H);
+    }
+
     // FPS 顯示
     if (state.fps !== undefined) {
       ctx.fillStyle = state.lowQuality ? '#ff4444' : '#44ff44';

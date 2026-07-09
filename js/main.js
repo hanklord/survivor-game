@@ -73,6 +73,7 @@
     this._magnetDelay = 0;
     this._magnetDelay = 0;
     this._magnetAllXP = false;
+    this._levelUpEffect = new SG.LevelUpEffect();
 
     // 綁定
     var self = this;
@@ -363,6 +364,7 @@
       bombFlash: this._bomb.isFlashing(),
       bombProgress: this._bomb.getProgress(),
       bombReady: this._bomb.ready,
+      levelUpEffect: this._levelUpEffect,
       dt: dt
     });
 
@@ -586,6 +588,7 @@
     this._combo.update(dt);
     this._bomb.update(dt);
     this._damageNumbers.update(dt);
+    this._levelUpEffect.update(dt);
     this.ui.updateHUD(this.player, this.gameTime, this.kills);
     this.ui.updateSkillIcons(this.skillTree);
   };
@@ -681,6 +684,8 @@
     if (this.levelingUp) return; // 防止重複觸發
     this.levelingUp = true;
     this.audio.playLevelUp();
+    // 觸發聖光特效
+    if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y);
     var self = this;
     this.ui.showLevelUp(this.player, this.weaponManager, this.skillTree, function() {
       self.levelingUp = false;
