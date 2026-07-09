@@ -74,6 +74,7 @@
     this._magnetDelay = 0;
     this._magnetAllXP = false;
     this._levelUpEffect = new SG.LevelUpEffect();
+    this._levelUpPending = false;
 
     // 綁定
     var self = this;
@@ -523,7 +524,7 @@
         this.xpGemPool.release(g);
         this.xpGems.splice(i, 1);
         this.audio.playPickup();
-        if (leveled && !this.levelingUp) this._showLevelUp();
+        if (leveled && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
       }
     }
     // 全部吸完後關閉磁鐵
@@ -560,7 +561,7 @@
       for (var rx = 0; rx < this._rushWave.getRewardXP(); rx++) {
         if (this.player.addXP(this.player.xpNeeded)) rushLeveled = true;
       }
-      if (rushLeveled && !this.levelingUp) this._showLevelUp();
+      if (rushLeveled && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
     } else if (!this._rushWave.active) {
       document.getElementById("rush-warning").style.display = "none";
     }
@@ -570,7 +571,7 @@
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
       this.enemies.push(eliteResult.elite);
     }
-    if (eliteResult.triggerLevelUp && !this.levelingUp) this._showLevelUp();
+    if (eliteResult.triggerLevelUp && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
     // 磁鐵效果：吸取所有 XP
     if (this._eliteSpawner.isMagnetActive()) this._magnetAllXP = true;
     if (bossResult.showWarning) { this.ui.showBossWarning(); this.audio.playBossWarning(); }
@@ -682,17 +683,20 @@
   };
 
   Game.prototype._showLevelUp = function() {
-    if (this.levelingUp) return; // 防止重複觸發
-    this.levelingUp = true;
+    if (this._levelUpPending) return; // 防止重複觸發
+    this._levelUpPending = true;
     this.audio.playLevelUp();
-    // 觸發聖光特效，演出結束後才顯示技能選單
+    // 觸發聖光特效（遊戲不暫停，繼續跑）
     if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y);
     var self = this;
+    // 聖光 1.3s + 間隔 0.2s 後才暫停並跳選單
     setTimeout(function() {
+      self.levelingUp = true; // 此時才暫停遊戲
+      self._levelUpPending = false;
       self.ui.showLevelUp(self.player, self.weaponManager, self.skillTree, function() {
         self.levelingUp = false;
       }, self._meleeAttack, self._archerAttack, self._passiveItems);
-    }, 1800); // 聖光 1.3s + 間隔 0.5s
+    }, 1500); // 1.3s + 0.2s
   };
 
   Game.prototype._endGame = function() {
