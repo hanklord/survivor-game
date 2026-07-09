@@ -344,6 +344,8 @@
     if (!this.paused && !this.levelingUp && !this.levelClearing) {
       try { this._update(dt); } catch(err) { console.error('[Game] _update error:', err); }
     }
+    // 聖光效果不受遊戲暫停影響，獨立更新
+    this._levelUpEffect.update(dt);
     this.renderer.render({
       player: this.player,
       enemies: this.enemies,
@@ -588,7 +590,6 @@
     this._combo.update(dt);
     this._bomb.update(dt);
     this._damageNumbers.update(dt);
-    this._levelUpEffect.update(dt);
     this.ui.updateHUD(this.player, this.gameTime, this.kills);
     this.ui.updateSkillIcons(this.skillTree);
   };
@@ -691,7 +692,7 @@
       self.ui.showLevelUp(self.player, self.weaponManager, self.skillTree, function() {
         self.levelingUp = false;
       }, self._meleeAttack, self._archerAttack, self._passiveItems);
-    }, 1300); // 等聖光效果結束（1.3s）
+    }, 1800); // 聖光 1.3s + 間隔 0.5s
   };
 
   Game.prototype._endGame = function() {
