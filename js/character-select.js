@@ -5,7 +5,8 @@
   var CHARACTERS = [
     { id: 'ranged', name: '法師', desc: '火球魔法攻擊', color: '#ff6600', attackType: 'ranged' },
     { id: 'melee', name: '近戰劍士', desc: '劍氣斬擊周圍敵人', color: '#ff4466', attackType: 'melee' },
-    { id: 'archer', name: '弓手', desc: '弓箭擴散射擊', color: '#44cc44', attackType: 'archer' }
+    { id: 'archer', name: '弓手', desc: '弓箭擴散射擊', color: '#44cc44', attackType: 'archer' },
+    { id: 'knight', name: '黃金騎士', desc: '高防禦近戰攻擊', color: '#ffcc00', attackType: 'melee' }
   ];
 
   function CharacterSelect(onSelect) {
@@ -24,7 +25,7 @@
       (function(ch) {
         var card = document.createElement('div');
         card.style.cssText = 'background:rgba(30,30,60,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:20px 30px; cursor:pointer; text-align:center; transition:all 0.2s;';
-        card.innerHTML = '<div style="font-size:48px; margin-bottom:10px;">' + (ch.id === 'ranged' ? '🔥' : ch.id === 'archer' ? '🏹' : '⚔️') + '</div>' +
+        card.innerHTML = '<div style="font-size:48px; margin-bottom:10px;">' + (ch.id === 'ranged' ? '🔥' : ch.id === 'archer' ? '🏹' : ch.id === 'knight' ? '🛡️' : '⚔️') + '</div>' +
           '<div style="font-size:18px; color:' + ch.color + '; font-weight:bold;">' + ch.name + '</div>' +
           '<div style="font-size:13px; color:#aaa; margin-top:6px;">' + ch.desc + '</div>';
         card.onmouseover = function() { card.style.transform = 'scale(1.08)'; card.style.borderColor = '#fff'; };

@@ -176,6 +176,8 @@
     load('melee_sprite_run', 'assets/strips/zero_run_8f.png');
     load('archer_sprite_idle', 'assets/strips/archer_idle_4f.png');
     load('archer_sprite_run', 'assets/strips/archer_run_8f.png');
+    load('knight_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
+    load('knight_sprite_run', 'assets/strips/golden_knight_idle_4f.png');
     load('shield_icon', 'assets/shield_icon.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
@@ -243,6 +245,14 @@
     this._combo = new SG.ComboSystem();
     this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
+    } else if (this._selectedCharacter.id === 'knight') {
+      var knightCfg = { sprites: { idle: { file: 'assets/strips/golden_knight_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/golden_knight_idle_4f.png', fps: 8 } } };
+      this.player.animator = this._buildAnimator('knight', knightCfg);
+      this.player.spriteDefaultRight = true;
+      this.player.maxHp = 150; this.player.hp = 150; // 坦克高血量
+      this.player.speed *= 0.85; // 移速稍慢
+      this._meleeAttack = new SG.MeleeAttack(this.player);
+      this._archerAttack = null;
     } else if (this._selectedCharacter.id === 'archer') {
       var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_run_8f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('archer', archerCfg);
