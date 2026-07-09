@@ -183,9 +183,8 @@
       if (state.meleeIsKnight && slashImg) {
         // 不用 lighter 合成（避免閃爍），用正常混合 + 平滑淡出
         ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = Math.min(1, alpha * 1.5); // 前期保持不透明，最後才淡
+        var baseAlpha = Math.min(1, alpha * 1.5);
         var slashFrames = 4;
-        var frameIdx = Math.min(Math.floor(mv.progress * slashFrames), slashFrames - 1);
         var fw = slashImg.width / slashFrames;
         var fh = slashImg.height;
         var drawSize = mv.range * 2.2;
@@ -194,7 +193,19 @@
         if (facingLeft) {
           ctx.scale(-1, 1);
         }
-        ctx.drawImage(slashImg, frameIdx * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+        // 16 幀插值：在 4 原始幀之間 crossfade
+        var virtualPos = mv.progress * (slashFrames - 1); // 0 ~ 3 之間的連續值
+        var frameA = Math.min(Math.floor(virtualPos), slashFrames - 1);
+        var frameB = Math.min(frameA + 1, slashFrames - 1);
+        var blend = virtualPos - frameA; // 0~1 之間，代表 B 幀的比例
+        // 繪製 A 幀
+        ctx.globalAlpha = baseAlpha * (1 - blend);
+        ctx.drawImage(slashImg, frameA * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+        // 繪製 B 幀（crossfade 疊加）
+        if (blend > 0.01 && frameB !== frameA) {
+          ctx.globalAlpha = baseAlpha * blend;
+          ctx.drawImage(slashImg, frameB * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+        }
       } else {
         ctx.rotate(mv.angle);
         ctx.globalCompositeOperation = 'lighter';
