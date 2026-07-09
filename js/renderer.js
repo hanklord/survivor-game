@@ -181,8 +181,9 @@
       // 黃金騎士：用 sprite strip 斬擊特效
       var slashImg = this.images.slash_effect;
       if (state.meleeIsKnight && slashImg) {
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = alpha;
+        // 不用 lighter 合成（避免閃爍），用正常混合 + 平滑淡出
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = Math.min(1, alpha * 1.5); // 前期保持不透明，最後才淡
         var slashFrames = 4;
         var frameIdx = Math.min(Math.floor(mv.progress * slashFrames), slashFrames - 1);
         var fw = slashImg.width / slashFrames;
