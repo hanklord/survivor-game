@@ -26,12 +26,16 @@
   };
 
   // 更新 Boss 排程，回傳 { boss: Boss|null, warning: boolean }
-  WaveManager.prototype.updateBoss = function(dt, gameTime, player, W, H) {
+  WaveManager.prototype.updateBoss = function(dt, gameTime, player, W, H, bossIndices) {
     var result = { boss: null, showWarning: false, hideWarning: false };
     var bossConfigs = this.imgConfig.bosses || [];
+    // 只生成當前關卡指定的 Boss
+    var indices = bossIndices || [];
 
     // 檢查是否該顯示預警
-    for (var i = 0; i < bossConfigs.length; i++) {
+    for (var k = 0; k < indices.length; k++) {
+      var i = indices[k];
+      if (i >= bossConfigs.length) continue;
       var bc = bossConfigs[i];
       if (!this.spawnedBosses[i] && !this.bossWarning && gameTime >= bc.spawnTime - BOSS_WARNING_TIME && gameTime < bc.spawnTime) {
         this.bossWarning = { idx: i, time: BOSS_WARNING_TIME };

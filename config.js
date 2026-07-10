@@ -13,16 +13,16 @@ window.GAME_CONFIG = {
     { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 6 } }, "size": 101, "color": "#440044", "hp": 20, "speed": 54, "damage": 20 }
   ],
   "bosses": [
-    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 60 },
-    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gorilla_idle_8f.png", "fps": 7 } }, "size": 234, "color": "#553311", "hp": 800, "speed": 24, "damage": 22, "spawnTime": 90 },
-    { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_beetle_knight_idle_3f.png", "fps": 8 } }, "size": 180, "color": "#1a3366", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 120 },
-    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dragon_8f_4c2r.png", "fps": 6 } }, "size": 216, "color": "#ff0066", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 150 },
-    { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_skeletonking_9f.png", "fps": 6 } }, "size": 171, "color": "#ff4400", "hp": 1500, "speed": 33, "damage": 30, "spawnTime": 180 },
-    { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gnu_idle_5f.png", "fps": 7 } }, "size": 198, "color": "#44ccff", "hp": 2000, "speed": 18, "damage": 35, "spawnTime": 210 },
-    { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage3_idle_4f.png", "fps": 6 } }, "size": 216, "color": "#008844", "hp": 2500, "speed": 21, "damage": 40, "spawnTime": 240 },
-    { "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_machine_dragon_idle_4f.png", "fps": 6 } }, "size": 162, "color": "#4400ff", "hp": 2000, "speed": 30, "damage": 45, "spawnTime": 270 },
-    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 180, "color": "#ffcc00", "hp": 3000, "speed": 27, "damage": 50, "spawnTime": 300 },
-    { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dark_dragon_8f_4c2r.png", "fps": 6 } }, "size": 432, "color": "#000000", "hp": 8000, "speed": 24, "damage": 60, "spawnTime": 360 }
+    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 45 },
+    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gorilla_idle_8f.png", "fps": 7 } }, "size": 234, "color": "#553311", "hp": 800, "speed": 24, "damage": 22, "spawnTime": 62 },
+    { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_beetle_knight_idle_3f.png", "fps": 8 } }, "size": 180, "color": "#1a3366", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 60 },
+    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dragon_8f_4c2r.png", "fps": 6 } }, "size": 216, "color": "#ff0066", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 84 },
+    { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_skeletonking_9f.png", "fps": 6 } }, "size": 171, "color": "#ff4400", "hp": 1500, "speed": 33, "damage": 30, "spawnTime": 75 },
+    { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gnu_idle_5f.png", "fps": 7 } }, "size": 198, "color": "#44ccff", "hp": 2000, "speed": 18, "damage": 35, "spawnTime": 105 },
+    { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage3_idle_4f.png", "fps": 6 } }, "size": 216, "color": "#008844", "hp": 2500, "speed": 21, "damage": 40, "spawnTime": 90 },
+    { "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_machine_dragon_idle_4f.png", "fps": 6 } }, "size": 162, "color": "#4400ff", "hp": 2000, "speed": 30, "damage": 45, "spawnTime": 125 },
+    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 180, "color": "#ffcc00", "hp": 3000, "speed": 27, "damage": 50, "spawnTime": 120 },
+    { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dark_dragon_8f_4c2r.png", "fps": 6 } }, "size": 432, "color": "#000000", "hp": 8000, "speed": 24, "damage": 60, "spawnTime": 168 }
   ],
   "projectile": { "image": null, "color": "#ff6600", "size": 24 },
   "xpGem": { "image": "assets/xp_gem.png", "color": "#00ff88" },

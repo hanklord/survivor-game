@@ -545,7 +545,7 @@
     }
 
     // Boss 排程
-    var bossResult = this.waveManager.updateBoss(dt, this.gameTime, this.player, this.W, this.H);
+    var bossResult = this.waveManager.updateBoss(dt, this.levelManager.levelTime, this.player, this.W, this.H, this.levelManager.getBossIndices());
     // Rush Wave
     var rushEvent = this._rushWave.update(dt);
     if (rushEvent === "rush_start") {
