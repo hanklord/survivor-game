@@ -187,7 +187,7 @@
         var slashFrames = 4;
         var fw = slashImg.width / slashFrames;
         var fh = slashImg.height;
-        var drawSize = mv.range * 2.2;
+        var drawSize = mv.range * 1.2;
         // 向左時只做水平翻轉，不旋轉
         var facingLeft = (Math.abs(mv.angle) > Math.PI / 2);
         if (facingLeft) {

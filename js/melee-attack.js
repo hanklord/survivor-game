@@ -2,11 +2,11 @@
 (function() {
   window.SG = window.SG || {};
 
-  var BASE_RANGE = 80;
+  var BASE_RANGE = 160;
   var BASE_DAMAGE = 15;
   var BASE_CD = 0.6;
   var HITBOX_DURATION = 0.25;
-  var ARC_ANGLE = 1.2; // ±60° 扇形
+  var ARC_ANGLE = 1.0; // ±57° 扇形（約 114° 總弧度，配合特效弧度）
 
   function MeleeAttack(player) {
     this.player = player;
