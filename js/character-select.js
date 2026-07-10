@@ -35,6 +35,11 @@
       })(CHARACTERS[i]);
     }
     this._el.appendChild(container);
+    // 版本號顯示
+    var ver = document.createElement('div');
+    ver.style.cssText = 'position:absolute; bottom:16px; left:0; right:0; text-align:center; font-size:12px; color:rgba(255,255,255,0.4);';
+    ver.textContent = window.GAME_VERSION || '';
+    this._el.appendChild(ver);
     this._el.style.display = 'block';
   };
 

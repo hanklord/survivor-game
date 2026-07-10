@@ -1,3 +1,4 @@
+window.GAME_VERSION = "v0.5.0";
 window.GAME_CONFIG = {
   "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/mage_idle_4f.png", "fps": 6 }, "run": { "file": "assets/strips/mage_run_4f.png", "fps": 10 } }, "size": 66 },
   "enemies": [
