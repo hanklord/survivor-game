@@ -30,10 +30,10 @@ window.GAME_CONFIG = {
   "background": { "color": "#1a1a2e", "image": null },
   "audio": { "enabled": true, "volume": 0.5 },
   "levels": [
-    { "name": "草地", "bgColor": "#1a2e1a", "bgImage": "assets/backgrounds/grass.png", "duration": 90, "enemySpeedMult": 1, "bossIndices": [0, 1] },
-    { "name": "洞窟", "bgColor": "#1a1a2e", "bgImage": "assets/backgrounds/cave.png", "bgm": "assets/audio/bgm_level2.mp3", "duration": 120, "enemySpeedMult": 1.2, "bossIndices": [2, 3] },
-    { "name": "沼澤", "bgColor": "#1a2e2a", "bgImage": "assets/backgrounds/swamp.png", "bgm": "assets/audio/bgm_level3.mp3", "duration": 150, "enemySpeedMult": 1.3, "bossIndices": [4, 5] },
-    { "name": "火山", "bgColor": "#2e1a1a", "bgImage": "assets/backgrounds/volcano.png", "bgm": "assets/audio/bgm_level4.mp3", "duration": 180, "enemySpeedMult": 1.5, "bossIndices": [6, 7] },
-    { "name": "地獄", "bgColor": "#1a0a0a", "bgImage": "assets/backgrounds/hell.png", "bgm": "assets/audio/bgm_level5.mp3", "duration": 240, "enemySpeedMult": 1.8, "bossIndices": [8, 9] }
+    { "name": "草地", "bgColor": "#1a2e1a", "bgImage": "assets/backgrounds/grass.png", "duration": 90, "enemySpeedMult": 1.0, "bossIndices": [0, 1] },
+    { "name": "洞窟", "bgColor": "#1a1a2e", "bgImage": "assets/backgrounds/cave.png", "bgm": "assets/audio/bgm_level2.mp3", "duration": 120, "enemySpeedMult": 1.5, "bossIndices": [2, 3] },
+    { "name": "沼澤", "bgColor": "#1a2e2a", "bgImage": "assets/backgrounds/swamp.png", "bgm": "assets/audio/bgm_level3.mp3", "duration": 150, "enemySpeedMult": 2.0, "bossIndices": [4, 5] },
+    { "name": "火山", "bgColor": "#2e1a1a", "bgImage": "assets/backgrounds/volcano.png", "bgm": "assets/audio/bgm_level4.mp3", "duration": 180, "enemySpeedMult": 2.5, "bossIndices": [6, 7] },
+    { "name": "地獄", "bgColor": "#1a0a0a", "bgImage": "assets/backgrounds/hell.png", "bgm": "assets/audio/bgm_level5.mp3", "duration": 240, "enemySpeedMult": 3.0, "bossIndices": [8, 9] }
   ]
 };

@@ -6,7 +6,7 @@
   var BASE_DAMAGE = 15;
   var BASE_CD = 0.6;
   var HITBOX_DURATION = 0.25;
-  var ARC_ANGLE = 1.0; // ±57° 扇形（約 114° 總弧度，配合特效弧度）
+  var ARC_ANGLE = 1.75; // ±100° 扇形（約 200° 半圓形覆蓋）
 
   function MeleeAttack(player) {
     this.player = player;

@@ -211,21 +211,21 @@
         ctx.globalCompositeOperation = 'lighter';
         ctx.globalAlpha = alpha;
         ctx.beginPath();
-        ctx.arc(0, 0, mv.range, -1.0, 1.0);
+        ctx.arc(0, 0, mv.range, -1.75, 1.75);
         ctx.strokeStyle = 'rgba(100,0,150,0.5)';
         ctx.lineWidth = 14;
         ctx.lineCap = 'round';
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(0, 0, mv.range * 0.9, -0.9, 0.9);
+        ctx.arc(0, 0, mv.range * 0.9, -1.6, 1.6);
         ctx.strokeStyle = 'rgba(180,50,255,0.7)';
         ctx.lineWidth = 8;
         ctx.lineCap = 'round';
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(0, 0, mv.range * 0.8, -0.8, 0.8);
+        ctx.arc(0, 0, mv.range * 0.8, -1.45, 1.45);
         ctx.strokeStyle = 'rgba(230,150,255,1)';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';

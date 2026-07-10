@@ -2,7 +2,7 @@
 (function() {
   window.SG = window.SG || {};
 
-  var BASE_CD = 0.6;
+  var BASE_CD = 1.0;
   var BASE_DAMAGE = 12;
   var ARROW_SPEED = 500;
   var ARROW_RANGE = 400;
@@ -25,7 +25,7 @@
     this.level++;
     // 奇數等級加數量，偶數等級加頻率
     if (this.level % 2 === 0) {
-      this.cd = Math.max(0.2, this.cd - 0.08);
+      this.cd = Math.max(0.4, this.cd - 0.04);
     } else {
       this.arrowCount = Math.min(this.arrowCount + 1, 9);
     if (this.level >= 15) return;
