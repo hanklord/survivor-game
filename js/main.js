@@ -672,6 +672,9 @@
       self._applyLevelBg();
       self.ui.updateLevelName(self.levelManager.getCurrent().name);
       self.audio.playAmbient(self.levelManager.getCurrent().name);
+      // 關卡專用 BGM
+      var lvBgm = self.levelManager.getCurrent().bgm;
+      if (lvBgm) self.audio.switchBGM(lvBgm);
       // 清場
       self.enemies = [];
       self.bosses = [];

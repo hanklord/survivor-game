@@ -52,6 +52,17 @@
     if (this._bgm) this._bgm.pause();
   };
 
+  // 切換背景音樂（關卡專用 BGM）
+  AudioManager.prototype.switchBGM = function(src) {
+    if (!src) return; // 無指定時維持現有 BGM
+    if (this._bgm) { this._bgm.pause(); this._bgm.currentTime = 0; }
+    this._bgm = new Audio(src);
+    this._bgm.loop = true;
+    this._bgm.volume = this.volume * 0.4;
+    if (!this.enabled) this._bgm.muted = true;
+    if (this._bgmPlaying) this._bgm.play().catch(function() {});
+  };
+
   // 恢復背景音樂
   AudioManager.prototype.resumeBGM = function() {
     if (this._bgm && this._bgmPlaying) this._bgm.play().catch(function() {});
