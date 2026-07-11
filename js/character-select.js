@@ -19,18 +19,18 @@
     var self = this;
     this._el.innerHTML = '<div style="text-align:center;margin-bottom:10px;"><img src="assets/ui/title.png" style="max-width:400px;width:80%;height:auto;" alt="無盡的英雄"></div><h3 style="margin:0 0 10px 0;color:#aaa;">選擇角色</h3>';
     var container = document.createElement('div');
-    container.style.cssText = 'display:flex; gap:30px; justify-content:center; margin-top:20px;';
+    container.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center; align-items:flex-start; margin-top:20px; padding:0 10px;';
 
     for (var i = 0; i < CHARACTERS.length; i++) {
       (function(ch) {
         var card = document.createElement('div');
-        card.style.cssText = 'background:rgba(30,30,60,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:20px 30px; cursor:pointer; text-align:center; transition:all 0.2s;';
+        card.style.cssText = 'position:relative; background:rgba(30,30,60,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:15px 20px; cursor:pointer; text-align:center; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; width:130px;';
         
         // 動畫 sprite canvas
         var spriteCanvas = document.createElement('canvas');
         spriteCanvas.width = 80;
         spriteCanvas.height = 80;
-        spriteCanvas.style.cssText = 'display:block; margin:0 auto 10px auto; image-rendering:pixelated;';
+        spriteCanvas.style.cssText = 'width:80px; height:80px; margin-bottom:10px; image-rendering:pixelated;';
         card.appendChild(spriteCanvas);
 
         // 載入 sprite 並播放動畫
