@@ -294,3 +294,41 @@ levelTime >= level.duration AND bosses.length === 0
 - 場景環境音（Web Audio 合成）
 - 每關獨立 BGM 切換
 - Godot 4.x 分支（實驗性）
+
+---
+
+## 9. Hardcore 模式（V162+）
+
+- 通關後可選「Hardcore」重新開始，角色保留等級/技能
+- 敵人（普通+Rush+精英+Boss）HP ×3^N（累乘）
+- `HARDCORE_HP_MULTIPLIER = 3.0`（config.js 可調）
+- 關卡名稱顯示「(Hardcore Lv.N)」
+- 視覺特效（hardcoreLevel > 0 時啟用）：
+  - 螢幕邊緣紅色脈動光暈（vignette，2.5s 週期，opacity 15~35%）
+  - 飄浮灰燼粒子（28 顆，5~10px，紅/橘色，上飄+飄動）
+  - 等級越高效果越強
+
+## 10. 畫面比例與佈局（V165+）
+
+- 遊戲強制 9:16 直屏比例
+- PC 寬螢幕：pillarbox（兩側黑色），遊戲居中
+- Canvas: `width = min(螢幕寬, 螢幕高×9/16)`
+- `#game-container` 同步定位/大小
+- 角色選擇畫面也限制在 9:16 區域
+
+## 11. 系統更新摘要（V162~V177）
+
+| 項目 | 說明 |
+|------|------|
+| 版本號格式 | V+數字（每 commit +1），顯示在角色選擇底部 |
+| 設定按鈕 | 右上角⚙，暫停+BGM/音效開關（localStorage 保存） |
+| 玩家血條 | 角色頭上 HP bar（綠/黃/紅） |
+| Boss 箭頭 | 螢幕外 Boss 用紅橘色箭頭指示方向 |
+| 各關 BGM | L1 預設, L2~L5 各有專屬 MP3, switchBGM() |
+| 角色選擇 | 標題圖片(title.png) + 背景圖(title_bg.jpg) + 靜態角色圖 |
+| 騎士斬擊 | 扇形±100°判定, range 160px, crossfade 4→16幀插值 |
+| 聖光效果 | 跟隨角色、獨立動畫循環、1.3s播完才跳選單 |
+| 怪物大小 | 全體 ×1.8（config size） |
+| 弓箭手射速 | CD 0.67s（×1.5 加快） |
+| 過關修正 | 每關只生成 bossIndices 指定的 Boss，用 levelTime |
+| 除錯鍵 | N 鍵跳關 |
