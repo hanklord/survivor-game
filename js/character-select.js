@@ -17,9 +17,27 @@
 
   CharacterSelect.prototype._render = function() {
     var self = this;
-    this._el.innerHTML = '<div style="text-align:center;margin-bottom:10px;"><img src="assets/ui/title.png" style="max-width:400px;width:80%;height:auto;" alt="無盡的英雄"></div><h3 style="margin:0 0 10px 0;color:#aaa;">選擇角色</h3>';
+    this._el.innerHTML = '';
+    
+    // 外層垂直容器
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:20px 10px;';
+    
+    // 1. 標題圖片
+    var titleDiv = document.createElement('div');
+    titleDiv.style.cssText = 'text-align:center; margin-bottom:15px;';
+    titleDiv.innerHTML = '<img src="assets/ui/title.png" style="max-width:320px;width:70%;height:auto;" alt="無盡的英雄">';
+    wrapper.appendChild(titleDiv);
+    
+    // 2. 副標
+    var subtitle = document.createElement('h3');
+    subtitle.style.cssText = 'margin:0 0 15px 0; color:#aaa; font-size:16px;';
+    subtitle.textContent = '選擇角色';
+    wrapper.appendChild(subtitle);
+    
+    // 3. 角色卡片容器
     var container = document.createElement('div');
-    container.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center; align-items:flex-start; margin-top:20px; padding:0 10px;';
+    container.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center; align-items:flex-start;';
 
     for (var i = 0; i < CHARACTERS.length; i++) {
       (function(ch) {
@@ -70,7 +88,8 @@
         container.appendChild(card);
       })(CHARACTERS[i]);
     }
-    this._el.appendChild(container);
+    wrapper.appendChild(container);
+    this._el.appendChild(wrapper);
     // 版本號顯示
     var ver = document.createElement('div');
     ver.style.cssText = 'position:absolute; bottom:16px; left:0; right:0; text-align:center; font-size:12px; color:rgba(255,255,255,0.4);';
