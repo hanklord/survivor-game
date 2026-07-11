@@ -17,7 +17,7 @@
 
   CharacterSelect.prototype._render = function() {
     var self = this;
-    this._el.innerHTML = '<h2>選擇角色</h2>';
+    this._el.innerHTML = '<div style="text-align:center;margin-bottom:10px;"><img src="assets/ui/title.png" style="max-width:400px;width:80%;height:auto;" alt="無盡的英雄"></div><h3 style="margin:0 0 10px 0;color:#aaa;">選擇角色</h3>';
     var container = document.createElement('div');
     container.style.cssText = 'display:flex; gap:30px; justify-content:center; margin-top:20px;';
 
