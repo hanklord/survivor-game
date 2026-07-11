@@ -109,6 +109,9 @@
     document.addEventListener('click', unlockAudio);
     document.addEventListener('keydown', unlockAudio);
 
+    // 設定按鈕
+    this._setupSettings();
+
     this._selectedCharacter = null;
     this._archerAttack = null;
     this._passiveItems = new SG.PassiveItems();
@@ -132,6 +135,52 @@
     this.ui.togglePause(this.paused);
     if (this.paused) this.audio.pauseBGM();
     else this.audio.resumeBGM();
+  };
+
+  Game.prototype._setupSettings = function() {
+    var self = this;
+    var btn = document.getElementById('settings-btn');
+    var menu = document.getElementById('settings-menu');
+    var bgmCheck = document.getElementById('set-bgm');
+    var sfxCheck = document.getElementById('set-sfx');
+    var resumeBtn = document.getElementById('set-resume');
+
+    // 讀取 localStorage
+    var savedBgm = localStorage.getItem('survivor_bgm');
+    var savedSfx = localStorage.getItem('survivor_sfx');
+    if (savedBgm === 'off') { bgmCheck.checked = false; }
+    if (savedSfx === 'off') { sfxCheck.checked = false; this.audio.enabled = false; }
+
+    btn.onclick = function() {
+      self.paused = true;
+      menu.style.display = 'flex';
+    };
+
+    resumeBtn.onclick = function() {
+      menu.style.display = 'none';
+      self.paused = false;
+      self.audio.resumeBGM();
+    };
+
+    bgmCheck.onchange = function() {
+      if (bgmCheck.checked) {
+        localStorage.setItem('survivor_bgm', 'on');
+        self.audio.resumeBGM();
+      } else {
+        localStorage.setItem('survivor_bgm', 'off');
+        self.audio.pauseBGM();
+      }
+    };
+
+    sfxCheck.onchange = function() {
+      if (sfxCheck.checked) {
+        localStorage.setItem('survivor_sfx', 'on');
+        self.audio.enabled = true;
+      } else {
+        localStorage.setItem('survivor_sfx', 'off');
+        self.audio.enabled = false;
+      }
+    };
   };
 
   Game.prototype._loadImages = function() {

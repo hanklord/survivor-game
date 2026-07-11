@@ -607,6 +607,16 @@
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.pickupRange, 0, Math.PI * 2);
     ctx.stroke();
+
+    // 玩家血條（角色頭上）
+    var hpBarW = ps * 0.7;
+    var hpBarH = 4;
+    var hpBarY = player.y - ps / 2 - 10;
+    var hpRatio = Math.max(0, player.hp / player.maxHp);
+    ctx.fillStyle = '#222';
+    ctx.fillRect(player.x - hpBarW / 2, hpBarY, hpBarW, hpBarH);
+    ctx.fillStyle = hpRatio > 0.5 ? '#44dd44' : hpRatio > 0.25 ? '#ddaa00' : '#dd2222';
+    ctx.fillRect(player.x - hpBarW / 2, hpBarY, hpBarW * hpRatio, hpBarH);
   };
 
   Renderer.prototype._drawParticles = function(particles, camX, camY) {
