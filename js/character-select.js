@@ -3,10 +3,10 @@
   window.SG = window.SG || {};
 
   var CHARACTERS = [
-    { id: 'ranged', name: '法師', desc: '火球魔法攻擊', color: '#ff6600', attackType: 'ranged', scale: 1.0, idleSprite: 'assets/strips/mage_idle_4f.png', idleFrames: 4 },
-    // { id: 'melee', name: '近戰劍士', desc: '劍氣斬擊周圍敵人', color: '#ff4466', attackType: 'melee', scale: 1.0, idleSprite: 'assets/strips/zero_idle_8f.png', idleFrames: 8 },
-    { id: 'archer', name: '弓手', desc: '弓箭擴散射擊', color: '#44cc44', attackType: 'archer', scale: 1.0, idleSprite: 'assets/strips/archer_idle_4f.png', idleFrames: 4 },
-    { id: 'knight', name: '黃金騎士', desc: '高防禦近戰攻擊', color: '#ffcc00', attackType: 'melee', scale: 1.5, idleSprite: 'assets/strips/golden_knight_idle_4f.png', idleFrames: 4 }
+    { id: 'ranged', name: '法師', desc: '火球魔法攻擊', color: '#ff6600', attackType: 'ranged', scale: 1.0, icon: 'assets/ui/chars/mage.png' },
+    // { id: 'melee', name: '近戰劍士', desc: '劍氣斬擊周圍敵人', color: '#ff4466', attackType: 'melee', scale: 1.0, icon: 'assets/ui/chars/melee.png' },
+    { id: 'archer', name: '弓手', desc: '弓箭擴散射擊', color: '#44cc44', attackType: 'archer', scale: 1.0, icon: 'assets/ui/chars/archer.png' },
+    { id: 'knight', name: '黃金騎士', desc: '高防禦近戰攻擊', color: '#ffcc00', attackType: 'melee', scale: 1.5, icon: 'assets/ui/chars/knight.png' }
   ];
 
   function CharacterSelect(onSelect) {
@@ -44,37 +44,11 @@
         var card = document.createElement('div');
         card.style.cssText = 'background:rgba(20,20,50,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:12px 10px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:100px; overflow:hidden; transition:transform 0.2s, border-color 0.2s;';
         
-        // Sprite 容器（固定大小，居中，裁切溢出）
-        var spriteBox = document.createElement('div');
-        spriteBox.style.cssText = 'width:64px; height:64px; overflow:hidden; margin-bottom:8px; flex-shrink:0;';
-        
-        var spriteCanvas = document.createElement('canvas');
-        spriteCanvas.width = 64;
-        spriteCanvas.height = 64;
-        spriteCanvas.style.cssText = 'width:64px; height:64px; image-rendering:pixelated; display:block;';
-        spriteBox.appendChild(spriteCanvas);
-        card.appendChild(spriteBox);
-
-        // 載入 sprite 並播放動畫
-        if (ch.idleSprite) {
-          var img = new Image();
-          img.src = ch.idleSprite;
-          var frameIdx = 0;
-          var frames = ch.idleFrames || 4;
-          img.onload = function() {
-            var fw = img.width / frames;
-            var fh = img.height;
-            var sCtx = spriteCanvas.getContext('2d');
-            sCtx.imageSmoothingEnabled = false;
-            function drawFrame() {
-              sCtx.clearRect(0, 0, 64, 64);
-              sCtx.drawImage(img, frameIdx * fw, 0, fw, fh, 0, 0, 64, 64);
-              frameIdx = (frameIdx + 1) % frames;
-            }
-            drawFrame();
-            setInterval(drawFrame, 150);
-          };
-        }
+        // 靜態角色圖（第一幀）
+        var charImg = document.createElement('img');
+        charImg.src = ch.icon || '';
+        charImg.style.cssText = 'width:64px; height:64px; image-rendering:pixelated; margin-bottom:8px;';
+        card.appendChild(charImg);
 
         // 角色名稱
         var nameDiv = document.createElement('div');
