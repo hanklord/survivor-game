@@ -350,6 +350,7 @@
       this.player.maxHp = 150; this.player.hp = 150; // 坦克高血量
       this.player.speed *= 0.85; // 移速稍慢
       this._meleeAttack = new SG.MeleeAttack(this.player);
+      this._meleeAttack.damage = Math.round(this._meleeAttack.damage * 2.5); // 騎士攻擊力 ×2.5
       this._archerAttack = null;
     } else if (this._selectedCharacter.id === 'archer') {
       var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_run_8f.png', fps: 10 } } };
