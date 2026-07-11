@@ -544,7 +544,11 @@
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
       // Hardcore HP 倍率
       var hcMult = this.getHardcoreHPMult();
-      if (hcMult > 1) { spawned[i].hp *= hcMult; spawned[i].maxHp *= hcMult; }
+      if (hcMult > 1) {
+        spawned[i].hp = Math.round(spawned[i].hp * hcMult);
+        spawned[i].maxHp = spawned[i].hp;
+        console.log('[Hardcore] Enemy HP:', spawned[i].hp, 'mult:', hcMult.toFixed(2));
+      }
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
@@ -558,7 +562,7 @@
       var rushSpawned = this.waveManager.spawnRushWave(this._rushWave.getSpawnCount(), this.player, this.W, this.H, this.imgConfig);
       if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
         rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
-        var hcR = this.getHardcoreHPMult(); if (hcR > 1) { rushSpawned[ri].hp *= hcR; rushSpawned[ri].maxHp *= hcR; }
+        var hcR = this.getHardcoreHPMult(); if (hcR > 1) { rushSpawned[ri].hp = Math.round(rushSpawned[ri].hp * hcR); rushSpawned[ri].maxHp = rushSpawned[ri].hp; }
         if (this.enemies.length < MAX_ENEMIES) this.enemies.push(rushSpawned[ri]);
       }
     } else if (rushEvent === "rush_end") {
@@ -576,7 +580,7 @@
     var eliteResult = this._eliteSpawner.update(dt, this.W, this.H, this.imgConfig);
     if (eliteResult.elite && this.enemies.length < MAX_ENEMIES) {
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
-      var hcE = this.getHardcoreHPMult(); if (hcE > 1) { eliteResult.elite.hp *= hcE; eliteResult.elite.maxHp *= hcE; }
+      var hcE = this.getHardcoreHPMult(); if (hcE > 1) { eliteResult.elite.hp = Math.round(eliteResult.elite.hp * hcE); eliteResult.elite.maxHp = eliteResult.elite.hp; }
       this.enemies.push(eliteResult.elite);
     }
     if (eliteResult.triggerLevelUp && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
@@ -588,7 +592,11 @@
       bossResult.boss.animator = this._buildAnimator('boss_' + bossResult.boss.cfgIdx, (this.imgConfig.bosses || [])[bossResult.boss.cfgIdx]);
       // Hardcore HP 倍率
       var hcBossMult = this.getHardcoreHPMult();
-      if (hcBossMult > 1) { bossResult.boss.hp *= hcBossMult; bossResult.boss.maxHp *= hcBossMult; }
+      if (hcBossMult > 1) {
+        bossResult.boss.hp = Math.round(bossResult.boss.hp * hcBossMult);
+        bossResult.boss.maxHp = bossResult.boss.hp;
+        console.log('[Hardcore] Boss HP:', bossResult.boss.hp, 'mult:', hcBossMult.toFixed(2));
+      }
       this.bosses.push(bossResult.boss);
     }
     if (this.waveManager.isWarning()) this.ui.updateBossWarningOpacity(this.gameTime);
