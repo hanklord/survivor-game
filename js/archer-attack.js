@@ -2,7 +2,7 @@
 (function() {
   window.SG = window.SG || {};
 
-  var BASE_CD = 1.0;
+  var BASE_CD = 0.67;
   var BASE_DAMAGE = 12;
   var ARROW_SPEED = 500;
   var ARROW_RANGE = 400;
