@@ -301,7 +301,7 @@
 
     // 設定初始關卡背景
     this._applyLevelBg();
-    this.ui.updateLevelName(this.levelManager.getCurrent().name);
+    this.ui.updateLevelName(this._getLevelDisplayName());
     this.audio.playAmbient(this.levelManager.getCurrent().name);
 
     requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
@@ -690,7 +690,7 @@
     this.ui.showLevelClear(levelName, function() {
       self.levelClearing = false;
       self._applyLevelBg();
-      self.ui.updateLevelName(self.levelManager.getCurrent().name);
+      self.ui.updateLevelName(self._getLevelDisplayName());
       self.audio.playAmbient(self.levelManager.getCurrent().name);
       // 關卡專用 BGM
       var lvBgm = self.levelManager.getCurrent().bgm;
@@ -717,7 +717,7 @@
 
     // 套用背景
     this._applyLevelBg();
-    this.ui.updateLevelName(this.levelManager.getCurrent().name + ' (Hardcore Lv.' + this.hardcoreLevel + ')');
+    this.ui.updateLevelName(this._getLevelDisplayName());
     this.audio.playAmbient(this.levelManager.getCurrent().name);
     var lvBgm = this.levelManager.getCurrent().bgm;
     if (lvBgm) this.audio.switchBGM(lvBgm);
@@ -733,7 +733,13 @@
   // 取得當前 Hardcore HP 倍率
   Game.prototype.getHardcoreHPMult = function() {
     if (this.hardcoreLevel <= 0) return 1;
-    return Math.pow(window.HARDCORE_HP_MULTIPLIER || 1.2, this.hardcoreLevel);
+    return Math.pow(window.HARDCORE_HP_MULTIPLIER || 3.0, this.hardcoreLevel);
+  };
+
+  Game.prototype._getLevelDisplayName = function() {
+    var name = this.levelManager.getCurrent().name;
+    if (this.hardcoreLevel > 0) name += ' (Hardcore Lv.' + this.hardcoreLevel + ')';
+    return name;
   };
 
   Game.prototype._removeFrom = function(arr, obj) {
