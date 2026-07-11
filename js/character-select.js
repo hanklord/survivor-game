@@ -37,19 +37,23 @@
     
     // 3. 角色卡片容器
     var container = document.createElement('div');
-    container.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center; align-items:flex-start;';
+    container.style.cssText = 'display:flex; flex-wrap:nowrap; gap:12px; justify-content:center; align-items:stretch;';
 
     for (var i = 0; i < CHARACTERS.length; i++) {
       (function(ch) {
         var card = document.createElement('div');
-        card.style.cssText = 'position:relative; background:rgba(30,30,60,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:15px 20px; cursor:pointer; text-align:center; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; width:130px;';
+        card.style.cssText = 'background:rgba(20,20,50,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:12px 10px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:100px; overflow:hidden; transition:transform 0.2s, border-color 0.2s;';
         
-        // 動畫 sprite canvas
+        // Sprite 容器（固定大小，居中，裁切溢出）
+        var spriteBox = document.createElement('div');
+        spriteBox.style.cssText = 'width:64px; height:64px; overflow:hidden; margin-bottom:8px; flex-shrink:0;';
+        
         var spriteCanvas = document.createElement('canvas');
-        spriteCanvas.width = 80;
-        spriteCanvas.height = 80;
-        spriteCanvas.style.cssText = 'width:80px; height:80px; margin-bottom:10px; image-rendering:pixelated;';
-        card.appendChild(spriteCanvas);
+        spriteCanvas.width = 64;
+        spriteCanvas.height = 64;
+        spriteCanvas.style.cssText = 'width:64px; height:64px; image-rendering:pixelated; display:block;';
+        spriteBox.appendChild(spriteCanvas);
+        card.appendChild(spriteBox);
 
         // 載入 sprite 並播放動畫
         if (ch.idleSprite) {
@@ -63,8 +67,8 @@
             var sCtx = spriteCanvas.getContext('2d');
             sCtx.imageSmoothingEnabled = false;
             function drawFrame() {
-              sCtx.clearRect(0, 0, 80, 80);
-              sCtx.drawImage(img, frameIdx * fw, 0, fw, fh, 0, 0, 80, 80);
+              sCtx.clearRect(0, 0, 64, 64);
+              sCtx.drawImage(img, frameIdx * fw, 0, fw, fh, 0, 0, 64, 64);
               frameIdx = (frameIdx + 1) % frames;
             }
             drawFrame();
@@ -72,13 +76,15 @@
           };
         }
 
+        // 角色名稱
         var nameDiv = document.createElement('div');
-        nameDiv.style.cssText = 'font-size:18px; color:' + ch.color + '; font-weight:bold;';
+        nameDiv.style.cssText = 'font-size:14px; color:' + ch.color + '; font-weight:bold; white-space:nowrap;';
         nameDiv.textContent = ch.name;
         card.appendChild(nameDiv);
 
+        // 技能描述
         var descDiv = document.createElement('div');
-        descDiv.style.cssText = 'font-size:13px; color:#aaa; margin-top:6px;';
+        descDiv.style.cssText = 'font-size:11px; color:#aaa; margin-top:4px; white-space:nowrap;';
         descDiv.textContent = ch.desc;
         card.appendChild(descDiv);
 
