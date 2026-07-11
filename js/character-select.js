@@ -75,6 +75,15 @@
     ver.style.cssText = 'position:absolute; bottom:16px; left:0; right:0; text-align:center; font-size:12px; color:rgba(255,255,255,0.4);';
     ver.textContent = window.GAME_VERSION || '';
     this._el.appendChild(ver);
+    // 套用 9:16 直屏
+    var sw = window.innerWidth;
+    var sh = window.innerHeight;
+    var tw = Math.min(sw, Math.floor(sh * 9 / 16));
+    var th = Math.min(sh, Math.floor(tw * 16 / 9));
+    this._el.style.width = tw + 'px';
+    this._el.style.height = th + 'px';
+    this._el.style.left = Math.floor((sw - tw) / 2) + 'px';
+    this._el.style.top = Math.floor((sh - th) / 2) + 'px';
     this._el.style.display = 'block';
   };
 
