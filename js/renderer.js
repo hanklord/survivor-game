@@ -384,6 +384,11 @@
     ctx.globalAlpha = 1;
     ctx.restore();
 
+    // Hardcore 視覺特效（螢幕空間）
+    if (state.hardcoreVFX && state.hardcoreVFX.active) {
+      state.hardcoreVFX.draw(ctx, W, H);
+    }
+
     // Boss 指示箭頭（螢幕空間，在 restore 之後繪製）
     if (state.bosses && state.bosses.length > 0 && state.player) {
       var px = state.player.x - camX; // 玩家螢幕座標

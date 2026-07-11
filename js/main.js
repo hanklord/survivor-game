@@ -76,6 +76,7 @@
     this._magnetAllXP = false;
     this._levelUpEffect = new SG.LevelUpEffect();
     this._levelUpPending = false;
+    this._hardcoreVFX = new SG.HardcoreVFX();
 
     // 綁定
     var self = this;
@@ -430,6 +431,7 @@
     }
     // 聖光效果不受遊戲暫停影響，獨立更新
     this._levelUpEffect.update(dt);
+    this._hardcoreVFX.update(dt);
     this.renderer.render({
       player: this.player,
       enemies: this.enemies,
@@ -452,6 +454,7 @@
       bombProgress: this._bomb.getProgress(),
       bombReady: this._bomb.ready,
       levelUpEffect: this._levelUpEffect,
+      hardcoreVFX: this._hardcoreVFX,
       dt: dt
     });
 
@@ -786,6 +789,7 @@
   // Hardcore 模式：保留角色進度，敵人 HP 累乘，從第一關重新開始
   Game.prototype._startHardcore = function() {
     this.hardcoreLevel++;
+    this._hardcoreVFX.setActive(this.hardcoreLevel);
     this.gameOver = false;
     this.gameTime = 0;
     this.levelClearing = false;
