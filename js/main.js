@@ -85,6 +85,7 @@
       var enabled = self.audio.toggleMute();
       self.ui.updateMute(enabled);
     };
+    this.input._onSkipLevel = function() { self._debugSkipLevel(); };
     this._resize();
     // 炸彈按鈕
     var bombBtn = document.getElementById("bomb-btn");
@@ -168,6 +169,16 @@
     this.ui.togglePause(this.paused);
     if (this.paused) this.audio.pauseBGM();
     else this.audio.resumeBGM();
+  };
+
+  // 除錯：按 N 跳關
+  Game.prototype._debugSkipLevel = function() {
+    if (this.gameOver || this.levelClearing) return;
+    // 清除所有 Boss
+    this.bosses = [];
+    // 設定時間超過 duration 觸發過關
+    this.levelManager.levelTime = this.levelManager.getCurrent().duration + 1;
+    console.log('[DEBUG] Skip level → next');
   };
 
   Game.prototype._setupSettings = function() {

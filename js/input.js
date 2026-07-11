@@ -20,6 +20,7 @@
       self.keys[e.code] = true;
       if (e.code === 'Escape' && self._onPause) self._onPause();
       if (e.code === 'KeyM' && self._onMute) self._onMute();
+      if (e.code === 'KeyN' && self._onSkipLevel) self._onSkipLevel(); // 除錯：跳關
     });
     document.addEventListener('keyup', function(e) {
       self.keys[e.code] = false;
