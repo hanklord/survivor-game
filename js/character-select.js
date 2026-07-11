@@ -21,7 +21,7 @@
     
     // 外層垂直容器
     var wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:20px 10px;';
+    wrapper.style.cssText = 'display:flex; flex-direction:column; align-items:center; width:100%; padding:30px 10px; box-sizing:border-box;';
     
     // 1. 標題圖片
     var titleDiv = document.createElement('div');
@@ -101,7 +101,7 @@
     ver.style.cssText = 'position:absolute; bottom:16px; left:0; right:0; text-align:center; font-size:12px; color:rgba(255,255,255,0.4);';
     ver.textContent = window.GAME_VERSION || '';
     this._el.appendChild(ver);
-    this._el.style.display = 'flex';
+    this._el.style.display = 'block';
   };
 
   SG.CharacterSelect = CharacterSelect;
