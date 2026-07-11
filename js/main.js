@@ -125,8 +125,40 @@
   }
 
   Game.prototype._resize = function() {
-    this.W = this.canvas.width = window.innerWidth;
-    this.H = this.canvas.height = window.innerHeight;
+    // 9:16 直屏比例
+    var screenW = window.innerWidth;
+    var screenH = window.innerHeight;
+    var targetW = Math.min(screenW, Math.floor(screenH * 9 / 16));
+    var targetH = Math.floor(targetW * 16 / 9);
+    if (targetH > screenH) {
+      targetH = screenH;
+      targetW = Math.floor(targetH * 9 / 16);
+    }
+    this.W = this.canvas.width = targetW;
+    this.H = this.canvas.height = targetH;
+    var left = Math.floor((screenW - targetW) / 2);
+    var top = Math.floor((screenH - targetH) / 2);
+    // Canvas 居中
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.left = left + 'px';
+    this.canvas.style.top = top + 'px';
+    // UI 容器同步
+    var container = document.getElementById('game-container');
+    if (container) {
+      container.style.left = left + 'px';
+      container.style.top = top + 'px';
+      container.style.width = targetW + 'px';
+      container.style.height = targetH + 'px';
+    }
+    // bg-canvas
+    var bgCanvas = document.getElementById('bg-canvas');
+    if (bgCanvas) {
+      bgCanvas.width = targetW;
+      bgCanvas.height = targetH;
+      bgCanvas.style.position = 'absolute';
+      bgCanvas.style.left = left + 'px';
+      bgCanvas.style.top = top + 'px';
+    }
     this.renderer.onResize(this.W, this.H);
   };
 
