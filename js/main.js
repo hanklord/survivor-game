@@ -787,9 +787,9 @@
       self._applyLevelBg();
       self.ui.updateLevelName(self._getLevelDisplayName());
       self.audio.playAmbient(self.levelManager.getCurrent().name);
-      // 關卡專用 BGM
+      // 關卡專用 BGM（無指定時回到預設）
       var lvBgm = self.levelManager.getCurrent().bgm;
-      if (lvBgm) self.audio.switchBGM(lvBgm);
+      self.audio.switchBGM(lvBgm || 'assets/audio/bgm.mp3');
       // 清場
       self.enemies = [];
       self.bosses = [];
@@ -816,7 +816,7 @@
     this.ui.updateLevelName(this._getLevelDisplayName());
     this.audio.playAmbient(this.levelManager.getCurrent().name);
     var lvBgm = this.levelManager.getCurrent().bgm;
-    if (lvBgm) this.audio.switchBGM(lvBgm);
+    this.audio.switchBGM(lvBgm || 'assets/audio/bgm.mp3');
 
     // 隱藏結算畫面
     if (this.ui.els.levelClear) this.ui.els.levelClear.style.display = 'none';
