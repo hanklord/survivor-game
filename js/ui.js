@@ -95,10 +95,20 @@
   };
 
   // 顯示全通關
-  UI.prototype.showAllClear = function(gameTime, level, kills) {
+  UI.prototype.showAllClear = function(gameTime, level, kills, hardcoreLevel, hardcoreCallback) {
     if (!this.els.levelClear) return;
-    this.els.levelClear.innerHTML = '<h2>🏆 全部通關！</h2><p>Time: ' + SG.formatTime(gameTime) + ' | Level: ' + level + ' | Kills: ' + kills + '</p><button class="upgrade-btn" onclick="location.reload()">再玩一次</button>';
+    var hcLabel = hardcoreLevel > 0 ? ' (Hardcore Lv.' + hardcoreLevel + ')' : '';
+    var nextHcLv = hardcoreLevel + 1;
+    this.els.levelClear.innerHTML = '<h2>🏆 全部通關！' + hcLabel + '</h2>' +
+      '<p>Time: ' + SG.formatTime(gameTime) + ' | Level: ' + level + ' | Kills: ' + kills + '</p>' +
+      '<button class="upgrade-btn" id="btn-hardcore" style="background:#660000;border-color:#ff4400;margin-bottom:8px;">🔥 Hardcore Lv.' + nextHcLv + '（敵人 HP ×' + Math.pow(window.HARDCORE_HP_MULTIPLIER || 1.2, nextHcLv).toFixed(2) + '）</button>' +
+      '<button class="upgrade-btn" onclick="location.reload()">再玩一次（重置）</button>';
     this.els.levelClear.style.display = 'block';
+    // 綁定 Hardcore 按鈕
+    var hcBtn = document.getElementById('btn-hardcore');
+    if (hcBtn && hardcoreCallback) {
+      hcBtn.onclick = function() { hardcoreCallback(); };
+    }
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）

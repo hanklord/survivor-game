@@ -62,6 +62,7 @@
     this.gameOver = false;
     this.levelingUp = false;
     this.levelClearing = false;
+    this.hardcoreLevel = 0; // Hardcore 輪數（0=普通）
     this.lastTime = 0;
     this._fpsFrames = 0;
     this._fpsTimer = 0;
@@ -541,6 +542,9 @@
     var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime);
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
+      // Hardcore HP 倍率
+      var hcMult = this.getHardcoreHPMult();
+      if (hcMult > 1) { spawned[i].hp *= hcMult; spawned[i].maxHp *= hcMult; }
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
@@ -554,6 +558,7 @@
       var rushSpawned = this.waveManager.spawnRushWave(this._rushWave.getSpawnCount(), this.player, this.W, this.H, this.imgConfig);
       if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
         rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
+        var hcR = this.getHardcoreHPMult(); if (hcR > 1) { rushSpawned[ri].hp *= hcR; rushSpawned[ri].maxHp *= hcR; }
         if (this.enemies.length < MAX_ENEMIES) this.enemies.push(rushSpawned[ri]);
       }
     } else if (rushEvent === "rush_end") {
@@ -571,6 +576,7 @@
     var eliteResult = this._eliteSpawner.update(dt, this.W, this.H, this.imgConfig);
     if (eliteResult.elite && this.enemies.length < MAX_ENEMIES) {
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
+      var hcE = this.getHardcoreHPMult(); if (hcE > 1) { eliteResult.elite.hp *= hcE; eliteResult.elite.maxHp *= hcE; }
       this.enemies.push(eliteResult.elite);
     }
     if (eliteResult.triggerLevelUp && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
@@ -580,6 +586,9 @@
     if (bossResult.hideWarning) this.ui.hideBossWarning();
     if (bossResult.boss) {
       bossResult.boss.animator = this._buildAnimator('boss_' + bossResult.boss.cfgIdx, (this.imgConfig.bosses || [])[bossResult.boss.cfgIdx]);
+      // Hardcore HP 倍率
+      var hcBossMult = this.getHardcoreHPMult();
+      if (hcBossMult > 1) { bossResult.boss.hp *= hcBossMult; bossResult.boss.maxHp *= hcBossMult; }
       this.bosses.push(bossResult.boss);
     }
     if (this.waveManager.isWarning()) this.ui.updateBossWarningOpacity(this.gameTime);
@@ -660,10 +669,13 @@
     var levelName = this.levelManager.getCurrent().name;
 
     if (!this.levelManager.nextLevel()) {
-      // 全通關
-      this.ui.showAllClear(this.gameTime, this.player.level, this.kills);
+      // 全通關 — 提供 Hardcore 選項
+      var self = this;
       this.gameOver = true;
       this.leaderboard.addEntry(this.kills, this.player.level, this.gameTime);
+      this.ui.showAllClear(this.gameTime, this.player.level, this.kills, this.hardcoreLevel, function() {
+        self._startHardcore();
+      });
       return;
     }
 
@@ -680,6 +692,40 @@
       self.bosses = [];
       self.waveManager = new SG.WaveManager(self.imgConfig);
     });
+  };
+
+  // Hardcore 模式：保留角色進度，敵人 HP 累乘，從第一關重新開始
+  Game.prototype._startHardcore = function() {
+    this.hardcoreLevel++;
+    this.gameOver = false;
+    this.gameTime = 0;
+    this.levelClearing = false;
+
+    // 重置關卡（從第一關開始）
+    this.levelManager = new SG.LevelManager(this.imgConfig);
+    this.waveManager = new SG.WaveManager(this.imgConfig);
+    this.enemies = [];
+    this.bosses = [];
+
+    // 套用背景
+    this._applyLevelBg();
+    this.ui.updateLevelName(this.levelManager.getCurrent().name + ' (Hardcore Lv.' + this.hardcoreLevel + ')');
+    this.audio.playAmbient(this.levelManager.getCurrent().name);
+    var lvBgm = this.levelManager.getCurrent().bgm;
+    if (lvBgm) this.audio.switchBGM(lvBgm);
+
+    // 隱藏結算畫面
+    if (this.ui.els.levelClear) this.ui.els.levelClear.style.display = 'none';
+
+    // 繼續遊戲循環
+    var self = this;
+    requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
+  };
+
+  // 取得當前 Hardcore HP 倍率
+  Game.prototype.getHardcoreHPMult = function() {
+    if (this.hardcoreLevel <= 0) return 1;
+    return Math.pow(window.HARDCORE_HP_MULTIPLIER || 1.2, this.hardcoreLevel);
   };
 
   Game.prototype._removeFrom = function(arr, obj) {
