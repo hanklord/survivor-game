@@ -3,11 +3,11 @@
   window.SG = window.SG || {};
 
   var VIGNETTE_PERIOD = 2.5; // 脈動週期（秒）
-  var VIGNETTE_MIN_ALPHA = 0.05;
-  var VIGNETTE_MAX_ALPHA = 0.15;
-  var EMBER_COUNT = 18;
-  var EMBER_MIN_SIZE = 2;
-  var EMBER_MAX_SIZE = 4;
+  var VIGNETTE_MIN_ALPHA = 0.15;
+  var VIGNETTE_MAX_ALPHA = 0.35;
+  var EMBER_COUNT = 28;
+  var EMBER_MIN_SIZE = 5;
+  var EMBER_MAX_SIZE = 10;
   var EMBER_LIFE_MIN = 2.0;
   var EMBER_LIFE_MAX = 4.0;
   var EMBER_SPEED_Y = -30; // 上飄速度 px/s
@@ -74,7 +74,7 @@
     // Hardcore 等級越高光暈越強
     vigAlpha *= Math.min(1 + (this.hardcoreLevel - 1) * 0.3, 2.5);
 
-    var grad = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.7);
+    var grad = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.15, W / 2, H / 2, Math.max(W, H) * 0.6);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
     grad.addColorStop(0.7, 'rgba(80,0,0,' + (vigAlpha * 0.5).toFixed(3) + ')');
     grad.addColorStop(1, 'rgba(150,0,0,' + vigAlpha.toFixed(3) + ')');
@@ -98,7 +98,7 @@
       ctx.globalAlpha = alpha;
       ctx.fillStyle = e.color;
       ctx.shadowColor = e.color;
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 10;
       ctx.beginPath();
       ctx.arc(px, py, e.size, 0, Math.PI * 2);
       ctx.fill();
