@@ -271,23 +271,23 @@
       }
       drawThrust(vvData.thrust);
       drawThrust(vvData.thrust2);
-      // 震退波
+      // 震退波（跟隨玩家位置）
       if (vvData.shockwaves) {
         for (var si = 0; si < vvData.shockwaves.length; si++) {
           var sw = vvData.shockwaves[si];
           var swAlpha = (1 - sw.progress) * 0.9;
-          var swRadius = 80 * (0.2 + sw.progress * 0.8); // 從 20% 開始擴張
+          var swRadius = 80 * (0.2 + sw.progress * 0.8);
           ctx.save();
           ctx.globalAlpha = swAlpha;
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 4;
           ctx.beginPath();
-          ctx.arc(sw.x, sw.y, swRadius, 0, Math.PI * 2);
+          ctx.arc(state.player.x, state.player.y, swRadius, 0, Math.PI * 2);
           ctx.stroke();
           ctx.strokeStyle = 'rgba(200,220,255,0.6)';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.arc(sw.x, sw.y, swRadius * 0.5, 0, Math.PI * 2);
+          ctx.arc(state.player.x, state.player.y, swRadius * 0.5, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
         }
