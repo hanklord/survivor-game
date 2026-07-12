@@ -35,9 +35,9 @@
 
   // 初始化背景音樂
   AudioManager.prototype._initBGM = function() {
-    this._bgm = new Audio('assets/audio/bgm.mp3');
+    this._bgm = new Audio('assets/audio/bgm_select.mp3');
     this._bgm.loop = true;
-    this._bgm.volume = this.volume * 0.4; // BGM 音量較低
+    this._bgm.volume = this.volume * 0.4;
   };
 
   // 開始播放背景音樂（需用戶互動後呼叫）

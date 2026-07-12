@@ -408,6 +408,9 @@
     this._applyLevelBg();
     this.ui.updateLevelName(this._getLevelDisplayName());
     this.audio.playAmbient(this.levelManager.getCurrent().name);
+    // 切換到關卡 BGM（從角色選擇 BGM 切出）
+    var startBgm = this.levelManager.getCurrent().bgm || 'assets/audio/bgm.mp3';
+    this.audio.switchBGM(startBgm);
 
     requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
   };
