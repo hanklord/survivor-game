@@ -80,14 +80,15 @@
         var angle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
 
         // 執行刺擊
-        var thrustHits = this._doThrust(angle, targets, hits);
+        this._doThrust(angle, targets, hits);
+        var firstVisual = this._visual; // 保存第一支視覺
 
         // Lv15+：雙刺（第二支隨機方向）
         if (this.level >= 15) {
           var randomAngle = Math.random() * Math.PI * 2;
           this._doThrust(randomAngle, targets, hits);
-          // 視覺加入第二支
-          this._visual2 = { angle: randomAngle, progress: 0, range: this.range };
+          this._visual2 = this._visual; // 第二支視覺
+          this._visual = firstVisual;   // 恢復第一支
         }
 
         // 觸發攻擊動畫
@@ -131,13 +132,13 @@
       }
     }
 
-    // Lv5+：震退效果（在刺擊終點產生 AOE）
+    // Lv5+：震退效果（從玩家位置產生 AOE）
     if (this.level >= 5 && hitAny) {
-      var shockX = this.player.x + Math.cos(angle) * this.range;
-      var shockY = this.player.y + Math.sin(angle) * this.range;
-      console.log('[Valkyrie] Shockwave at', shockX.toFixed(0), shockY.toFixed(0), 'level:', this.level);
+      var shockX = this.player.x;
+      var shockY = this.player.y;
+      console.log('[Valkyrie] Shockwave at player', shockX.toFixed(0), shockY.toFixed(0));
       this._shockwaves.push({ x: shockX, y: shockY, progress: 0 });
-      // 震退判定
+      // 震退判定（玩家周圍 80px）
       var knockDmg = Math.round(this.damage * KNOCKBACK_DAMAGE_MULT);
       for (var i = 0; i < targets.length; i++) {
         var t = targets[i];
@@ -148,7 +149,7 @@
           this._lastHits.push({ x: t.x, y: t.y, dmg: knockDmg });
           if (t.hp <= 0) { hits.push(t); continue; }
           // Knockback 推開（方向：從玩家指向敵人，向外推）
-          var ka = Math.atan2(t.y - this.player.y, t.x - this.player.x);
+          var ka = Math.atan2(t.y - shockY, t.x - shockX);
           t.x += Math.cos(ka) * KNOCKBACK_FORCE;
           t.y += Math.sin(ka) * KNOCKBACK_FORCE;
         }
