@@ -154,7 +154,6 @@
       }
     }
   };
-  };
 
   ValkyrieAttack.prototype.getVisual = function() {
     return {
