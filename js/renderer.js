@@ -238,37 +238,60 @@
     }
     // 女武神長槍貫通視覺
     if (state.valkyrieVisual) {
-      var vv = state.valkyrieVisual;
-      var vAlpha = 1 - vv.progress;
-      ctx.save();
-      ctx.translate(state.player.x, state.player.y);
-      ctx.rotate(vv.angle);
-      ctx.globalAlpha = vAlpha;
-      var spearImg = this.images.spear_attack;
-      if (spearImg) {
-        // 用 sprite 圖片，沿攻擊方向延伸
-        var drawW = vv.range * 1.3;
-        var drawH = drawW * (spearImg.height / spearImg.width);
-        ctx.drawImage(spearImg, 0, -drawH / 2, drawW, drawH);
-      } else {
-        // fallback: 三角形
-        var extendLen = vv.range * Math.min(1, vv.progress * 4 + 0.3);
-        ctx.fillStyle = 'rgba(220,230,255,0.9)';
-        ctx.beginPath();
-        ctx.moveTo(extendLen, 0);
-        ctx.lineTo(extendLen - 20, -10);
-        ctx.lineTo(extendLen - 20, 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(200,220,255,' + (vAlpha * 0.7).toFixed(2) + ')';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(20, 0);
-        ctx.lineTo(extendLen - 20, 0);
-        ctx.stroke();
+      var vvData = state.valkyrieVisual;
+      var self = this;
+      // 繪製單支刺擊
+      function drawThrust(vv) {
+        if (!vv) return;
+        var vAlpha = 1 - vv.progress;
+        ctx.save();
+        ctx.translate(state.player.x, state.player.y);
+        ctx.rotate(vv.angle);
+        ctx.globalAlpha = vAlpha;
+        var spearImg = self.images.spear_attack;
+        if (spearImg) {
+          var drawW = vv.range * 1.3;
+          var drawH = drawW * (spearImg.height / spearImg.width);
+          ctx.drawImage(spearImg, 0, -drawH / 2, drawW, drawH);
+        } else {
+          var extendLen = vv.range * Math.min(1, vv.progress * 4 + 0.3);
+          ctx.fillStyle = 'rgba(220,230,255,0.9)';
+          ctx.beginPath();
+          ctx.moveTo(extendLen, 0);
+          ctx.lineTo(extendLen - 20, -10);
+          ctx.lineTo(extendLen - 20, 10);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(200,220,255,' + (vAlpha * 0.7).toFixed(2) + ')';
+          ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(extendLen - 20, 0); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
       }
-      ctx.globalAlpha = 1;
-      ctx.restore();
+      drawThrust(vvData.thrust);
+      drawThrust(vvData.thrust2);
+      // 震退波
+      if (vvData.shockwaves) {
+        for (var si = 0; si < vvData.shockwaves.length; si++) {
+          var sw = vvData.shockwaves[si];
+          var swAlpha = (1 - sw.progress) * 0.6;
+          var swRadius = 80 * sw.progress;
+          ctx.save();
+          ctx.globalAlpha = swAlpha;
+          ctx.strokeStyle = 'rgba(220,230,255,0.8)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, swRadius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, swRadius * 0.6, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
     }
     // 弓箭投射物
     if (state.archerVisual) {
