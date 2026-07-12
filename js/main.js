@@ -116,6 +116,7 @@
 
     this._selectedCharacter = null;
     this._archerAttack = null;
+    this._valkyrieAttack = null;
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
     this._eliteSpawner = new SG.EliteSpawner(null);
@@ -274,6 +275,8 @@
     load('archer_sprite_run', 'assets/strips/archer_run_8f.png');
     load('knight_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
     load('knight_sprite_run', 'assets/strips/golden_knight_run_8f.png');
+    load('valkyrie_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
+    load('valkyrie_sprite_run', 'assets/strips/golden_knight_run_8f.png');
     load('shield_icon', 'assets/shield_icon.png');
     load('slash_effect', 'assets/strips/slash_effect_4f.png');
     // 載入各關卡背景圖
@@ -351,6 +354,13 @@
       this.player.speed *= 0.85; // 移速稍慢
       this._meleeAttack = new SG.MeleeAttack(this.player);
       this._meleeAttack.damage = Math.round(this._meleeAttack.damage * 2.5); // 騎士攻擊力 ×2.5
+      this._archerAttack = null;
+    } else if (this._selectedCharacter.id === 'valkyrie') {
+      var valkCfg = { sprites: { idle: { file: 'assets/strips/golden_knight_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/golden_knight_run_8f.png', fps: 10 } } };
+      this.player.animator = this._buildAnimator('valkyrie', valkCfg);
+      this.player.spriteDefaultRight = true;
+      this._valkyrieAttack = new SG.ValkyrieAttack(this.player);
+      this._meleeAttack = null;
       this._archerAttack = null;
     } else if (this._selectedCharacter.id === 'archer') {
       var archerCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_run_8f.png', fps: 10 } } };
@@ -453,6 +463,7 @@
       xpGems: this.xpGems,
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
+      valkyrieVisual: this._valkyrieAttack ? this._valkyrieAttack.getVisual() : null,
       meleeIsKnight: this._selectedCharacter && this._selectedCharacter.id === 'knight',
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
@@ -502,8 +513,13 @@
     for (var i = 0; i < this.enemies.length; i++) this.spatialHash.insert(this.enemies[i]);
     for (var i = 0; i < this.bosses.length; i++) this.spatialHash.insert(this.bosses[i]);
 
-    // 自動射擊（遠程角色）/ 近戰斬擊（近戰角色）
-    if (this.player.attackType === 'melee' && this._meleeAttack) {
+    // 自動射擊（遠程角色）/ 近戰斬擊（近戰角色）/ 女武神貫通
+    if (this.player.attackType === 'valkyrie' && this._valkyrieAttack) {
+      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses);
+      for (var i = 0; i < valkHits.length; i++) this._handleKill(valkHits[i]);
+      var vhits = this._valkyrieAttack.getLastHits();
+      for (var i = 0; i < vhits.length; i++) if (!this._lowQuality) this._damageNumbers.add(vhits[i].x, vhits[i].y, vhits[i].dmg, false);
+    } else if (this.player.attackType === 'melee' && this._meleeAttack) {
       var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
       var mhits = this._meleeAttack.getLastHits();
@@ -857,7 +873,7 @@
       self._levelUpPending = false;
       self.ui.showLevelUp(self.player, self.weaponManager, self.skillTree, function() {
         self.levelingUp = false;
-      }, self._meleeAttack, self._archerAttack, self._passiveItems);
+      }, self._meleeAttack, self._archerAttack, self._passiveItems, self._valkyrieAttack);
     }, 1500); // 1.3s + 0.2s
   };
 

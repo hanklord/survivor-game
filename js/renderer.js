@@ -236,6 +236,36 @@
       ctx.globalAlpha = 1;
       ctx.restore();
     }
+    // 女武神長槍貫通視覺
+    if (state.valkyrieVisual) {
+      var vv = state.valkyrieVisual;
+      var vAlpha = 1 - vv.progress;
+      ctx.save();
+      ctx.translate(state.player.x, state.player.y);
+      ctx.rotate(vv.angle);
+      ctx.globalAlpha = vAlpha;
+      // 三角形箭頭延伸
+      var extendLen = vv.range * Math.min(1, vv.progress * 4 + 0.3);
+      ctx.fillStyle = 'rgba(220,230,255,0.9)';
+      ctx.shadowColor = '#aaccff';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(extendLen, 0);
+      ctx.lineTo(extendLen - 20, -10);
+      ctx.lineTo(extendLen - 20, 10);
+      ctx.closePath();
+      ctx.fill();
+      // 直線軌跡
+      ctx.strokeStyle = 'rgba(200,220,255,' + (vAlpha * 0.7).toFixed(2) + ')';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(20, 0);
+      ctx.lineTo(extendLen - 20, 0);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
     // 弓箭投射物
     if (state.archerVisual) {
       var arrows = state.archerVisual;

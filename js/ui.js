@@ -112,7 +112,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -157,6 +157,12 @@
       if (ea.level < 15) pool.push({ name: '💥 爆炸箭 Lv' + ea.level, action: function() { archerAttack.getExplosiveArrow().upgrade(); } });
       var pa = archerAttack.getPiercingArrow();
       if (pa.level < 15) pool.push({ name: '🔱 貫通箭 Lv' + pa.level, action: function() { archerAttack.getPiercingArrow().upgrade(); } });
+    }
+
+    // 女武神專屬
+    if (valkyrieAttack && valkyrieAttack.level < 15) {
+      pool.push({ name: '🔱 戳刺頻率+ Lv' + valkyrieAttack.level, action: function() { valkyrieAttack.upgrade('rate'); } });
+      pool.push({ name: '🔱 戳刺距離+ Lv' + valkyrieAttack.level, action: function() { valkyrieAttack.upgrade('range'); } });
     }
 
     // 被動道具
