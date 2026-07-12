@@ -645,7 +645,6 @@
     if (player.animator && player.animator.isLoaded()) {
       player.animator.draw(ctx, player.x, player.y, ps, player.facingLeft, player.spriteWidthRatio);
     } else if (this.images.player) {
-      // 靜態圖左右翻轉
       if (player.facingLeft) {
         ctx.save();
         ctx.translate(player.x, player.y);
@@ -656,12 +655,31 @@
         ctx.drawImage(this.images.player, player.x - ps / 2, player.y - ps / 2, ps, ps);
       }
     } else {
-      // 幾何 fallback
       ctx.fillStyle = player.invuln > 0 ? PLAYER_HIT_COLOR : PLAYER_COLOR;
       ctx.shadowColor = PLAYER_COLOR;
       ctx.shadowBlur = 0;
       ctx.beginPath(); ctx.arc(player.x, player.y, ps / 2, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
+    }
+
+    // 刷光效果（白色光帶掃過）
+    var shineTime = (Date.now() / 1000) % 3.5;
+    var shineDuration = 0.35;
+    if (shineTime < shineDuration) {
+      var t = shineTime / shineDuration; // 0→1
+      var bandW = ps * 0.3;
+      var offset = (t - 0.5) * ps * 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(player.x - ps / 2, player.y - ps / 2, ps, ps);
+      ctx.clip();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = '#ffffff';
+      ctx.translate(player.x + offset, player.y);
+      ctx.rotate(-0.6);
+      ctx.fillRect(-bandW / 2, -ps, bandW, ps * 2);
+      ctx.restore();
     }
     // 撿取範圍圓圈
     ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
