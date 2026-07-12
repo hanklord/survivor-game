@@ -169,7 +169,7 @@
     this._drawEnemies(state.enemies, camX, camY);
     this._drawBosses(state.bosses, camX, camY);
     this._drawProjectiles(state.projectiles, camX, camY);
-    this._drawPlayer(player);
+    this._drawPlayer(player, state.hardcoreLevel || 0);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
     // 近戰揮砍視覺（綁定角色位置的紫色弧形斬擊）
     if (state.meleeVisual) {
@@ -639,14 +639,17 @@
     }
   };
 
-  Renderer.prototype._drawPlayer = function(player) {
+  Renderer.prototype._drawPlayer = function(player, hardcoreLevel) {
     var ctx = this.ctx;
     var ps = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * (player.scale || 1.0);
 
-    // 刷光計算
+    // 刷光計算（僅 Hardcore 模式）
     var shineTime = (Date.now() / 1000) % 3.5;
     var shineDuration = 0.35;
-    var doShine = shineTime < shineDuration;
+    var doShine = hardcoreLevel > 0 && shineTime < shineDuration;
+    var shineColor = '#ffffff';
+    if (hardcoreLevel === 2) shineColor = '#ffd700';
+    else if (hardcoreLevel >= 3) shineColor = '#b450ff';
 
     // 使用離屏 canvas 繪製角色 + 刷光（source-atop 限制在不透明區域）
     if (doShine && player.animator && player.animator.isLoaded()) {
@@ -664,7 +667,7 @@
       // source-atop：刷光只出現在不透明像素上
       octx.globalCompositeOperation = 'source-atop';
       octx.globalAlpha = 0.4;
-      octx.fillStyle = '#ffffff';
+      octx.fillStyle = shineColor;
       var t = shineTime / shineDuration;
       var bandW = ps * 0.3;
       var offset = (t - 0.5) * ps * 2;

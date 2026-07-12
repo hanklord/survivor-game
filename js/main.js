@@ -482,6 +482,7 @@
       bombReady: this._bomb.ready,
       levelUpEffect: this._levelUpEffect,
       hardcoreVFX: this._hardcoreVFX,
+      hardcoreLevel: this.hardcoreLevel,
       dt: dt
     });
 
