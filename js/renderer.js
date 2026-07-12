@@ -244,25 +244,29 @@
       ctx.translate(state.player.x, state.player.y);
       ctx.rotate(vv.angle);
       ctx.globalAlpha = vAlpha;
-      // 三角形箭頭延伸
-      var extendLen = vv.range * Math.min(1, vv.progress * 4 + 0.3);
-      ctx.fillStyle = 'rgba(220,230,255,0.9)';
-      ctx.shadowColor = '#aaccff';
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.moveTo(extendLen, 0);
-      ctx.lineTo(extendLen - 20, -10);
-      ctx.lineTo(extendLen - 20, 10);
-      ctx.closePath();
-      ctx.fill();
-      // 直線軌跡
-      ctx.strokeStyle = 'rgba(200,220,255,' + (vAlpha * 0.7).toFixed(2) + ')';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(20, 0);
-      ctx.lineTo(extendLen - 20, 0);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      var spearImg = this.images.spear_attack;
+      if (spearImg) {
+        // 用 sprite 圖片，沿攻擊方向延伸
+        var drawW = vv.range * 1.3;
+        var drawH = drawW * (spearImg.height / spearImg.width);
+        ctx.drawImage(spearImg, 0, -drawH / 2, drawW, drawH);
+      } else {
+        // fallback: 三角形
+        var extendLen = vv.range * Math.min(1, vv.progress * 4 + 0.3);
+        ctx.fillStyle = 'rgba(220,230,255,0.9)';
+        ctx.beginPath();
+        ctx.moveTo(extendLen, 0);
+        ctx.lineTo(extendLen - 20, -10);
+        ctx.lineTo(extendLen - 20, 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(200,220,255,' + (vAlpha * 0.7).toFixed(2) + ')';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(20, 0);
+        ctx.lineTo(extendLen - 20, 0);
+        ctx.stroke();
+      }
       ctx.globalAlpha = 1;
       ctx.restore();
     }

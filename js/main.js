@@ -277,6 +277,7 @@
     load('knight_sprite_run', 'assets/strips/golden_knight_run_8f.png');
     load('valkyrie_sprite_idle', 'assets/strips/valkyrie_idle_6f.png');
     load('valkyrie_sprite_run', 'assets/strips/valkyrie_run_6f.png');
+    load('spear_attack', 'assets/strips/spear_attack.png');
     load('shield_icon', 'assets/shield_icon.png');
     load('slash_effect', 'assets/strips/slash_effect_4f.png');
     // 載入各關卡背景圖
