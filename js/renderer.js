@@ -275,19 +275,19 @@
       if (vvData.shockwaves) {
         for (var si = 0; si < vvData.shockwaves.length; si++) {
           var sw = vvData.shockwaves[si];
-          var swAlpha = (1 - sw.progress) * 0.6;
-          var swRadius = 80 * sw.progress;
+          var swAlpha = (1 - sw.progress) * 0.9;
+          var swRadius = 80 * (0.2 + sw.progress * 0.8); // 從 20% 開始擴張
           ctx.save();
           ctx.globalAlpha = swAlpha;
-          ctx.strokeStyle = 'rgba(220,230,255,0.8)';
-          ctx.lineWidth = 3;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 4;
           ctx.beginPath();
           ctx.arc(sw.x, sw.y, swRadius, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = 'rgba(200,220,255,0.6)';
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.arc(sw.x, sw.y, swRadius * 0.6, 0, Math.PI * 2);
+          ctx.arc(sw.x, sw.y, swRadius * 0.5, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
         }

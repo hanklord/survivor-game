@@ -146,8 +146,8 @@
           t.hp -= knockDmg;
           this._lastHits.push({ x: t.x, y: t.y, dmg: knockDmg });
           if (t.hp <= 0) { hits.push(t); continue; }
-          // Knockback 推開
-          var ka = Math.atan2(t.y - shockY, t.x - shockX);
+          // Knockback 推開（方向：從玩家指向敵人，向外推）
+          var ka = Math.atan2(t.y - this.player.y, t.x - this.player.x);
           t.x += Math.cos(ka) * KNOCKBACK_FORCE;
           t.y += Math.sin(ka) * KNOCKBACK_FORCE;
         }
