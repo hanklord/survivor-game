@@ -275,8 +275,8 @@
     load('archer_sprite_run', 'assets/strips/archer_run_8f.png');
     load('knight_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
     load('knight_sprite_run', 'assets/strips/golden_knight_run_8f.png');
-    load('valkyrie_sprite_idle', 'assets/strips/golden_knight_idle_4f.png');
-    load('valkyrie_sprite_run', 'assets/strips/golden_knight_run_8f.png');
+    load('valkyrie_sprite_idle', 'assets/strips/valkyrie_idle_6f.png');
+    load('valkyrie_sprite_run', 'assets/strips/valkyrie_run_6f.png');
     load('shield_icon', 'assets/shield_icon.png');
     load('slash_effect', 'assets/strips/slash_effect_4f.png');
     // 載入各關卡背景圖
@@ -356,7 +356,7 @@
       this._meleeAttack.damage = Math.round(this._meleeAttack.damage * 2.5); // 騎士攻擊力 ×2.5
       this._archerAttack = null;
     } else if (this._selectedCharacter.id === 'valkyrie') {
-      var valkCfg = { sprites: { idle: { file: 'assets/strips/golden_knight_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/golden_knight_run_8f.png', fps: 10 } } };
+      var valkCfg = { sprites: { idle: { file: 'assets/strips/valkyrie_idle_6f.png', fps: 8 }, run: { file: 'assets/strips/valkyrie_run_6f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('valkyrie', valkCfg);
       this.player.spriteDefaultRight = true;
       this._valkyrieAttack = new SG.ValkyrieAttack(this.player);
