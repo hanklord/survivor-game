@@ -160,9 +160,10 @@
     }
 
     // 女武神專屬
-    if (valkyrieAttack && valkyrieAttack.level < 15) {
-      pool.push({ name: '🔱 戳刺頻率+ Lv' + valkyrieAttack.level, action: function() { valkyrieAttack.upgrade('rate'); } });
-      pool.push({ name: '🔱 戳刺距離+ Lv' + valkyrieAttack.level, action: function() { valkyrieAttack.upgrade('range'); } });
+    if (valkyrieAttack && valkyrieAttack.level < 20) {
+      var nextType = valkyrieAttack.getNextUpgradeType();
+      var desc = nextType === 'range' ? '距離延長' : '頻率提升';
+      pool.push({ name: '🔱 長槍強化 Lv.' + (valkyrieAttack.level + 1) + ' (' + desc + ')', action: function() { valkyrieAttack.upgrade(); } });
     }
 
     // 被動道具
@@ -189,6 +190,12 @@
     } else if (player.attackType === 'archer') {
       for (var bi = 0; bi < pool.length; bi++) {
         if (pool[bi].name.indexOf('弓術精進') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
+    } else if (player.attackType === 'valkyrie') {
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('長槍強化') >= 0) {
           baseSkill = pool.splice(bi, 1)[0]; break;
         }
       }

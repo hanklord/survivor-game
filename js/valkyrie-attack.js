@@ -16,14 +16,26 @@
     this.timer = 0;
     this._visual = null; // { angle, progress, range }
     this._lastHits = [];
-    this.level = 1;
+    this.level = 0; // 升級前為 0，升級後 1~20
+    this._rangeUps = 0; // 距離升級次數（最多 3）
   }
 
-  ValkyrieAttack.prototype.upgrade = function(type) {
+  // 取得下一次升級類型
+  ValkyrieAttack.prototype.getNextUpgradeType = function() {
+    var nextLv = this.level + 1;
+    // Lv2, Lv4, Lv6 為距離（且距離未滿 3 次）
+    if ((nextLv === 2 || nextLv === 4 || nextLv === 6) && this._rangeUps < 3) return 'range';
+    return 'rate';
+  };
+
+  ValkyrieAttack.prototype.upgrade = function() {
+    if (this.level >= 20) return;
+    var type = this.getNextUpgradeType();
     if (type === 'rate') {
-      this.cd = Math.max(0.3, this.cd - 0.06);
-    } else if (type === 'range') {
-      this.range += 40;
+      this.cd = Math.max(0.2, this.cd - 0.03);
+    } else {
+      this.range += 50;
+      this._rangeUps++;
     }
     this.level++;
   };
