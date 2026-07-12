@@ -14,10 +14,12 @@
     this.range = BASE_RANGE;
     this.damage = BASE_DAMAGE;
     this.timer = 0;
-    this._visual = null; // { angle, progress, range }
+    this._visual = null;
+    this._visual2 = null;
+    this._shockwaves = [];
     this._lastHits = [];
-    this.level = 0; // 升級前為 0，升級後 1~20
-    this._rangeUps = 0; // 距離升級次數（最多 3）
+    this.level = 0;
+    this._rangeUps = 0;
   }
 
   // 取得下一次升級類型
@@ -56,7 +58,7 @@
     // 更新震退波視覺
     if (this._shockwaves) {
       for (var si = this._shockwaves.length - 1; si >= 0; si--) {
-        this._shockwaves[si].progress += dt / 0.3;
+        this._shockwaves[si].progress += dt / 0.4;
         if (this._shockwaves[si].progress >= 1) this._shockwaves.splice(si, 1);
       }
     }
@@ -133,8 +135,7 @@
     if (this.level >= 5 && hitAny) {
       var shockX = this.player.x + Math.cos(angle) * this.range;
       var shockY = this.player.y + Math.sin(angle) * this.range;
-      // 震退波視覺
-      if (!this._shockwaves) this._shockwaves = [];
+      console.log('[Valkyrie] Shockwave at', shockX.toFixed(0), shockY.toFixed(0), 'level:', this.level);
       this._shockwaves.push({ x: shockX, y: shockY, progress: 0 });
       // 震退判定
       var knockDmg = Math.round(this.damage * KNOCKBACK_DAMAGE_MULT);
