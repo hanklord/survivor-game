@@ -642,7 +642,42 @@
   Renderer.prototype._drawPlayer = function(player) {
     var ctx = this.ctx;
     var ps = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * (player.scale || 1.0);
-    if (player.animator && player.animator.isLoaded()) {
+
+    // 刷光計算
+    var shineTime = (Date.now() / 1000) % 3.5;
+    var shineDuration = 0.35;
+    var doShine = shineTime < shineDuration;
+
+    // 使用離屏 canvas 繪製角色 + 刷光（source-atop 限制在不透明區域）
+    if (doShine && player.animator && player.animator.isLoaded()) {
+      var size = Math.ceil(ps) + 4;
+      if (!this._playerOffscreen || this._playerOffscreen.width !== size) {
+        this._playerOffscreen = document.createElement('canvas');
+        this._playerOffscreen.width = size;
+        this._playerOffscreen.height = size;
+      }
+      var oc = this._playerOffscreen;
+      var octx = oc.getContext('2d');
+      octx.clearRect(0, 0, size, size);
+      // 繪製角色到離屏
+      player.animator.draw(octx, size / 2, size / 2, ps, player.facingLeft, player.spriteWidthRatio);
+      // source-atop：刷光只出現在不透明像素上
+      octx.globalCompositeOperation = 'source-atop';
+      octx.globalAlpha = 0.4;
+      octx.fillStyle = '#ffffff';
+      var t = shineTime / shineDuration;
+      var bandW = ps * 0.3;
+      var offset = (t - 0.5) * ps * 2;
+      octx.save();
+      octx.translate(size / 2 + offset, size / 2);
+      octx.rotate(-0.6);
+      octx.fillRect(-bandW / 2, -ps, bandW, ps * 2);
+      octx.restore();
+      octx.globalCompositeOperation = 'source-over';
+      octx.globalAlpha = 1;
+      // 畫到主 canvas
+      ctx.drawImage(oc, player.x - size / 2, player.y - size / 2);
+    } else if (player.animator && player.animator.isLoaded()) {
       player.animator.draw(ctx, player.x, player.y, ps, player.facingLeft, player.spriteWidthRatio);
     } else if (this.images.player) {
       if (player.facingLeft) {
@@ -660,26 +695,6 @@
       ctx.shadowBlur = 0;
       ctx.beginPath(); ctx.arc(player.x, player.y, ps / 2, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
-    }
-
-    // 刷光效果（白色光帶掃過）
-    var shineTime = (Date.now() / 1000) % 3.5;
-    var shineDuration = 0.35;
-    if (shineTime < shineDuration) {
-      var t = shineTime / shineDuration; // 0→1
-      var bandW = ps * 0.3;
-      var offset = (t - 0.5) * ps * 2;
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(player.x - ps / 2, player.y - ps / 2, ps, ps);
-      ctx.clip();
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = '#ffffff';
-      ctx.translate(player.x + offset, player.y);
-      ctx.rotate(-0.6);
-      ctx.fillRect(-bandW / 2, -ps, bandW, ps * 2);
-      ctx.restore();
     }
     // 撿取範圍圓圈
     ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
