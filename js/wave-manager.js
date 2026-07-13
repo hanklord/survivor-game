@@ -32,14 +32,22 @@
     // 只生成當前關卡指定的 Boss
     var indices = bossIndices || [];
 
-    // 檢查是否該顯示預警
+    // 檢查是否該顯示預警或直接生成
     for (var k = 0; k < indices.length; k++) {
       var i = indices[k];
       if (i >= bossConfigs.length) continue;
       var bc = bossConfigs[i];
-      if (!this.spawnedBosses[i] && !this.bossWarning && gameTime >= bc.spawnTime - BOSS_WARNING_TIME && gameTime < bc.spawnTime) {
-        this.bossWarning = { idx: i, time: BOSS_WARNING_TIME };
+      if (this.spawnedBosses[i] || this.bossWarning) continue;
+      if (gameTime >= bc.spawnTime - BOSS_WARNING_TIME && gameTime < bc.spawnTime) {
+        // 正常預警窗口
+        this.bossWarning = { idx: i, time: Math.max(0.1, bc.spawnTime - gameTime) };
         result.showWarning = true;
+        console.log('[Boss] Warning for boss', i, 'at time', gameTime.toFixed(1));
+      } else if (gameTime >= bc.spawnTime) {
+        // 超過生成時間但還沒生成（窗口被跳過）→ 立即生成
+        result.boss = SG.Boss.spawn(i, this.imgConfig, player, W, H);
+        this.spawnedBosses[i] = true;
+        console.log('[Boss] Immediate spawn boss', i, 'at time', gameTime.toFixed(1));
       }
     }
 
