@@ -3,7 +3,7 @@
   window.SG = window.SG || {};
 
   var BASE_CD = 0.8;
-  var BASE_RANGE = 200;
+  var BASE_RANGE = 80;
   var BASE_DAMAGE = 20;
   var THRUST_WIDTH = 30; // 判定寬度
   var VISUAL_DURATION = 0.2; // 特效持續時間
