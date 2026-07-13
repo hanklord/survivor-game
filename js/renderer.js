@@ -535,6 +535,37 @@
         ctx.restore();
       }
     }
+
+    // Boss 血條 HUD（畫面頂部中央）
+    if (state.activeBoss) {
+      var ab = state.activeBoss;
+      var bossNames = ['紫龍','大猩猩','甲蟲騎士','龍騎','骷髏王','牛頭怪','暗法師','機械龍','史萊姆王','暗黑巨龍'];
+      var bName = bossNames[ab.cfgIdx] || ('Boss ' + (ab.cfgIdx + 1));
+      var barW = W * 0.55;
+      var barH = 10;
+      var barX = (W - barW) / 2;
+      var barY = 36;
+      var hpRatio = Math.max(0, ab.hp / ab.maxHp);
+      // 名稱
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👹 ' + bName, W / 2, barY - 6);
+      ctx.textAlign = 'left';
+      // 血條背景
+      ctx.fillStyle = '#333';
+      ctx.fillRect(barX, barY, barW, barH);
+      // 血條
+      var grad = ctx.createLinearGradient(barX, barY, barX + barW * hpRatio, barY);
+      grad.addColorStop(0, '#ff2222');
+      grad.addColorStop(1, '#ff6644');
+      ctx.fillStyle = grad;
+      ctx.fillRect(barX, barY, barW * hpRatio, barH);
+      // 邊框
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(barX, barY, barW, barH);
+    }
   };
 
   // 背景層繪製（分層 canvas）

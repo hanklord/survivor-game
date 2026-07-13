@@ -554,6 +554,7 @@
       ultimateReady: this._ultimateReady,
       ultimateFlash: this._ultimateFlash,
       fireExplosions: this._fireExplosions || [],
+      activeBoss: this.bosses.length > 0 ? this.bosses[0] : null,
       bombProgress: this._bomb.getProgress(),
       bombReady: this._bomb.ready,
       levelUpEffect: this._levelUpEffect,
