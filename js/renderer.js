@@ -429,13 +429,31 @@
       ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
     }
 
-    // 炸彈充能進度（右下角）
-    if (state.bombProgress !== undefined) {
-      var bx = camX + W - 50, by = camY + H - 50;
-      ctx.beginPath(); ctx.arc(bx, by, 22, 0, Math.PI * 2);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 4; ctx.stroke();
-      ctx.beginPath(); ctx.arc(bx, by, 22, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * state.bombProgress);
-      ctx.strokeStyle = state.bombReady ? '#ff4400' : '#ff8800'; ctx.lineWidth = 4; ctx.stroke();
+    // 絕招集氣視覺（角色下方環形 + 滿氣金光）
+    if (state.ultimateCharge !== undefined && state.player) {
+      var ux = state.player.x, uy = state.player.y;
+      var pScale = state.player.scale || 1;
+      var pSize = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * pScale;
+      // 環形進度條（角色腳下）
+      var ringY = uy + pSize / 2 + 6;
+      var ringR = 14;
+      ctx.beginPath(); ctx.arc(ux, ringY, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(100,100,100,0.5)'; ctx.lineWidth = 3; ctx.stroke();
+      if (state.ultimateCharge > 0) {
+        ctx.beginPath(); ctx.arc(ux, ringY, ringR, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * state.ultimateCharge);
+        ctx.strokeStyle = state.ultimateReady ? '#ffd700' : '#ffaa00'; ctx.lineWidth = 3; ctx.stroke();
+      }
+      // 滿氣金光脈動
+      if (state.ultimateReady) {
+        var pulse = (Math.sin(Date.now() / 200) * 0.5 + 0.5); // 0~1 快速脈動
+        ctx.save();
+        ctx.globalAlpha = 0.2 + pulse * 0.3;
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 20 + pulse * 15;
+        ctx.beginPath(); ctx.arc(ux, uy, pSize / 2 + 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
     }
 
     ctx.globalAlpha = 1;

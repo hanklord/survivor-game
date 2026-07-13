@@ -88,18 +88,37 @@
     this.input._onSkipLevel = function() { self._debugSkipLevel(); };
     this.input._onDebugLevelUp = function() { self._debugLevelUp(); };
     this._resize();
-    // 炸彈按鈕
-    var bombBtn = document.getElementById("bomb-btn");
+    // 絕招：點擊角色施放（集氣滿時）
     var self2 = this;
-    var doBomb = function(e) {
-      if (e) e.preventDefault();
-      if (!self2._bomb || !self2._bomb.ready) return;
-      var killed = self2._bomb.activate(self2.enemies);
-      for (var i = 0; i < killed.length; i++) self2._handleKill(killed[i]);
-      self2.enemies = [];
+    this._ultimateCharge = 0; // 0~1
+    this._ultimateReady = false;
+    this._ultimateKillsNeeded = 30; // 擊殺 30 隻集滿
+    var doUltimate = function(e) {
+      if (!self2._ultimateReady || self2.gameOver || self2.paused) return;
+      // 檢查點擊位置是否在角色附近
+      var rect = self2.canvas.getBoundingClientRect();
+      var cx = (e.clientX - rect.left) * (self2.W / rect.width);
+      var cy = (e.clientY - rect.top) * (self2.H / rect.height);
+      // 轉為世界座標
+      var camX = self2.player.x - self2.W / 2;
+      var camY = self2.player.y - self2.H / 2;
+      var wx = cx + camX, wy = cy + camY;
+      var dist = Math.sqrt((wx - self2.player.x) * (wx - self2.player.x) + (wy - self2.player.y) * (wy - self2.player.y));
+      if (dist < 60) {
+        // 施放絕招
+        var killed = self2._bomb.activate(self2.enemies);
+        for (var i = 0; i < killed.length; i++) self2._handleKill(killed[i]);
+        self2.enemies = [];
+        self2._ultimateCharge = 0;
+        self2._ultimateReady = false;
+      }
     };
-    bombBtn.onclick = doBomb;
-    bombBtn.addEventListener("touchend", doBomb);
+    this.canvas.addEventListener('click', doUltimate);
+    this.canvas.addEventListener('touchend', function(e) {
+      if (e.changedTouches && e.changedTouches[0]) {
+        doUltimate({ clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY });
+      }
+    });
     window.addEventListener('resize', function() { self._resize(); });
 
     // 首次互動解鎖音頻 + 播放 BGM
@@ -488,6 +507,8 @@
       fps: this._currentFps,
       comboVisual: this._combo.getVisual(),
       bombFlash: this._bomb.isFlashing(),
+      ultimateCharge: this._ultimateCharge,
+      ultimateReady: this._ultimateReady,
       bombProgress: this._bomb.getProgress(),
       bombReady: this._bomb.ready,
       levelUpEffect: this._levelUpEffect,
@@ -770,6 +791,11 @@
     this.kills++;
     this._combo.addKill();
     this.audio.playEnemyDeath();
+    // 絕招集氣
+    if (this._ultimateCharge < 1) {
+      this._ultimateCharge = Math.min(1, this._ultimateCharge + 1 / this._ultimateKillsNeeded);
+      if (this._ultimateCharge >= 1) this._ultimateReady = true;
+    }
   };
 
   // 玩家受傷（含護甲、閃避、反射）
