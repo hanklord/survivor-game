@@ -197,10 +197,9 @@
   // 除錯：按 N 跳關
   Game.prototype._debugSkipLevel = function() {
     if (this.gameOver || this.levelClearing) return;
-    // 清除所有 Boss
+    // 清除所有 Boss 並設定擊殺數為 2 觸發過關
     this.bosses = [];
-    // 設定時間超過 duration 觸發過關
-    this.levelManager.levelTime = this.levelManager.getCurrent().duration + 1;
+    this.levelManager.bossKills = 2;
     console.log('[DEBUG] Skip level → next');
   };
 
