@@ -86,6 +86,7 @@
       self.ui.updateMute(enabled);
     };
     this.input._onSkipLevel = function() { self._debugSkipLevel(); };
+    this.input._onDebugLevelUp = function() { self._debugLevelUp(); };
     this._resize();
     // 炸彈按鈕
     var bombBtn = document.getElementById("bomb-btn");
@@ -180,6 +181,15 @@
     // 設定時間超過 duration 觸發過關
     this.levelManager.levelTime = this.levelManager.getCurrent().duration + 1;
     console.log('[DEBUG] Skip level → next');
+  };
+
+  // 除錯：按 L 立即升一級
+  Game.prototype._debugLevelUp = function() {
+    if (this.gameOver || this.levelingUp || this._levelUpPending) return;
+    this.player.level++;
+    this.player.xpNeeded = 5 + this.player.level * 3;
+    console.log('[DEBUG] Level up → Lv.' + this.player.level);
+    this._showLevelUp();
   };
 
   Game.prototype._setupSettings = function() {

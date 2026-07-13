@@ -21,6 +21,7 @@
       if (e.code === 'Escape' && self._onPause) self._onPause();
       if (e.code === 'KeyM' && self._onMute) self._onMute();
       if (e.code === 'KeyN' && self._onSkipLevel) self._onSkipLevel(); // 除錯：跳關
+      if (e.code === 'KeyL' && self._onDebugLevelUp) self._onDebugLevelUp(); // 除錯：升級
     });
     document.addEventListener('keyup', function(e) {
       self.keys[e.code] = false;
