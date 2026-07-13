@@ -5,7 +5,6 @@
   var MAX_STACK = 5;
 
   var PASSIVES = [
-    { id: 'speed', name: '👟 移速+10%', icon: '👟', effect: function(p) { p.speed *= 1.1; } },
     { id: 'pickup', name: '🧲 拾取範圍+30%', icon: '🧲', effect: function(p) { p.pickupRange *= 1.3; } },
     { id: 'xpBonus', name: '⭐ 經驗+20%', icon: '⭐', effect: function(p) { p.xpMultiplier = (p.xpMultiplier || 1) * 1.2; } },
     { id: 'armor', name: '🛡️ 護甲+2', icon: '🛡️', effect: function(p) { p.armor = (p.armor || 0) + 2; } },

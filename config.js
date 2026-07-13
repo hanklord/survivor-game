@@ -1,5 +1,6 @@
-window.GAME_VERSION = "V200";
+window.GAME_VERSION = "V201";
 window.HARDCORE_HP_MULTIPLIER = 3.0;
+window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.GAME_CONFIG = {
   "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/mage_idle_4f.png", "fps": 6 }, "run": { "file": "assets/strips/mage_run_4f.png", "fps": 10 } }, "size": 66 },
   "enemies": [

@@ -831,6 +831,9 @@
   Game.prototype._onLevelClear = function() {
     var self = this;
     this.levelClearing = true;
+    // 通關回血
+    var healAmount = this.player.maxHp * (window.LEVEL_CLEAR_HEAL_PERCENT || 0.5);
+    this.player.hp = Math.min(this.player.hp + healAmount, this.player.maxHp);
     var levelName = this.levelManager.getCurrent().name;
 
     if (!this.levelManager.nextLevel()) {
