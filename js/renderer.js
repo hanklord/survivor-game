@@ -169,7 +169,7 @@
     this._drawEnemies(state.enemies, camX, camY);
     this._drawBosses(state.bosses, camX, camY);
     this._drawProjectiles(state.projectiles, camX, camY);
-    this._drawPlayer(player, state.hardcoreLevel || 0);
+    this._drawPlayer(player, state.hardcoreLevel || 0, state.ultimateReady);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
     // 近戰揮砍視覺（綁定角色位置的紫色弧形斬擊）
     if (state.meleeVisual) {
@@ -429,30 +429,18 @@
       ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
     }
 
-    // 絕招集氣視覺（角色下方環形 + 滿氣金光）
+    // 絕招集氣視覺（環繞角色 + 滿氣金光限非透明像素）
     if (state.ultimateCharge !== undefined && state.player) {
       var ux = state.player.x, uy = state.player.y;
       var pScale = state.player.scale || 1;
       var pSize = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * pScale;
-      // 環形進度條（角色腳下）
-      var ringY = uy + pSize / 2 + 6;
-      var ringR = 14;
-      ctx.beginPath(); ctx.arc(ux, ringY, ringR, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(100,100,100,0.5)'; ctx.lineWidth = 3; ctx.stroke();
+      var ringR = pSize * 0.65; // 環繞角色（1.3 倍半徑）
+      // 環形進度條（包圍角色）
+      ctx.beginPath(); ctx.arc(ux, uy, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(100,100,100,0.4)'; ctx.lineWidth = 3; ctx.stroke();
       if (state.ultimateCharge > 0) {
-        ctx.beginPath(); ctx.arc(ux, ringY, ringR, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * state.ultimateCharge);
+        ctx.beginPath(); ctx.arc(ux, uy, ringR, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * state.ultimateCharge);
         ctx.strokeStyle = state.ultimateReady ? '#ffd700' : '#ffaa00'; ctx.lineWidth = 3; ctx.stroke();
-      }
-      // 滿氣金光脈動
-      if (state.ultimateReady) {
-        var pulse = (Math.sin(Date.now() / 200) * 0.5 + 0.5); // 0~1 快速脈動
-        ctx.save();
-        ctx.globalAlpha = 0.2 + pulse * 0.3;
-        ctx.fillStyle = '#ffd700';
-        ctx.shadowColor = '#ffd700';
-        ctx.shadowBlur = 20 + pulse * 15;
-        ctx.beginPath(); ctx.arc(ux, uy, pSize / 2 + 5, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
       }
     }
 
@@ -657,7 +645,7 @@
     }
   };
 
-  Renderer.prototype._drawPlayer = function(player, hardcoreLevel) {
+  Renderer.prototype._drawPlayer = function(player, hardcoreLevel, ultimateReady) {
     var ctx = this.ctx;
     var ps = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * (player.scale || 1.0);
 
@@ -669,8 +657,12 @@
     if (hardcoreLevel === 2) shineColor = '#ffd700';
     else if (hardcoreLevel >= 3) shineColor = '#b450ff';
 
-    // 使用離屏 canvas 繪製角色 + 刷光（source-atop 限制在不透明區域）
-    if (doShine && player.animator && player.animator.isLoaded()) {
+    // 滿氣金光脈動
+    var doGlow = !!ultimateReady;
+    var glowPulse = doGlow ? (Math.sin(Date.now() / 200) * 0.5 + 0.5) : 0;
+
+    // 需要離屏 canvas 的情況：刷光 或 滿氣金光
+    if ((doShine || doGlow) && player.animator && player.animator.isLoaded()) {
       var size = Math.ceil(ps) + 4;
       if (!this._playerOffscreen || this._playerOffscreen.width !== size) {
         this._playerOffscreen = document.createElement('canvas');
@@ -684,16 +676,25 @@
       player.animator.draw(octx, size / 2, size / 2, ps, player.facingLeft, player.spriteWidthRatio);
       // source-atop：刷光只出現在不透明像素上
       octx.globalCompositeOperation = 'source-atop';
-      octx.globalAlpha = 0.4;
-      octx.fillStyle = shineColor;
-      var t = shineTime / shineDuration;
-      var bandW = ps * 0.3;
-      var offset = (t - 0.5) * ps * 2;
-      octx.save();
-      octx.translate(size / 2 + offset, size / 2);
-      octx.rotate(-0.6);
-      octx.fillRect(-bandW / 2, -ps, bandW, ps * 2);
-      octx.restore();
+      // 刷光（Hardcore）
+      if (doShine) {
+        octx.globalAlpha = 0.4;
+        octx.fillStyle = shineColor;
+        var t = shineTime / shineDuration;
+        var bandW = ps * 0.3;
+        var offset = (t - 0.5) * ps * 2;
+        octx.save();
+        octx.translate(size / 2 + offset, size / 2);
+        octx.rotate(-0.6);
+        octx.fillRect(-bandW / 2, -ps, bandW, ps * 2);
+        octx.restore();
+      }
+      // 滿氣金光（source-atop: 只在角色不透明像素上）
+      if (doGlow) {
+        octx.globalAlpha = 0.15 + glowPulse * 0.25;
+        octx.fillStyle = '#ffd700';
+        octx.fillRect(0, 0, size, size);
+      }
       octx.globalCompositeOperation = 'source-over';
       octx.globalAlpha = 1;
       // 畫到主 canvas
