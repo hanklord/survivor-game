@@ -235,6 +235,32 @@
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
       ctx.restore();
+
+      // 背後揮砍視覺（Lv13+）
+      if (mv.backSlash && state.meleeIsKnight && slashImg) {
+        var bs = mv.backSlash;
+        var bsAlpha = Math.min(1, (1 - bs.progress) * 1.5);
+        ctx.save();
+        ctx.translate(mv.x, mv.y);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = bsAlpha;
+        var bsFacing = (Math.abs(bs.angle) > Math.PI / 2);
+        if (bsFacing) ctx.scale(-1, 1);
+        var bsVP = bs.progress * (4 - 1);
+        var bsA = Math.min(Math.floor(bsVP), 3);
+        var bsB = Math.min(bsA + 1, 3);
+        var bsBlend = bsVP - bsA;
+        var bsFW = slashImg.width / 4;
+        var bsFH = slashImg.height;
+        var bsDS = mv.range * 1.2;
+        ctx.globalAlpha = bsAlpha * (1 - bsBlend);
+        ctx.drawImage(slashImg, bsA * bsFW, 0, bsFW, bsFH, -bsDS * 0.2, -bsDS / 2, bsDS, bsDS);
+        if (bsBlend > 0.01 && bsB !== bsA) {
+          ctx.globalAlpha = bsAlpha * bsBlend;
+          ctx.drawImage(slashImg, bsB * bsFW, 0, bsFW, bsFH, -bsDS * 0.2, -bsDS / 2, bsDS, bsDS);
+        }
+        ctx.restore();
+      }
     }
     // 女武神長槍貫通視覺
     if (state.valkyrieVisual) {
@@ -544,14 +570,8 @@
       var barW = W * 0.55;
       var barH = 10;
       var barX = (W - barW) / 2;
-      var barY = 36;
+      var barY = 46;
       var hpRatio = Math.max(0, ab.hp / ab.maxHp);
-      // 名稱
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 13px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('👹 ' + bName, W / 2, barY - 6);
-      ctx.textAlign = 'left';
       // 血條背景
       ctx.fillStyle = '#333';
       ctx.fillRect(barX, barY, barW, barH);
@@ -561,10 +581,15 @@
       grad.addColorStop(1, '#ff6644');
       ctx.fillStyle = grad;
       ctx.fillRect(barX, barY, barW * hpRatio, barH);
-      // 邊框
       ctx.strokeStyle = '#888';
       ctx.lineWidth = 1;
       ctx.strokeRect(barX, barY, barW, barH);
+      // 名稱在血條下方
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👹 ' + bName, W / 2, barY + barH + 14);
+      ctx.textAlign = 'left';
     }
   };
 

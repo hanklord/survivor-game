@@ -59,16 +59,9 @@
 
   // 更新 HUD
   UI.prototype.updateHUD = function(player, gameTime, kills) {
-    this.els.hpFill.style.width = (player.hp / player.maxHp * 100) + '%';
-    this.els.hpText.textContent = Math.ceil(player.hp) + '/' + player.maxHp;
-    this.els.xpFill.style.width = (player.xp / player.xpNeeded * 100) + '%';
-    this.els.timer.textContent = SG.formatTime(gameTime);
-    this.els.level.textContent = player.level;
-    this.els.kills.textContent = kills;
-    // 玩家數值
-    var statsEl = document.getElementById('player-stats');
+    var statsEl = document.getElementById('hud-stats');
     if (statsEl) {
-      statsEl.textContent = '⚔️' + Math.round(player.damage) + ' 🛡️' + (player.armor || 0) + ' 👟' + Math.round(player.speed);
+      statsEl.innerHTML = 'Lv.' + player.level + '<br>💀 ' + kills + '<br>⚔️ ' + Math.round(player.damage) + '<br>🛡️ ' + (player.armor || 0) + '<br>👟 ' + Math.round(player.speed);
     }
   };
 

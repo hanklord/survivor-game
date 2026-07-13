@@ -14,8 +14,10 @@
     this.damage = BASE_DAMAGE;
     this.cd = BASE_CD;
     this.timer = 0;
-    this._activeHitbox = null; // { timer, angle, hitIds }
+    this._activeHitbox = null;
+    this._activeHitbox2 = null; // 背後揮砍
     this._lastHits = [];
+    this.level = 0;
   }
 
   MeleeAttack.prototype.update = function(dt, enemies, bosses) {
@@ -48,6 +50,30 @@
       if (this._activeHitbox.timer <= 0) this._activeHitbox = null;
     }
 
+    // 背後揮砍判定（Lv13+）
+    if (this._activeHitbox2) {
+      this._activeHitbox2.timer -= dt;
+      var targets2 = enemies.concat(bosses);
+      var backAngle = this.player.facingLeft ? 0 : Math.PI; // 反方向
+      for (var i2 = 0; i2 < targets2.length; i2++) {
+        var t2 = targets2[i2];
+        if (t2.hp <= 0 || this._activeHitbox2.hitIds[t2.id]) continue;
+        var d2 = SG.dist(this.player, t2);
+        if (d2 > this.range + t2.size / 2) continue;
+        var a2 = Math.atan2(t2.y - this.player.y, t2.x - this.player.x);
+        var diff2 = a2 - backAngle;
+        while (diff2 > Math.PI) diff2 -= Math.PI * 2;
+        while (diff2 < -Math.PI) diff2 += Math.PI * 2;
+        if (Math.abs(diff2) <= ARC_ANGLE) {
+          t2.hp -= this.damage;
+          this._activeHitbox2.hitIds[t2.id] = true;
+          this._lastHits.push({ x: t2.x, y: t2.y, dmg: this.damage });
+          if (t2.hp <= 0) hits.push(t2);
+        }
+      }
+      if (this._activeHitbox2.timer <= 0) this._activeHitbox2 = null;
+    }
+
     // 攻擊冷卻
     this.timer -= dt;
     if (this.timer <= 0 && !this._activeHitbox) {
@@ -55,6 +81,10 @@
       if (targets.length > 0) {
         this.timer = this.cd;
         this._activeHitbox = { timer: HITBOX_DURATION, hitIds: {} };
+        // Lv13+：10% 機率背後揮砍
+        if (this.level >= 13 && Math.random() < 0.1) {
+          this._activeHitbox2 = { timer: HITBOX_DURATION, hitIds: {} };
+        }
       }
     }
 
@@ -63,22 +93,29 @@
 
   MeleeAttack.prototype.upgradeRate = function() {
     this.cd = Math.max(0.2, this.cd - 0.05);
+    this.level++;
   };
 
   MeleeAttack.prototype.upgradeRange = function() {
     this.range += 20;
+    this.level++;
   };
 
   MeleeAttack.prototype.getVisual = function() {
     if (!this._activeHitbox) return null;
     var angle = this.player.facingLeft ? Math.PI : 0;
-    return {
+    var v = {
       x: this.player.x,
       y: this.player.y,
       angle: angle,
       range: this.range,
-      progress: 1 - (this._activeHitbox.timer / HITBOX_DURATION)
+      progress: 1 - (this._activeHitbox.timer / HITBOX_DURATION),
+      backSlash: null
     };
+    if (this._activeHitbox2) {
+      v.backSlash = { angle: this.player.facingLeft ? 0 : Math.PI, progress: 1 - (this._activeHitbox2.timer / HITBOX_DURATION) };
+    }
+    return v;
   };
 
   MeleeAttack.prototype.getLastHits = function() {
