@@ -755,6 +755,7 @@
         this.xpGems.push(gem);
       }
       this._removeFrom(this.bosses, e);
+      this.levelManager.onBossKill(); // 追蹤 Boss 擊殺數
       // Boss 擊敗特效：畫面震動 + 吸取所有經驗
       this.renderer.shake(0.5, 12);
       this._magnetDelay = 0.5;

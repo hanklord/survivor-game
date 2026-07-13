@@ -13,10 +13,11 @@
     this.levels = (config && config.levels) || DEFAULT_LEVELS;
     this.currentLevel = 0;
     this.levelTime = 0;
-    this.completed = false;    // 全部通關
-    this.levelCleared = false; // 本關已通關（等待結算）
+    this.completed = false;
+    this.levelCleared = false;
     this.showingClear = false;
     this.clearTimer = 0;
+    this.bossKills = 0; // 本關擊殺 Boss 數
   }
 
   // 取得目前關卡設定
@@ -24,18 +25,21 @@
     return this.levels[this.currentLevel] || this.levels[0];
   };
 
-  // 更新關卡計時，回傳事件
   LevelManager.prototype.update = function(dt, bossesAlive) {
     if (this.completed || this.levelCleared) return null;
     this.levelTime += dt;
-    var level = this.getCurrent();
 
-    // 通關條件：存活到指定時間 且 Boss 全滅
-    if (this.levelTime >= level.duration && bossesAlive === 0) {
+    // 通關條件：擊殺 2 隻 Boss
+    if (this.bossKills >= 2) {
       this.levelCleared = true;
       return 'level_clear';
     }
     return null;
+  };
+
+  // Boss 被擊殺時呼叫
+  LevelManager.prototype.onBossKill = function() {
+    this.bossKills++;
   };
 
   // 進入下一關，回傳 false 表示已無下一關（全通關）
@@ -43,6 +47,7 @@
     this.currentLevel++;
     this.levelTime = 0;
     this.levelCleared = false;
+    this.bossKills = 0;
     if (this.currentLevel >= this.levels.length) {
       this.completed = true;
       return false;
