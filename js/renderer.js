@@ -316,6 +316,25 @@
         ctx.restore();
       }
     }
+    // 弓箭手火焰區域
+    if (state.archerFireZones && state.archerFireZones.length > 0) {
+      for (var fzi = 0; fzi < state.archerFireZones.length; fzi++) {
+        var fz = state.archerFireZones[fzi];
+        if (!this._isVisible(fz.x, fz.y, camX, camY, CULL_MARGIN)) continue;
+        var fzAlpha = Math.min(1, fz.life / 0.5) * 0.5; // 最後 0.5s 淡出
+        ctx.save();
+        ctx.globalAlpha = fzAlpha;
+        ctx.fillStyle = '#ff4400';
+        ctx.shadowColor = '#ff6600';
+        ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(fz.x, fz.y, 45, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffaa00';
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = fzAlpha * 0.7;
+        ctx.beginPath(); ctx.arc(fz.x, fz.y, 25, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
     // 爆炸箭視覺
     if (state.explosiveVisual) {
       var ev = state.explosiveVisual;

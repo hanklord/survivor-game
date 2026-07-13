@@ -541,6 +541,7 @@
       valkyrieVisual: this._valkyrieAttack ? this._valkyrieAttack.getVisual() : null,
       meleeIsKnight: this._selectedCharacter && this._selectedCharacter.id === 'knight',
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
+      archerFireZones: this._archerAttack ? this._archerAttack.getFireZones() : [],
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
       eliteVisuals: this._eliteSpawner.getVisuals(),
       piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,

@@ -8,6 +8,12 @@
   var ARROW_RANGE = 400;
   var SPREAD_ANGLE = 0.15; // 每支額外箭的角度偏移（rad）
 
+  var ARCHER_FIRE_CHANCE = 0.3;
+  var ARCHER_FIRE_DURATION = 2.0;
+  var ARCHER_FIRE_DAMAGE_RATIO = 0.3;
+  var ARCHER_FIRE_TICK = 0.5;
+  var ARCHER_FIRE_RADIUS = 45;
+
   function ArcherAttack(player) {
     this.player = player;
     this.cd = BASE_CD;
@@ -17,6 +23,7 @@
     this.arrows = [];
     this._lastHits = [];
     this._firedThisFrame = false;
+    this._fireZones = []; // 燃燒區域
     this.level = 1;
   }
 
@@ -93,16 +100,46 @@
           this._lastHits.push({ x: t.x, y: t.y, dmg: ar.damage });
           if (t.hp <= 0) hits.push(t);
           hit = true;
+          // Lv13+：火焰附加（30% 機率）
+          if (this.level >= 13 && Math.random() < ARCHER_FIRE_CHANCE) {
+            this._fireZones.push({ x: t.x, y: t.y, life: ARCHER_FIRE_DURATION, tickTimer: 0, dmg: Math.round(ar.damage * ARCHER_FIRE_DAMAGE_RATIO) });
+          }
           break;
         }
       }
       if (hit) this.arrows.splice(i, 1);
     }
+
+    // 更新燃燒區域 DOT
+    for (var fi = this._fireZones.length - 1; fi >= 0; fi--) {
+      var fz = this._fireZones[fi];
+      fz.life -= dt;
+      if (fz.life <= 0) { this._fireZones.splice(fi, 1); continue; }
+      fz.tickTimer += dt;
+      if (fz.tickTimer >= ARCHER_FIRE_TICK) {
+        fz.tickTimer = 0;
+        var allT = enemies.concat(bosses);
+        for (var fi2 = 0; fi2 < allT.length; fi2++) {
+          var ft = allT[fi2];
+          if (ft.hp <= 0) continue;
+          if (SG.dist(fz, ft) <= ARCHER_FIRE_RADIUS + ft.size / 2) {
+            ft.hp -= fz.dmg;
+            this._lastHits.push({ x: ft.x, y: ft.y, dmg: fz.dmg });
+            if (ft.hp <= 0) hits.push(ft);
+          }
+        }
+      }
+    }
+
     return hits;
   };
 
   ArcherAttack.prototype.getVisual = function() {
     return this.arrows.length > 0 ? this.arrows : null;
+  };
+
+  ArcherAttack.prototype.getFireZones = function() {
+    return this._fireZones;
   };
 
   ArcherAttack.prototype.getLastHits = function() {
