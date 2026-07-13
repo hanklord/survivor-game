@@ -570,7 +570,7 @@
       var barW = W * 0.55;
       var barH = 10;
       var barX = (W - barW) / 2;
-      var barY = 46;
+      var barY = 56;
       var hpRatio = Math.max(0, ab.hp / ab.maxHp);
       // 血條背景
       ctx.fillStyle = '#333';
