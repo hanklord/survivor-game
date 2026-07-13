@@ -489,6 +489,13 @@
     this._levelUpEffect.update(dt);
     this._hardcoreVFX.update(dt);
     if (this._ultimateFlash > 0) this._ultimateFlash = Math.max(0, this._ultimateFlash - dt);
+    // 火球爆炸特效更新
+    if (this._fireExplosions) {
+      for (var fe = this._fireExplosions.length - 1; fe >= 0; fe--) {
+        this._fireExplosions[fe].progress += dt / 0.35;
+        if (this._fireExplosions[fe].progress >= 1) this._fireExplosions.splice(fe, 1);
+      }
+    }
     this.renderer.render({
       player: this.player,
       enemies: this.enemies,
@@ -512,6 +519,7 @@
       ultimateCharge: this._ultimateCharge,
       ultimateReady: this._ultimateReady,
       ultimateFlash: this._ultimateFlash,
+      fireExplosions: this._fireExplosions || [],
       bombProgress: this._bomb.getProgress(),
       bombReady: this._bomb.ready,
       levelUpEffect: this._levelUpEffect,
@@ -612,6 +620,25 @@
           if (!this._lowQuality) this._damageNumbers.add(e.x, e.y, dmg, isCrit);
           hit = true;
           if (e.hp <= 0) this._handleKill(e);
+          // 法師 Lv5+：火球爆炸 AOE（40% 機率）
+          if (this.player.attackType === 'ranged' && this.player.projectileCount >= 5 && Math.random() < 0.4) {
+            var expRadius = 70;
+            var expDmg = Math.round(dmg * 0.5);
+            // 視覺
+            if (!this._fireExplosions) this._fireExplosions = [];
+            this._fireExplosions.push({ x: e.x, y: e.y, progress: 0 });
+            // AOE 傷害
+            var allTargets = this.enemies.concat(this.bosses);
+            for (var ae = 0; ae < allTargets.length; ae++) {
+              var at = allTargets[ae];
+              if (at === e || at.hp <= 0) continue;
+              if (SG.dist(e, at) <= expRadius + at.size / 2) {
+                at.hp -= expDmg;
+                if (!this._lowQuality) this._damageNumbers.add(at.x, at.y, expDmg, false);
+                if (at.hp <= 0) this._handleKill(at);
+              }
+            }
+          }
           break;
         }
       }

@@ -429,6 +429,25 @@
       ctx.fillRect(camX, camY, W, H);
     }
 
+    // 火球爆炸 AOE 視覺
+    if (state.fireExplosions && state.fireExplosions.length > 0) {
+      for (var fi = 0; fi < state.fireExplosions.length; fi++) {
+        var fe = state.fireExplosions[fi];
+        var feAlpha = (1 - fe.progress) * 0.7;
+        var feRadius = 70 * (0.3 + fe.progress * 0.7);
+        ctx.save();
+        ctx.globalAlpha = feAlpha;
+        ctx.fillStyle = '#ff4400';
+        ctx.shadowColor = '#ff6600';
+        ctx.shadowBlur = 15;
+        ctx.beginPath(); ctx.arc(fe.x, fe.y, feRadius, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffaa00';
+        ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.arc(fe.x, fe.y, feRadius * 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+
     // 升級聖光特效
     if (state.levelUpEffect && state.levelUpEffect.active) {
       state.levelUpEffect.draw(ctx, camX, camY, W, H);
