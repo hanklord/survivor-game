@@ -52,12 +52,8 @@
         this.timer = this.cd;
         this._firedThisFrame = true;
         // 瞄準最近敵人
-        var nearest = null, minD = Infinity;
-        for (var k = 0; k < targets.length; k++) {
-          var dd = SG.dist(this.player, targets[k]);
-          if (dd < minD) { minD = dd; nearest = targets[k]; }
-        }
-        var baseAngle = Math.atan2(nearest.y - this.player.y, nearest.x - this.player.x);
+        // 朝玩家移動方向發射（不鎖定敵人）
+        var baseAngle = this.player.facingAngle || 0;
         
         // 扇形發射
         for (var a = 0; a < this.arrowCount; a++) {

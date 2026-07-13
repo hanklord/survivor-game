@@ -623,15 +623,33 @@
     } else {
       this.player.fireTimer -= dt;
       if (this.player.fireTimer <= 0) {
-        var allTargets = this.enemies.concat(this.bosses).sort(function(a, b) {
-          return SG.dist(self.player, a) - SG.dist(self.player, b);
-        });
-        if (allTargets.length) {
-          var bullets = SG.Projectile.fireAtTargets(this.player, allTargets, this.projectilePool);
+        var allTargets = this.enemies.concat(this.bosses);
+        // 法師：只鎖定面朝方向 180° 內的敵人
+        var fAngle = this.player.facingAngle || 0;
+        var halfCircleTargets = [];
+        for (var ti = 0; ti < allTargets.length; ti++) {
+          var t = allTargets[ti];
+          var ta = Math.atan2(t.y - this.player.y, t.x - this.player.x);
+          var diff = ta - fAngle;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          if (Math.abs(diff) <= Math.PI / 2) halfCircleTargets.push(t);
+        }
+        halfCircleTargets.sort(function(a, b) { return SG.dist(self.player, a) - SG.dist(self.player, b); });
+        if (halfCircleTargets.length) {
+          var bullets = SG.Projectile.fireAtTargets(this.player, halfCircleTargets, this.projectilePool);
           for (var i = 0; i < bullets.length; i++) this.projectiles.push(bullets[i]);
           this.player.triggerAttack();
           this.audio.playShoot();
+        } else if (allTargets.length) {
+          // 半圓內沒敵人：朝面朝方向直射
+          var p = this.projectilePool.get();
+          p.init(this.player.x, this.player.y, fAngle, this.player.damage);
+          this.projectiles.push(p);
+          this.player.triggerAttack();
+          this.audio.playShoot();
         }
+        if (halfCircleTargets.length || allTargets.length) this.player.fireTimer = this.player.fireRate;
       }
     }
 
