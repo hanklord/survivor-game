@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V205";
+window.GAME_VERSION = "V206";
 window.HARDCORE_HP_MULTIPLIER = 3.0;
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.GAME_CONFIG = {

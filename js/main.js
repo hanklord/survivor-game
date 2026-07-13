@@ -654,7 +654,7 @@
           hit = true;
           if (e.hp <= 0) this._handleKill(e);
           // 法師 Lv5+：火球爆炸 AOE（40% 機率）
-          if (this.player.attackType === 'ranged' && this.player.projectileCount >= 5 && Math.random() < 0.4) {
+          if (this.player.attackType === 'ranged' && this.player.projectileCount >= 13 && Math.random() < 0.4) {
             var expRadius = 70;
             var expDmg = Math.round(dmg * 0.5);
             // 視覺
