@@ -94,6 +94,8 @@
     this._ultimateReady = false;
     this._ultimateFlash = 0;
     this._ultimateKillsNeeded = 30;
+    this._levelKills = 0; // 本關擊殺數（用於 Boss 觸發）
+    this._bossesSpawnedThisLevel = 0; // 本關已生成 Boss 數
     var doUltimate = function(e) {
       if (!self2._ultimateReady || self2.gameOver || self2.paused) return;
       // 檢查點擊位置是否在角色附近
@@ -195,6 +197,37 @@
   };
 
   // 除錯：按 N 跳關
+  // Boss 生成：基於擊殺數（20 隻出 Boss1，50 隻出 Boss2）
+  Game.prototype._checkBossSpawn = function() {
+    var indices = this.levelManager.getBossIndices();
+    if (this._bossesSpawnedThisLevel >= 2 || indices.length < 2) return;
+
+    var threshold1 = 20, threshold2 = 50;
+    if (this._levelKills >= threshold1 && this._bossesSpawnedThisLevel === 0) {
+      this._spawnBoss(indices[0]);
+      this._bossesSpawnedThisLevel = 1;
+      console.log('[Boss] Spawned boss 1 at', this._levelKills, 'kills');
+    }
+    if (this._levelKills >= threshold2 && this._bossesSpawnedThisLevel === 1) {
+      this._spawnBoss(indices[1]);
+      this._bossesSpawnedThisLevel = 2;
+      console.log('[Boss] Spawned boss 2 at', this._levelKills, 'kills');
+    }
+  };
+
+  Game.prototype._spawnBoss = function(bossIdx) {
+    var boss = SG.Boss.spawn(bossIdx, this.imgConfig, this.player, this.W, this.H);
+    if (!boss) return;
+    boss.animator = this._buildAnimator('boss_' + boss.cfgIdx, (this.imgConfig.bosses || [])[boss.cfgIdx]);
+    var hcMult = this.getHardcoreHPMult();
+    if (hcMult > 1) { boss.hp = Math.round(boss.hp * hcMult); boss.maxHp = boss.hp; }
+    this.bosses.push(boss);
+    this.ui.showBossWarning();
+    this.audio.playBossWarning();
+    var self = this;
+    setTimeout(function() { self.ui.hideBossWarning(); }, 3000);
+  };
+
   Game.prototype._debugSkipLevel = function() {
     if (this.gameOver || this.levelClearing) return;
     // 清除所有 Boss 並設定擊殺數為 2 觸發過關
@@ -730,8 +763,8 @@
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
-    // Boss 排程
-    var bossResult = this.waveManager.updateBoss(dt, this.levelManager.levelTime, this.player, this.W, this.H, this.levelManager.getBossIndices());
+    // Boss 排程（擊殺數觸發：20 隻出第一隻 Boss，50 隻出第二隻）
+    this._checkBossSpawn();
     // Rush Wave
     var rushEvent = this._rushWave.update(dt);
     if (rushEvent === "rush_start") {
@@ -762,22 +795,7 @@
       this.enemies.push(eliteResult.elite);
     }
     if (eliteResult.triggerLevelUp && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
-    // 磁鐵效果：吸取所有 XP
     if (this._eliteSpawner.isMagnetActive()) this._magnetAllXP = true;
-    if (bossResult.showWarning) { this.ui.showBossWarning(); this.audio.playBossWarning(); }
-    if (bossResult.hideWarning) this.ui.hideBossWarning();
-    if (bossResult.boss) {
-      bossResult.boss.animator = this._buildAnimator('boss_' + bossResult.boss.cfgIdx, (this.imgConfig.bosses || [])[bossResult.boss.cfgIdx]);
-      // Hardcore HP 倍率
-      var hcBossMult = this.getHardcoreHPMult();
-      if (hcBossMult > 1) {
-        bossResult.boss.hp = Math.round(bossResult.boss.hp * hcBossMult);
-        bossResult.boss.maxHp = bossResult.boss.hp;
-        console.log('[Hardcore] Boss HP:', bossResult.boss.hp, 'mult:', hcBossMult.toFixed(2));
-      }
-      this.bosses.push(bossResult.boss);
-    }
-    if (this.waveManager.isWarning()) this.ui.updateBossWarningOpacity(this.gameTime);
 
     // 關卡系統
     var levelEvent = this.levelManager.update(dt, this.bosses.length);
@@ -819,6 +837,7 @@
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
     }
     this.kills++;
+    if (!isBoss) this._levelKills++;
     this._combo.addKill();
     this.audio.playEnemyDeath();
     // 絕招集氣
@@ -885,6 +904,8 @@
       // 清場
       self.enemies = [];
       self.bosses = [];
+      self._levelKills = 0;
+      self._bossesSpawnedThisLevel = 0;
       self.waveManager = new SG.WaveManager(self.imgConfig);
     });
   };
@@ -902,6 +923,8 @@
     this.waveManager = new SG.WaveManager(this.imgConfig);
     this.enemies = [];
     this.bosses = [];
+    this._levelKills = 0;
+    this._bossesSpawnedThisLevel = 0;
 
     // 套用背景
     this._applyLevelBg();
