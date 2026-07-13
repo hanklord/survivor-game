@@ -90,9 +90,10 @@
     this._resize();
     // 絕招：點擊角色施放（集氣滿時）
     var self2 = this;
-    this._ultimateCharge = 0; // 0~1
+    this._ultimateCharge = 0;
     this._ultimateReady = false;
-    this._ultimateKillsNeeded = 30; // 擊殺 30 隻集滿
+    this._ultimateFlash = 0;
+    this._ultimateKillsNeeded = 30;
     var doUltimate = function(e) {
       if (!self2._ultimateReady || self2.gameOver || self2.paused) return;
       // 檢查點擊位置是否在角色附近
@@ -111,6 +112,7 @@
         self2.enemies = [];
         self2._ultimateCharge = 0;
         self2._ultimateReady = false;
+        self2._ultimateFlash = 0.5; // 全畫面閃光
       }
     };
     this.canvas.addEventListener('click', doUltimate);
@@ -487,6 +489,7 @@
     // 聖光效果不受遊戲暫停影響，獨立更新
     this._levelUpEffect.update(dt);
     this._hardcoreVFX.update(dt);
+    if (this._ultimateFlash > 0) this._ultimateFlash = Math.max(0, this._ultimateFlash - dt);
     this.renderer.render({
       player: this.player,
       enemies: this.enemies,
@@ -509,6 +512,7 @@
       bombFlash: this._bomb.isFlashing(),
       ultimateCharge: this._ultimateCharge,
       ultimateReady: this._ultimateReady,
+      ultimateFlash: this._ultimateFlash,
       bombProgress: this._bomb.getProgress(),
       bombReady: this._bomb.ready,
       levelUpEffect: this._levelUpEffect,

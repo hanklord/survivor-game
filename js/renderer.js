@@ -417,6 +417,18 @@
       ctx.fillRect(camX, camY, W, H);
     }
 
+    // 大招閃光（0.1s 淡入, 0.4s 淡出）
+    if (state.ultimateFlash > 0) {
+      var flashTotal = 0.5;
+      var elapsed = flashTotal - state.ultimateFlash;
+      var flashAlpha;
+      if (elapsed < 0.1) flashAlpha = (elapsed / 0.1) * 0.8; // 淡入
+      else flashAlpha = (state.ultimateFlash / 0.4) * 0.8;    // 淡出
+      flashAlpha = Math.min(0.8, Math.max(0, flashAlpha));
+      ctx.fillStyle = 'rgba(255,255,230,' + flashAlpha.toFixed(3) + ')';
+      ctx.fillRect(camX, camY, W, H);
+    }
+
     // 升級聖光特效
     if (state.levelUpEffect && state.levelUpEffect.active) {
       state.levelUpEffect.draw(ctx, camX, camY, W, H);
