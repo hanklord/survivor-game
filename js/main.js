@@ -877,8 +877,12 @@
   };
 
   Game.prototype._showLevelUp = function() {
-    if (this._levelUpPending) return; // 防止重複觸發
+    if (this._levelUpPending) return;
     this._levelUpPending = true;
+    // 每升一級攻擊力 ×1.01
+    this.player.damage *= 1.01;
+    if (this._meleeAttack) this._meleeAttack.damage *= 1.01;
+    if (this._valkyrieAttack) this._valkyrieAttack.damage *= 1.01;
     this.audio.playLevelUp();
     // 觸發聖光特效（遊戲不暫停，繼續跑）
     if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y, this.player);

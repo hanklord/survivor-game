@@ -65,6 +65,11 @@
     this.els.timer.textContent = SG.formatTime(gameTime);
     this.els.level.textContent = player.level;
     this.els.kills.textContent = kills;
+    // 玩家數值
+    var statsEl = document.getElementById('player-stats');
+    if (statsEl) {
+      statsEl.textContent = '⚔️' + Math.round(player.damage) + ' 🛡️' + (player.armor || 0) + ' 👟' + Math.round(player.speed);
+    }
   };
 
   // 更新技能圖標顯示
