@@ -34,10 +34,9 @@
     // 動畫相關
     this.animator = null;
     this.facingLeft = false;
-    this.spriteDefaultRight = false;
+    this.spriteDefaultRight = false; // true 表示 sprite 預設面右
     this.spriteWidthRatio = 1.0;
-    this.scale = 1.0;
-    this.facingAngle = 0; // 最後移動方向（弧度）
+    this.scale = 1.0; // 角色顯示縮放（影響渲染和碰撞框）
     this._attackTimer = 0;
   }
 
@@ -47,7 +46,6 @@
       this.x += dir.x * this.speed * dt;
       this.y += dir.y * this.speed * dt;
       if (dir.x !== 0) this.facingLeft = this.spriteDefaultRight ? dir.x < 0 : dir.x > 0;
-      this.facingAngle = Math.atan2(dir.y, dir.x);
       this._moving = true;
     } else {
       this._moving = false;
