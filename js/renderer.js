@@ -520,6 +520,56 @@
       }
     }
 
+    // Debug Hitbox 顯示
+    if (state.debugHitbox) {
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.6;
+      // 玩家 hitbox（綠）
+      ctx.strokeStyle = '#00ff00';
+      ctx.beginPath(); ctx.arc(state.player.x, state.player.y, state.playerHitboxRadius, 0, Math.PI * 2); ctx.stroke();
+      // 敵人 hitbox（紅）
+      ctx.strokeStyle = '#ff0000';
+      for (var di = 0; di < state.enemies.length; di++) {
+        var de = state.enemies[di];
+        ctx.beginPath(); ctx.arc(de.x, de.y, de.size / 2, 0, Math.PI * 2); ctx.stroke();
+      }
+      // Boss hitbox（紅粗）
+      ctx.lineWidth = 2.5;
+      for (var dbi = 0; dbi < state.bosses.length; dbi++) {
+        var db = state.bosses[dbi];
+        ctx.beginPath(); ctx.arc(db.x, db.y, db.size / 2, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.lineWidth = 1.5;
+      // 投射物 hitbox（黃）
+      ctx.strokeStyle = '#ffff00';
+      var dpSize = (this.imgConfig.projectile && this.imgConfig.projectile.size) || 12;
+      for (var dpi = 0; dpi < state.projectiles.length; dpi++) {
+        var dp = state.projectiles[dpi];
+        ctx.beginPath(); ctx.arc(dp.x, dp.y, dpSize / 2, 0, Math.PI * 2); ctx.stroke();
+      }
+      // 近戰判定（藍扇形）
+      if (state.meleeVisual) {
+        var dmv = state.meleeVisual;
+        ctx.strokeStyle = '#4488ff';
+        ctx.beginPath();
+        ctx.arc(dmv.x, dmv.y, dmv.range, dmv.angle - 1.75, dmv.angle + 1.75);
+        ctx.lineTo(dmv.x, dmv.y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      // 女武神刺擊判定（藍長矩形）
+      if (state.valkyrieVisual && state.valkyrieVisual.thrust) {
+        var dvv = state.valkyrieVisual.thrust;
+        ctx.strokeStyle = '#4488ff';
+        ctx.save();
+        ctx.translate(state.player.x, state.player.y);
+        ctx.rotate(dvv.angle);
+        ctx.strokeRect(0, -15, dvv.range, 30);
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+
     ctx.globalAlpha = 1;
     ctx.restore();
 

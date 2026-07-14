@@ -560,6 +560,8 @@
       levelUpEffect: this._levelUpEffect,
       hardcoreVFX: this._hardcoreVFX,
       hardcoreLevel: this.hardcoreLevel,
+      debugHitbox: window.DEBUG_SHOW_HITBOX,
+      playerHitboxRadius: PLAYER_HITBOX * (this.player.scale || 1),
       dt: dt
     });
 
