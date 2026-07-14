@@ -66,6 +66,17 @@
         }
       });
     }
+
+    // Gamepad 連接偵測
+    this._gpA = false;
+    this._gpStart = false;
+    this._onUltimate = null;
+    window.addEventListener('gamepadconnected', function(e) {
+      console.log('[Gamepad] Connected:', e.gamepad.id);
+    });
+    window.addEventListener('gamepaddisconnected', function(e) {
+      console.log('[Gamepad] Disconnected:', e.gamepad.id);
+    });
   };
 
   // 取得目前移動方向（已正規化）
@@ -79,11 +90,47 @@
       dx = this.joystickDir.x;
       dy = this.joystickDir.y;
     }
+    // Gamepad 左搖桿
+    var gp = this._getGamepad();
+    if (gp) {
+      var gpx = gp.axes[0] || 0;
+      var gpy = gp.axes[1] || 0;
+      if (Math.abs(gpx) > 0.15 || Math.abs(gpy) > 0.15) {
+        dx = gpx;
+        dy = gpy;
+      }
+    }
     if (dx || dy) {
       var m = Math.hypot(dx, dy);
       return { x: dx / m, y: dy / m };
     }
     return { x: 0, y: 0 };
+  };
+
+  // Gamepad 按鈕輪詢（每幀呼叫）
+  InputManager.prototype.pollGamepad = function() {
+    var gp = this._getGamepad();
+    if (!gp) return;
+    // A 鍵（按鈕 0）：施放大招
+    if (gp.buttons[0] && gp.buttons[0].pressed && !this._gpA) {
+      this._gpA = true;
+      if (this._onUltimate) this._onUltimate();
+    }
+    if (gp.buttons[0] && !gp.buttons[0].pressed) this._gpA = false;
+    // Start（按鈕 9）：暫停
+    if (gp.buttons[9] && gp.buttons[9].pressed && !this._gpStart) {
+      this._gpStart = true;
+      if (this._onPause) this._onPause();
+    }
+    if (gp.buttons[9] && !gp.buttons[9].pressed) this._gpStart = false;
+  };
+
+  InputManager.prototype._getGamepad = function() {
+    var gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (var i = 0; i < gamepads.length; i++) {
+      if (gamepads[i]) return gamepads[i];
+    }
+    return null;
   };
 
   SG.InputManager = InputManager;

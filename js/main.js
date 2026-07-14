@@ -87,6 +87,15 @@
     };
     this.input._onSkipLevel = function() { self._debugSkipLevel(); };
     this.input._onDebugLevelUp = function() { self._debugLevelUp(); };
+    this.input._onUltimate = function() {
+      if (!self._ultimateReady || self.gameOver || self.paused) return;
+      var killed = self._bomb.activate(self.enemies);
+      for (var i = 0; i < killed.length; i++) self._handleKill(killed[i]);
+      self.enemies = [];
+      self._ultimateCharge = 0;
+      self._ultimateReady = false;
+      self._ultimateFlash = 0.5;
+    };
     this._resize();
     // 絕招：點擊角色施放（集氣滿時）
     var self2 = this;
@@ -521,6 +530,7 @@
     // 聖光效果不受遊戲暫停影響，獨立更新
     this._levelUpEffect.update(dt);
     this._hardcoreVFX.update(dt);
+    this.input.pollGamepad();
     if (this._ultimateFlash > 0) this._ultimateFlash = Math.max(0, this._ultimateFlash - dt);
     // 火球爆炸特效更新
     if (this._fireExplosions) {
