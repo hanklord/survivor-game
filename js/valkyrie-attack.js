@@ -3,9 +3,9 @@
   window.SG = window.SG || {};
 
   var BASE_CD = 0.8;
-  var BASE_RANGE = 80;
+  var BASE_RANGE = 120;
   var BASE_DAMAGE = 20;
-  var THRUST_WIDTH = 30; // 判定寬度
+  var THRUST_WIDTH = 33; // 判定寬度
   var VISUAL_DURATION = 0.2; // 特效持續時間
 
   function ValkyrieAttack(player) {
@@ -44,7 +44,7 @@
 
   var KNOCKBACK_RADIUS = 80;
   var KNOCKBACK_DAMAGE_MULT = 0.25;
-  var KNOCKBACK_FORCE = 150; // px 推開距離
+  var KNOCKBACK_FORCE = 15; // px 推開距離
 
   ValkyrieAttack.prototype.update = function(dt, enemies, bosses) {
     var hits = [];
