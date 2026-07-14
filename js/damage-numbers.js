@@ -48,7 +48,7 @@
       var n = this.numbers[i];
       var alpha = Math.min(1, n.timer / 0.3);
       ctx.globalAlpha = alpha;
-      ctx.font = (n.crit ? 'bold 20px' : '14px') + ' Segoe UI, sans-serif';
+      ctx.font = (n.crit ? 'bold 20px' : '14px') + ' ' + (window.GAME_FONT || 'Cinzel, serif');
       ctx.fillStyle = n.crit ? '#ffdd00' : '#ffffff';
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 2;
