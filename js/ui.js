@@ -63,6 +63,12 @@
     if (statsEl) {
       statsEl.innerHTML = 'Lv.' + player.level + '<br>💀 ' + kills + '<br>⚔️ ' + Math.round(player.damage) + '<br>🛡️ ' + (player.armor || 0) + '<br>👟 ' + Math.round(player.speed);
     }
+    // XP bar
+    var xpFill = document.getElementById('xp-fill');
+    if (xpFill) xpFill.style.width = (player.xp / player.xpNeeded * 100) + '%';
+    // Timer
+    var timerEl = document.getElementById('game-timer');
+    if (timerEl) timerEl.textContent = SG.formatTime(gameTime);
   };
 
   // 更新技能圖標顯示
