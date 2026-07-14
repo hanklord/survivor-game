@@ -344,20 +344,28 @@
     }
     // 弓箭手火焰區域
     if (state.archerFireZones && state.archerFireZones.length > 0) {
+      var fzImg = this.images.fire_zone;
       for (var fzi = 0; fzi < state.archerFireZones.length; fzi++) {
         var fz = state.archerFireZones[fzi];
         if (!this._isVisible(fz.x, fz.y, camX, camY, CULL_MARGIN)) continue;
-        var fzAlpha = Math.min(1, fz.life / 0.5) * 0.5; // 最後 0.5s 淡出
+        var fzAlpha = Math.min(1, fz.life / 0.5) * 0.8;
         ctx.save();
         ctx.globalAlpha = fzAlpha;
-        ctx.fillStyle = '#ff4400';
-        ctx.shadowColor = '#ff6600';
-        ctx.shadowBlur = 10;
-        ctx.beginPath(); ctx.arc(fz.x, fz.y, 45, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffaa00';
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = fzAlpha * 0.7;
-        ctx.beginPath(); ctx.arc(fz.x, fz.y, 25, 0, Math.PI * 2); ctx.fill();
+        if (fzImg) {
+          // Sprite 動畫循環（8 幀，每 0.15s 切幀）
+          var fzFrames = 8;
+          var fzFW = fzImg.width / fzFrames;
+          var fzFH = fzImg.height;
+          var fzElapsed = 2.0 - fz.life; // 已過時間
+          var fzIdx = Math.floor(fzElapsed / 0.15) % fzFrames;
+          var drawSize = 90; // 45px 半徑 = 90px 直徑
+          ctx.drawImage(fzImg, fzIdx * fzFW, 0, fzFW, fzFH, fz.x - drawSize/2, fz.y - drawSize/2, drawSize, drawSize);
+        } else {
+          ctx.fillStyle = '#ff4400';
+          ctx.shadowColor = '#ff6600';
+          ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(fz.x, fz.y, 45, 0, Math.PI * 2); ctx.fill();
+        }
         ctx.restore();
       }
     }
