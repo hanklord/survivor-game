@@ -63,7 +63,7 @@ public class MeleeAttack : MonoBehaviour, IPlayerAttack
         }
 
         // 生成斬擊特效
-        SpawnSlashEffect();
+        SpawnSlashEffect(player.FacingLeft);
     }
 
     private void Update()
@@ -117,12 +117,17 @@ public class MeleeAttack : MonoBehaviour, IPlayerAttack
         }
     }
 
-    private void SpawnSlashEffect()
+    private void SpawnSlashEffect(bool facingLeft = true)
     {
         if (_slashEffectPrefab == null) return;
 
         var effect = Instantiate(_slashEffectPrefab, transform.position, Quaternion.Euler(0, 0, _attackAngle));
-        effect.transform.localScale = Vector3.one * (_currentRange / _baseRange);
+        var tempLocalScale = Vector3.one * (_currentRange / _baseRange);
+        effect.transform.parent = transform;
+        effect.transform.localScale = tempLocalScale;
+        effect.transform.localPosition = facingLeft ? new Vector3(-0.5f, 0, 0) :  new Vector3(0.5f, 0, 0);
+        effect.GetComponent<SpriteAnimatorController>()?.SetState(AnimState.Attack);
+        effect.GetComponent<SpriteAnimatorController>()?.SetFlipY(facingLeft);
         Destroy(effect, _hitboxDuration + 0.1f);
     }
 

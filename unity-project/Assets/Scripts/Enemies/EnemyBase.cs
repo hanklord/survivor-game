@@ -75,7 +75,7 @@ public class EnemyBase : MonoBehaviour
         if (_target == null) return;
 
         Vector2 dir = (_target.position - transform.position).normalized;
-        _rb.velocity = dir * Speed;
+        _rb.linearVelocity = dir * Speed;
 
         // 翻轉面向
         if (_animator != null)
@@ -116,7 +116,7 @@ public class EnemyBase : MonoBehaviour
     public void ApplyKnockback(Vector2 force)
     {
         _knockbackTimer = 0.15f;
-        _rb.velocity = force;
+        _rb.linearVelocity = force;
     }
 
     protected virtual void Die()

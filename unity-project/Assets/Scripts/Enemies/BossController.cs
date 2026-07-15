@@ -67,7 +67,7 @@ public class BossController : MonoBehaviour
         if (_target == null) return;
 
         Vector2 dir = (_target.position - transform.position).normalized;
-        _rb.velocity = dir * Speed;
+        _rb.linearVelocity = dir * Speed;
 
         if (_animator != null)
         {

@@ -15,14 +15,17 @@ public class SpriteAnimatorController : MonoBehaviour
 
     private SpriteRenderer _sr;
     private AnimState _currentState = AnimState.Idle;
+    [SerializeField] private AnimState _defaultState = AnimState.Idle;
     private SpriteAnimationSet _currentAnim;
     private int _currentFrame;
     private float _frameTimer;
+    
 
     private void Awake()
     {
         _sr = GetComponent<SpriteRenderer>();
-        SetState(AnimState.Idle);
+        SetState(AnimState.None);
+        SetState(_defaultState);
     }
 
     private void Update()
@@ -77,6 +80,14 @@ public class SpriteAnimatorController : MonoBehaviour
     {
         _sr.flipX = flip;
     }
+    
+    /// <summary>
+    /// 設定水平翻轉
+    /// </summary>
+    public void SetFlipY(bool flip)
+    {
+        _sr.flipY = flip;
+    }
 
     /// <summary>
     /// 取得當前狀態
@@ -89,6 +100,7 @@ public class SpriteAnimatorController : MonoBehaviour
 /// </summary>
 public enum AnimState
 {
+    None = -1,
     Idle,
     Run,
     Attack

@@ -31,7 +31,7 @@ public class CameraFollow : MonoBehaviour
         if (_target == null) return;
 
         Vector3 desired = _target.position + _offset;
-        Vector3 smoothed = Vector3.Lerp(transform.position, desired, _smoothSpeed * Time.deltaTime);
-        transform.position = smoothed;
+        //Vector3 smoothed = Vector3.Lerp(transform.position, desired, _smoothSpeed * Time.deltaTime);
+        transform.position = desired;
     }
 }

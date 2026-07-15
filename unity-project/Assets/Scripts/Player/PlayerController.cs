@@ -162,7 +162,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void Move()
     {
-        _rb.velocity = _moveDirection * CurrentSpeed;
+        _rb.linearVelocity = _moveDirection * CurrentSpeed;
     }
 
     private void UpdateInvulnerability()
