@@ -81,10 +81,13 @@
       if (targets.length > 0) {
         this.timer = this.cd;
         this._activeHitbox = { timer: HITBOX_DURATION, hitIds: {} };
-        // Lv13+：10% 機率背後揮砍（基於玩家等級）
-        if (this.player.level >= 13 && Math.random() < 0.1) {
-          this._activeHitbox2 = { timer: HITBOX_DURATION, hitIds: {} };
-          console.log('[Knight] Back-slash triggered at player Lv', this.player.level);
+        // Lv13+：30% 機率背後揮砍（基於玩家等級）
+        var backSlashRoll = Math.random();
+        if (this.player.level >= 13) {
+          console.log('[Knight] Lv' + this.player.level + ' backslash roll: ' + backSlashRoll.toFixed(3) + (backSlashRoll < 0.3 ? ' → TRIGGERED' : ' → miss'));
+          if (backSlashRoll < 0.3) {
+            this._activeHitbox2 = { timer: HITBOX_DURATION, hitIds: {} };
+          }
         }
       }
     }

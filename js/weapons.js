@@ -4,7 +4,7 @@
 
   // === 旋轉護盾 (Orbiting Shield) ===
   var SHIELD_ORBIT_RADIUS = 80;
-  var SHIELD_BALL_SIZE = 14;
+  var SHIELD_BALL_SIZE = 49;
   var SHIELD_SPEED = 3; // rad/s
   var SHIELD_DAMAGE = 8;
   var SHIELD_KNOCKBACK = 5;
