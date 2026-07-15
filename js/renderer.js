@@ -526,13 +526,13 @@
       ctx.strokeStyle = '#ff0000';
       for (var di = 0; di < state.enemies.length; di++) {
         var de = state.enemies[di];
-        ctx.beginPath(); ctx.arc(de.x, de.y, de.size / 2, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(de.x, de.y, de.hitboxRadius, 0, Math.PI * 2); ctx.stroke();
       }
       // Boss hitbox（紅粗）
       ctx.lineWidth = 2.5;
       for (var dbi = 0; dbi < state.bosses.length; dbi++) {
         var db = state.bosses[dbi];
-        ctx.beginPath(); ctx.arc(db.x, db.y, db.size / 2, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(db.x, db.y, db.hitboxRadius, 0, Math.PI * 2); ctx.stroke();
       }
       ctx.lineWidth = 1.5;
       // 投射物 hitbox（黃）

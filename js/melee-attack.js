@@ -34,7 +34,7 @@
         var t = targets[i];
         if (t.hp <= 0 || this._activeHitbox.hitIds[t.id]) continue;
         var d = SG.dist(this.player, t);
-        if (d > this.range + t.size / 2) continue;
+        if (d > this.range + t.hitboxRadius) continue;
         // 扇形角度檢查
         var a = Math.atan2(t.y - this.player.y, t.x - this.player.x);
         var diff = a - angle;
@@ -59,7 +59,7 @@
         var t2 = targets2[i2];
         if (t2.hp <= 0 || this._activeHitbox2.hitIds[t2.id]) continue;
         var d2 = SG.dist(this.player, t2);
-        if (d2 > this.range + t2.size / 2) continue;
+        if (d2 > this.range + t2.hitboxRadius) continue;
         var a2 = Math.atan2(t2.y - this.player.y, t2.x - this.player.x);
         var diff2 = a2 - backAngle;
         while (diff2 > Math.PI) diff2 -= Math.PI * 2;

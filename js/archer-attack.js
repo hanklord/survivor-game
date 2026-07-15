@@ -95,7 +95,7 @@
       for (var j = 0; j < targets.length; j++) {
         var t = targets[j];
         if (t.hp <= 0) continue;
-        if (SG.dist(ar, t) < 20 + t.size / 2) {
+        if (SG.dist(ar, t) < 20 + t.hitboxRadius) {
           t.hp -= ar.damage;
           this._lastHits.push({ x: t.x, y: t.y, dmg: ar.damage });
           if (t.hp <= 0) hits.push(t);
@@ -122,7 +122,7 @@
         for (var fi2 = 0; fi2 < allT.length; fi2++) {
           var ft = allT[fi2];
           if (ft.hp <= 0) continue;
-          if (SG.dist(fz, ft) <= ARCHER_FIRE_RADIUS + ft.size / 2) {
+          if (SG.dist(fz, ft) <= ARCHER_FIRE_RADIUS + ft.hitboxRadius) {
             ft.hp -= fz.dmg;
             this._lastHits.push({ x: ft.x, y: ft.y, dmg: fz.dmg });
             if (ft.hp <= 0) hits.push(ft);
@@ -211,7 +211,7 @@
       for (var i = 0; i < targets.length; i++) {
         var t = targets[i];
         if (t.hp <= 0) continue;
-        if (SG.dist(this.arrow, t) < 20 + t.size / 2) {
+        if (SG.dist(this.arrow, t) < 20 + t.hitboxRadius) {
           // 爆炸！
           this.explosion = { x: this.arrow.x, y: this.arrow.y, radius: this.radius, timer: EXPLODE_VISUAL_DURATION };
           // 範圍傷害
@@ -322,7 +322,7 @@
       for (var j = 0; j < targets.length; j++) {
         var t = targets[j];
         if (t.hp <= 0) continue;
-        if (SG.dist(ar, t) < 15 + t.size / 2) {
+        if (SG.dist(ar, t) < 15 + t.hitboxRadius) {
           t.hp -= this.damage;
           if (t.hp <= 0) hits.push(t);
         }

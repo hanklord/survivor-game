@@ -13,6 +13,7 @@
     this.speed = cfg.speed;
     this.damage = cfg.damage;
     this.size = cfg.size || 36;
+    this.hitboxRadius = cfg.hitboxRadius || (this.size / 2);
     this.color = cfg.color || '#ff4444';
     this.cfgIdx = cfgIdx;
     this.type = 'enemy';

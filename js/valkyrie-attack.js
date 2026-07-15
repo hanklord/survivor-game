@@ -121,7 +121,7 @@
       var along = dx * Math.cos(angle) + dy * Math.sin(angle);
       var perp = Math.abs(-dx * Math.sin(angle) + dy * Math.cos(angle));
 
-      if (along > 0 && along <= this.range + t.size / 2 && perp <= THRUST_WIDTH + t.size / 2) {
+      if (along > 0 && along <= this.range + t.hitboxRadius && perp <= THRUST_WIDTH + t.hitboxRadius) {
         t.hp -= this.damage;
         this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
         if (t.hp <= 0) hits.push(t);
@@ -144,7 +144,7 @@
         var t = targets[i];
         if (t.hp <= 0) continue;
         var dist = Math.sqrt((t.x - shockX) * (t.x - shockX) + (t.y - shockY) * (t.y - shockY));
-        if (dist <= KNOCKBACK_RADIUS + t.size / 2) {
+        if (dist <= KNOCKBACK_RADIUS + t.hitboxRadius) {
           t.hp -= knockDmg;
           this._lastHits.push({ x: t.x, y: t.y, dmg: knockDmg });
           if (t.hp <= 0) { hits.push(t); continue; }

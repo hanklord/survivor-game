@@ -33,7 +33,7 @@
         var e = targets[j];
         var key = e.id + '_' + i;
         if (this.hitTimers[key] && this.hitTimers[key] > 0) continue;
-        if (SG.dist({x:sx,y:sy}, e) < (SHIELD_BALL_SIZE / 2 + e.size / 2)) {
+        if (SG.dist({x:sx,y:sy}, e) < (SHIELD_BALL_SIZE / 2 + e.hitboxRadius)) {
           e.hp -= this.damage;
           // 擊退
           var ka = Math.atan2(e.y - this.player.y, e.x - this.player.x);
@@ -183,7 +183,7 @@
     var targets = enemies.concat(bosses);
     for (var i = 0; i < targets.length; i++) {
       var e = targets[i];
-      if (SG.dist(this, e) < (e.size / 2 + 8)) {
+      if (SG.dist(this, e) < (e.hitboxRadius + 8)) {
         e.hp -= this.damage;
         this.active = false;
         // AoE 爆炸

@@ -402,6 +402,7 @@
     this.player = new SG.Player();
     this.player.attackType = this._selectedCharacter.attackType;
     this.player.scale = this._selectedCharacter.scale || 1.0;
+    this.player.hitboxRadius = this._selectedCharacter.hitboxRadius || PLAYER_HITBOX;
     this.meta.applyToPlayer(this.player);
     this._eliteSpawner = new SG.EliteSpawner(this.player);
     this._combo = new SG.ComboSystem();
@@ -572,7 +573,7 @@
       hardcoreVFX: this._hardcoreVFX,
       hardcoreLevel: this.hardcoreLevel,
       debugHitbox: window.DEBUG_SHOW_HITBOX,
-      playerHitboxRadius: PLAYER_HITBOX * (this.player.scale || 1),
+      playerHitboxRadius: this.player.hitboxRadius,
       dt: dt
     });
 
@@ -658,7 +659,7 @@
       for (var j = 0; j < nearby.length; j++) {
         var e = nearby[j];
         if (e.hp <= 0) continue;
-        if (SG.dist(p, e) < (e.size / 2 + pSize / 2)) {
+        if (SG.dist(p, e) < (e.hitboxRadius + pSize / 2)) {
           // 暴擊判定
           var dmg = p.damage * (this.player.damageMultiplier || 1);
           var isCrit = this.player.critChance && Math.random() < this.player.critChance;
@@ -680,7 +681,7 @@
             for (var ae = 0; ae < allTargets.length; ae++) {
               var at = allTargets[ae];
               if (at === e || at.hp <= 0) continue;
-              if (SG.dist(e, at) <= expRadius + at.size / 2) {
+              if (SG.dist(e, at) <= expRadius + at.hitboxRadius) {
                 at.hp -= expDmg;
                 if (!this._lowQuality) this._damageNumbers.add(at.x, at.y, expDmg, false);
                 if (at.hp <= 0) this._handleKill(at);
@@ -707,7 +708,7 @@
       e.moveToward(this.player, dt);
       e.speed = origSpeed;
       e.updateAnimation(dt);
-      if (SG.dist(this.player, e) < (PLAYER_HITBOX * (this.player.scale || 1) + e.size / 2)) {
+      if (SG.dist(this.player, e) < (this.player.hitboxRadius + e.hitboxRadius)) {
         if (this._playerTakeDamage(e.damage, e)) return;
       }
     }
@@ -717,7 +718,7 @@
       var b = this.bosses[i];
       b.moveToward(this.player, dt);
       b.updateAnimation(dt);
-      if (SG.dist(this.player, b) < (PLAYER_HITBOX * (this.player.scale || 1) + b.size / 2)) {
+      if (SG.dist(this.player, b) < (this.player.hitboxRadius + b.hitboxRadius)) {
         if (this._playerTakeDamage(b.damage, b)) return;
       }
     }

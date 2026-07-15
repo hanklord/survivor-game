@@ -10,6 +10,7 @@
     this.speed = cfg.speed;
     this.damage = cfg.damage;
     this.size = cfg.size || 80;
+    this.hitboxRadius = cfg.hitboxRadius || (this.size / 2);
     this.color = cfg.color || '#ff0000';
     this.cfgIdx = cfgIdx;
     this.type = 'boss';
