@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_Sprite: {fileID: -6216381495161891476, guid: 892704e7d1e733049a90f331f8229086, type: 3}
-  m_Color: {r: 0.8, g: 0.6, b: 0.2, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -215,7 +215,7 @@ MonoBehaviour:
   _hitboxDuration: 0.25
   _arcDegrees: 200
   _knockback: 2
-  _slashEffectPrefab: {fileID: 0}
+  _slashEffectPrefab: {fileID: 4420210631251622352, guid: fe66474514d7c6740acbaa81537069ce, type: 3}
 --- !u!114 &8794583309026822081
 MonoBehaviour:
   m_ObjectHideFlags: 0

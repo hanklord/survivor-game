@@ -42,6 +42,20 @@ public class ProjectileController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, angle);
 
         gameObject.SetActive(true);
+
+        // 確保 SpriteRenderer 可見
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null && sr.sprite == null)
+        {
+            // 建立 placeholder sprite
+            var tex = new Texture2D(16, 16);
+            var colors = new Color[16 * 16];
+            for (int i = 0; i < colors.Length; i++) colors[i] = Color.white;
+            tex.SetPixels(colors);
+            tex.Apply();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16);
+            sr.color = new Color(1f, 0.5f, 0f);
+        }
     }
 
     private void Update()
@@ -162,6 +176,8 @@ public static class ProjectileFirer
     private static void SpawnProjectile(Vector3 pos, Vector2 velocity, float damage, float lifetime)
     {
         var proj = GameManager.Instance.PoolManager.GetProjectile();
+        if (proj == null) return;
+
         proj.transform.position = pos;
         proj.Initialize(velocity, damage, lifetime);
     }

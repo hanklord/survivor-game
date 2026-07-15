@@ -224,12 +224,26 @@ public class SceneBuilder : Editor
         var go = new GameObject("Projectile");
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.color = new Color(1f, 0.4f, 0f); // 橘色火球
         sr.sortingOrder = 5;
+
+        // 嘗試載入 projectile sprite
+        var projSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Effects/projectile.png");
+        if (projSprite != null)
+        {
+            sr.sprite = projSprite;
+            sr.color = Color.white;
+        }
+        else
+        {
+            // 無圖時建立 placeholder
+            sr.sprite = CreateCircleSprite();
+            sr.color = new Color(1f, 0.4f, 0f); // 橘色火球
+        }
 
         var rb = go.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0;
         rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
         var col = go.AddComponent<CircleCollider2D>();
         col.radius = 0.12f;
@@ -238,7 +252,29 @@ public class SceneBuilder : Editor
         go.AddComponent<ProjectileController>();
         go.layer = 8; // Projectile layer
 
+        // Projectile HTML size = 24px → scale = 24/86.4 ≈ 0.28
+        go.transform.localScale = Vector3.one * 0.28f;
+
         SavePrefab(go, "Assets/Prefabs/Projectiles/Projectile.prefab");
+    }
+
+    private static Sprite CreateCircleSprite()
+    {
+        int size = 32;
+        var tex = new Texture2D(size, size);
+        float center = size / 2f;
+        float radius = size / 2f - 1;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                tex.SetPixel(x, y, dist <= radius ? Color.white : Color.clear);
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32);
     }
 
     private static void BuildXPGemPrefab()
@@ -283,34 +319,54 @@ public class SceneBuilder : Editor
         // Mage (HTML size 66px, scale=0.76)
         BuildSinglePlayerPrefab("Player_Mage", CharacterType.Mage,
             typeof(MageAttack), typeof(WeaponManager),
-            new Color(0.27f, 0.53f, 1f), 0.76f);
+            new Color(0.27f, 0.53f, 1f), 0.76f,
+            "Assets/Sprites/Characters/mage_idle_4f.png",
+            "Assets/Sprites/Characters/mage_run_4f.png", 6f, 10f);
 
         // Archer (HTML size 66px, scale=0.76)
         BuildSinglePlayerPrefab("Player_Archer", CharacterType.Archer,
             typeof(ArcherAttack), typeof(WeaponManager),
-            new Color(0.2f, 0.8f, 0.2f), 0.76f);
+            new Color(0.2f, 0.8f, 0.2f), 0.76f,
+            "Assets/Sprites/Characters/archer_idle_4f.png",
+            "Assets/Sprites/Characters/archer_run_8f.png", 6f, 10f);
 
         // Knight (HTML size 98px, scale=1.14)
         BuildSinglePlayerPrefab("Player_Knight", CharacterType.Knight,
             typeof(MeleeAttack), typeof(WeaponManager),
-            new Color(0.8f, 0.6f, 0.2f), 1.14f);
+            new Color(0.8f, 0.6f, 0.2f), 1.14f,
+            "Assets/Sprites/Characters/golden_knight_idle_4f.png",
+            "Assets/Sprites/Characters/golden_knight_run_8f.png", 6f, 10f);
 
         // Valkyrie (HTML size 77px, scale=0.89)
         BuildSinglePlayerPrefab("Player_Valkyrie", CharacterType.Valkyrie,
             typeof(ValkyrieAttack), typeof(WeaponManager),
-            new Color(0.9f, 0.3f, 0.9f), 0.89f);
+            new Color(0.9f, 0.3f, 0.9f), 0.89f,
+            "Assets/Sprites/Characters/valkyrie_idle_6f.png",
+            "Assets/Sprites/Characters/valkyrie_run_6f.png", 6f, 10f);
     }
 
     private static void BuildSinglePlayerPrefab(string name, CharacterType type,
-        System.Type attackComponent, System.Type weaponManager, Color color, float scale)
+        System.Type attackComponent, System.Type weaponManager, Color color, float scale,
+        string idleSpritePath, string runSpritePath, float idleFps, float runFps)
     {
         var go = new GameObject(name);
         go.tag = "Player";
         go.layer = 6; // Player layer
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.color = color;
         sr.sortingOrder = 10;
+
+        // 設定第一幀 sprite
+        var idleSprites = SpriteStripImporter.GetSpritesFromStrip(idleSpritePath);
+        if (idleSprites != null && idleSprites.Length > 0)
+        {
+            sr.sprite = idleSprites[0];
+            sr.color = Color.white;
+        }
+        else
+        {
+            sr.color = color;
+        }
 
         var rb = go.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0;
@@ -327,7 +383,149 @@ public class SceneBuilder : Editor
 
         go.transform.localScale = Vector3.one * scale;
 
-        SavePrefab(go, $"Assets/Prefabs/Player/{name}.prefab");
+        string path = $"Assets/Prefabs/Player/{name}.prefab";
+        SavePrefab(go, path);
+
+        // 重新載入 Prefab 設定動畫幀
+        var runSprites = SpriteStripImporter.GetSpritesFromStrip(runSpritePath);
+        if ((idleSprites != null && idleSprites.Length > 0) || (runSprites != null && runSprites.Length > 0))
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            var animator = instance.GetComponent<SpriteAnimatorController>();
+
+            if (animator != null)
+            {
+                var so = new SerializedObject(animator);
+
+                // Idle
+                if (idleSprites != null && idleSprites.Length > 0)
+                {
+                    var idleAnim = so.FindProperty("_idleAnim");
+                    if (idleAnim != null)
+                    {
+                        var frames = idleAnim.FindPropertyRelative("frames");
+                        frames.arraySize = idleSprites.Length;
+                        for (int i = 0; i < idleSprites.Length; i++)
+                            frames.GetArrayElementAtIndex(i).objectReferenceValue = idleSprites[i];
+                        idleAnim.FindPropertyRelative("fps").floatValue = idleFps;
+                    }
+                }
+
+                // Run
+                if (runSprites != null && runSprites.Length > 0)
+                {
+                    var runAnim = so.FindProperty("_runAnim");
+                    if (runAnim != null)
+                    {
+                        var frames = runAnim.FindPropertyRelative("frames");
+                        frames.arraySize = runSprites.Length;
+                        for (int i = 0; i < runSprites.Length; i++)
+                            frames.GetArrayElementAtIndex(i).objectReferenceValue = runSprites[i];
+                        runAnim.FindPropertyRelative("fps").floatValue = runFps;
+                    }
+                }
+
+                so.ApplyModifiedProperties();
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(instance, path);
+            DestroyImmediate(instance);
+        }
+
+        // 連結攻擊特效引用
+        LinkAttackEffectPrefabs(path, attackComponent);
+    }
+
+    private static void LinkAttackEffectPrefabs(string prefabPath, System.Type attackType)
+    {
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        if (prefab == null) return;
+
+        var instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        bool changed = false;
+
+        // MeleeAttack — 需要 SlashEffect
+        if (attackType == typeof(MeleeAttack))
+        {
+            var comp = instance.GetComponent<MeleeAttack>();
+            if (comp != null)
+            {
+                var so = new SerializedObject(comp);
+                var prop = so.FindProperty("_slashEffectPrefab");
+                if (prop != null)
+                {
+                    var fx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Effects/SlashEffect.prefab");
+                    if (fx != null) { prop.objectReferenceValue = fx; changed = true; }
+                }
+                so.ApplyModifiedProperties();
+            }
+        }
+
+        // ValkyrieAttack — 需要 ThrustEffect + ShockwaveEffect
+        if (attackType == typeof(ValkyrieAttack))
+        {
+            var comp = instance.GetComponent<ValkyrieAttack>();
+            if (comp != null)
+            {
+                var so = new SerializedObject(comp);
+
+                var thrustProp = so.FindProperty("_thrustEffectPrefab");
+                if (thrustProp != null)
+                {
+                    var fx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Effects/ThrustEffect.prefab");
+                    if (fx != null) { thrustProp.objectReferenceValue = fx; changed = true; }
+                }
+
+                var shockProp = so.FindProperty("_shockwaveEffectPrefab");
+                if (shockProp != null)
+                {
+                    var fx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Effects/ShockwaveEffect.prefab");
+                    if (fx != null) { shockProp.objectReferenceValue = fx; changed = true; }
+                }
+                so.ApplyModifiedProperties();
+            }
+        }
+
+        // ArcherAttack — 需要 FireZone
+        if (attackType == typeof(ArcherAttack))
+        {
+            var comp = instance.GetComponent<ArcherAttack>();
+            if (comp != null)
+            {
+                var so = new SerializedObject(comp);
+                var prop = so.FindProperty("_fireZonePrefab");
+                if (prop != null)
+                {
+                    var fx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Effects/FireZone.prefab");
+                    if (fx != null) { prop.objectReferenceValue = fx; changed = true; }
+                }
+                so.ApplyModifiedProperties();
+            }
+        }
+
+        // MageAttack — 需要 FireExplosion
+        if (attackType == typeof(MageAttack))
+        {
+            var comp = instance.GetComponent<MageAttack>();
+            if (comp != null)
+            {
+                var so = new SerializedObject(comp);
+                var prop = so.FindProperty("_fireExplosionPrefab");
+                if (prop != null)
+                {
+                    var fx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Effects/ExplosionEffect.prefab");
+                    if (fx != null) { prop.objectReferenceValue = fx; changed = true; }
+                }
+                so.ApplyModifiedProperties();
+            }
+        }
+
+        if (changed)
+        {
+            PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
+        }
+        DestroyImmediate(instance);
     }
 
     private static void BuildEnemyPrefab()
@@ -460,71 +658,206 @@ public class SceneBuilder : Editor
 
     private static void BuildEffectPrefabs()
     {
-        // Slash Effect (近戰)
-        var slash = new GameObject("SlashEffect");
-        var slashSR = slash.AddComponent<SpriteRenderer>();
-        slashSR.color = new Color(0.8f, 0.4f, 1f, 0.7f);
-        slashSR.sortingOrder = 15;
-        SavePrefab(slash, "Assets/Prefabs/Effects/SlashEffect.prefab");
+        // Slash Effect (騎士近戰) — 使用 slash_effect_4f.png 動畫
+        BuildAnimatedEffectPrefab("SlashEffect", "Assets/Sprites/Effects/slash_effect_4f.png",
+            new Color(0.8f, 0.4f, 1f), 15, 0.8f, 12f);
 
-        // Thrust Effect (女武神)
-        var thrust = new GameObject("ThrustEffect");
-        var thrustSR = thrust.AddComponent<SpriteRenderer>();
-        thrustSR.color = new Color(0.4f, 0.8f, 1f, 0.7f);
-        thrustSR.sortingOrder = 15;
-        SavePrefab(thrust, "Assets/Prefabs/Effects/ThrustEffect.prefab");
+        // Thrust Effect (女武神突刺) — 使用 spear_attack.png
+        BuildStaticEffectPrefab("ThrustEffect", "Assets/Sprites/Effects/spear_attack.png",
+            new Color(0.4f, 0.8f, 1f), 15, 0.5f);
 
-        // Shockwave Effect
-        var shock = new GameObject("ShockwaveEffect");
-        var shockSR = shock.AddComponent<SpriteRenderer>();
-        shockSR.color = new Color(1f, 1f, 0.4f, 0.5f);
-        shockSR.sortingOrder = 14;
-        SavePrefab(shock, "Assets/Prefabs/Effects/ShockwaveEffect.prefab");
+        // Shockwave Effect — placeholder 圓形
+        BuildShockwaveEffectPrefab();
 
-        // Nova Effect
+        // Nova Effect — placeholder 圓形
         var nova = new GameObject("NovaEffect");
         var novaSR = nova.AddComponent<SpriteRenderer>();
+        novaSR.sprite = CreateCircleSprite();
         novaSR.color = new Color(0.2f, 0.6f, 1f, 0.5f);
         novaSR.sortingOrder = 14;
+        nova.transform.localScale = Vector3.one * 3f;
         SavePrefab(nova, "Assets/Prefabs/Effects/NovaEffect.prefab");
 
-        // Thunder Effect
+        // Thunder Effect — 細長矩形
         var thunder = new GameObject("ThunderEffect");
         var thunderSR = thunder.AddComponent<SpriteRenderer>();
+        thunderSR.sprite = CreateCircleSprite();
         thunderSR.color = new Color(1f, 1f, 0.2f, 0.9f);
         thunderSR.sortingOrder = 16;
+        thunder.transform.localScale = new Vector3(0.3f, 3f, 1f);
         SavePrefab(thunder, "Assets/Prefabs/Effects/ThunderEffect.prefab");
 
-        // Explosion Effect
-        var explosion = new GameObject("ExplosionEffect");
-        var expSR = explosion.AddComponent<SpriteRenderer>();
-        expSR.color = new Color(1f, 0.5f, 0f, 0.8f);
-        expSR.sortingOrder = 15;
-        SavePrefab(explosion, "Assets/Prefabs/Effects/ExplosionEffect.prefab");
+        // Explosion Effect (Mage 火焰 AOE) — 使用 flame_8f.png 動畫
+        BuildAnimatedEffectPrefab("ExplosionEffect", "Assets/Sprites/Effects/flame_8f.png",
+            new Color(1f, 0.5f, 0f), 15, 1.0f, 16f);
+
+        // FireZone (Archer 火焰區域) — 使用 fire_zone_8f.png 動畫
+        BuildFireZoneWithSprite();
 
         // Magnet Pickup
         var magnet = new GameObject("MagnetPickup");
         var magnetSR = magnet.AddComponent<SpriteRenderer>();
+        magnetSR.sprite = CreateCircleSprite();
         magnetSR.color = new Color(1f, 0f, 0f, 1f);
         magnetSR.sortingOrder = 3;
         var magnetCol = magnet.AddComponent<CircleCollider2D>();
         magnetCol.radius = 0.4f;
         magnetCol.isTrigger = true;
         magnet.AddComponent<MagnetPickup>();
-        magnet.layer = 9; // Pickup
+        magnet.layer = 9;
+        magnet.transform.localScale = Vector3.one * 0.5f;
         SavePrefab(magnet, "Assets/Prefabs/Pickups/MagnetPickup.prefab");
 
         // Treasure Chest
         var chest = new GameObject("TreasureChest");
         var chestSR = chest.AddComponent<SpriteRenderer>();
+        chestSR.sprite = CreateCircleSprite();
         chestSR.color = new Color(1f, 0.85f, 0f, 1f);
         chestSR.sortingOrder = 3;
         var chestCol = chest.AddComponent<CircleCollider2D>();
         chestCol.radius = 0.3f;
         chestCol.isTrigger = true;
         chest.AddComponent<TreasureChest>();
-        chest.layer = 9; // Pickup
+        chest.layer = 9;
+        chest.transform.localScale = Vector3.one * 0.5f;
         SavePrefab(chest, "Assets/Prefabs/Pickups/TreasureChest.prefab");
+
+        // Shield Orbit Ball — 使用 shield_orbit.png
+        BuildStaticEffectPrefab("ShieldBall", "Assets/Sprites/Effects/shield_orbit.png",
+            new Color(0.3f, 0.7f, 1f), 12, 0.4f);
+    }
+
+    private static void BuildAnimatedEffectPrefab(string name, string spritePath, Color fallbackColor, int sortOrder, float scale, float fps)
+    {
+        var go = new GameObject(name);
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = sortOrder;
+        go.transform.localScale = Vector3.one * scale;
+
+        var sprites = SpriteStripImporter.GetSpritesFromStrip(spritePath);
+        if (sprites != null && sprites.Length > 0)
+        {
+            sr.sprite = sprites[0];
+            sr.color = Color.white;
+
+            // 加上動畫元件
+            var animator = go.AddComponent<SpriteAnimatorController>();
+            string path = $"Assets/Prefabs/Effects/{name}.prefab";
+            SavePrefab(go, path);
+
+            // 重新載入設定動畫幀
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            var anim = instance.GetComponent<SpriteAnimatorController>();
+            if (anim != null)
+            {
+                var so = new SerializedObject(anim);
+                var idleAnim = so.FindProperty("_idleAnim");
+                if (idleAnim != null)
+                {
+                    var frames = idleAnim.FindPropertyRelative("frames");
+                    frames.arraySize = sprites.Length;
+                    for (int i = 0; i < sprites.Length; i++)
+                        frames.GetArrayElementAtIndex(i).objectReferenceValue = sprites[i];
+                    idleAnim.FindPropertyRelative("fps").floatValue = fps;
+                }
+                so.ApplyModifiedProperties();
+            }
+            PrefabUtility.SaveAsPrefabAsset(instance, path);
+            DestroyImmediate(instance);
+        }
+        else
+        {
+            sr.sprite = CreateCircleSprite();
+            sr.color = fallbackColor;
+            SavePrefab(go, $"Assets/Prefabs/Effects/{name}.prefab");
+        }
+    }
+
+    private static void BuildStaticEffectPrefab(string name, string spritePath, Color fallbackColor, int sortOrder, float scale)
+    {
+        var go = new GameObject(name);
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = sortOrder;
+        go.transform.localScale = Vector3.one * scale;
+
+        var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+        if (sprite != null)
+        {
+            sr.sprite = sprite;
+            sr.color = Color.white;
+        }
+        else
+        {
+            sr.sprite = CreateCircleSprite();
+            sr.color = fallbackColor;
+        }
+
+        SavePrefab(go, $"Assets/Prefabs/Effects/{name}.prefab");
+    }
+
+    private static void BuildShockwaveEffectPrefab()
+    {
+        var go = new GameObject("ShockwaveEffect");
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = CreateCircleSprite();
+        sr.color = new Color(1f, 1f, 0.4f, 0.4f);
+        sr.sortingOrder = 14;
+        go.transform.localScale = Vector3.one * 2f;
+        SavePrefab(go, "Assets/Prefabs/Effects/ShockwaveEffect.prefab");
+    }
+
+    private static void BuildFireZoneWithSprite()
+    {
+        var go = new GameObject("FireZone");
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = 3;
+        go.transform.localScale = Vector3.one * 1.2f;
+
+        var sprites = SpriteStripImporter.GetSpritesFromStrip("Assets/Sprites/Effects/fire_zone_8f.png");
+        if (sprites != null && sprites.Length > 0)
+        {
+            sr.sprite = sprites[0];
+            sr.color = Color.white;
+            go.AddComponent<SpriteAnimatorController>();
+        }
+        else
+        {
+            sr.sprite = CreateCircleSprite();
+            sr.color = new Color(1f, 0.3f, 0f, 0.5f);
+        }
+
+        var col = go.AddComponent<CircleCollider2D>();
+        col.radius = 0.5f;
+        col.isTrigger = true;
+        go.AddComponent<FireZone>();
+
+        string path = "Assets/Prefabs/Effects/FireZone.prefab";
+        SavePrefab(go, path);
+
+        // 設定動畫幀
+        if (sprites != null && sprites.Length > 0)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            var anim = instance.GetComponent<SpriteAnimatorController>();
+            if (anim != null)
+            {
+                var so = new SerializedObject(anim);
+                var idleAnim = so.FindProperty("_idleAnim");
+                if (idleAnim != null)
+                {
+                    var frames = idleAnim.FindPropertyRelative("frames");
+                    frames.arraySize = sprites.Length;
+                    for (int i = 0; i < sprites.Length; i++)
+                        frames.GetArrayElementAtIndex(i).objectReferenceValue = sprites[i];
+                    idleAnim.FindPropertyRelative("fps").floatValue = 12f;
+                }
+                so.ApplyModifiedProperties();
+            }
+            PrefabUtility.SaveAsPrefabAsset(instance, path);
+            DestroyImmediate(instance);
+        }
     }
 
     // =============================================

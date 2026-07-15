@@ -150,8 +150,9 @@ public class ValkyrieAttack : MonoBehaviour, IPlayerAttack
 
         Vector3 pos = transform.position + (Vector3)(dir * _currentRange * 0.5f);
         var effect = Instantiate(_thrustEffectPrefab, pos, Quaternion.Euler(0, 0, angle));
-        effect.transform.localScale = new Vector3(_currentRange / _baseRange, 1f, 1f);
-        Destroy(effect, 0.3f);
+        // 固定大小，不拉伸（spear_attack.png 已包含正確比例）
+        effect.transform.localScale = Vector3.one * 0.5f;
+        Destroy(effect, 0.2f);
     }
 
     public void Upgrade()

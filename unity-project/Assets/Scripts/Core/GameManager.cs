@@ -88,6 +88,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void InitGame(CharacterType characterType)
     {
+        // 確保 timeScale 恢復
+        Time.timeScale = 1f;
+
         GameTime = 0f;
         Kills = 0;
         IsGameOver = false;

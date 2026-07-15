@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_Sprite: {fileID: -1178890762224635251, guid: ae6f2fc791536984597ae7bf535da24e, type: 3}
-  m_Color: {r: 0.2, g: 0.8, b: 0.2, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -215,7 +215,7 @@ MonoBehaviour:
   _range: 8
   _spreadAngle: 8.6
   _arrowPrefab: {fileID: 0}
-  _fireZonePrefab: {fileID: 0}
+  _fireZonePrefab: {fileID: 5475977199133850334, guid: fb5b965ade1b1d64c97bf59fe4f130cf, type: 3}
 --- !u!114 &8113179997044928896
 MonoBehaviour:
   m_ObjectHideFlags: 0

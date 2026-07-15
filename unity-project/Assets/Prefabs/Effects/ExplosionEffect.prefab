@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 333422939325292754}
   - component: {fileID: 6011822657303333276}
+  - component: {fileID: 5263992772045286504}
   m_Layer: 0
   m_Name: ExplosionEffect
   m_TagString: Untagged
@@ -73,14 +74,43 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 15
-  m_Sprite: {fileID: 0}
-  m_Color: {r: 1, g: 0.5, b: 0, a: 0.8}
+  m_Sprite: {fileID: -7871788300110944905, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3.52, y: 15.36}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &5263992772045286504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074643565053656701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d729c8a74795b4499f8cf86c2c2d8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _idleAnim:
+    frames:
+    - {fileID: -7871788300110944905, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: -1157248697166079331, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: 7811048746334358231, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: -6682798851520811074, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: 157931632196150130, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: -5723192853971531870, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: 5793194716063935678, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    - {fileID: -4307143682722288182, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+    fps: 16
+  _runAnim:
+    frames: []
+    fps: 8
+  _attackAnim:
+    frames: []
+    fps: 8

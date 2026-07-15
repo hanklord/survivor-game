@@ -113,10 +113,15 @@ public class PlayerController : MonoBehaviour
         }
 
         _attackSystem = GetComponent<IPlayerAttack>();
+
+        Debug.Log($"[Player] Initialized: {type}, Speed={CurrentSpeed}, HP={MaxHP}, Attack={_attackSystem?.GetType().Name ?? "NULL"}");
     }
 
     private void Update()
     {
+        // 防護：如果尚未初始化或遊戲暫停/結束，不處理輸入
+        if (CurrentSpeed <= 0) return;
+        if (GameManager.Instance == null) return;
         if (GameManager.Instance.IsGameOver || GameManager.Instance.IsPaused) return;
 
         HandleInput();
@@ -127,13 +132,20 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (_rb == null) _rb = GetComponent<Rigidbody2D>();
         Move();
     }
 
     private void HandleInput()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        float h = 0f, v = 0f;
+
+        // 直接用 KeyCode（不依賴 Input Manager 設定）
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) h -= 1f;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) h += 1f;
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) v += 1f;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) v -= 1f;
+
         _moveDirection = new Vector2(h, v).normalized;
 
         if (h != 0) FacingLeft = h < 0;
@@ -168,7 +180,15 @@ public class PlayerController : MonoBehaviour
         if (_fireTimer <= 0f)
         {
             _fireTimer = 1f / FireRate;
-            _attackSystem?.Attack(this);
+            if (_attackSystem != null)
+            {
+                _attackSystem.Attack(this);
+            }
+            else
+            {
+                // 嘗試重新取得攻擊元件
+                _attackSystem = GetComponent<IPlayerAttack>();
+            }
         }
     }
 

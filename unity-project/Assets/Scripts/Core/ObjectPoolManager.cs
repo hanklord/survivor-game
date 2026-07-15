@@ -58,20 +58,59 @@ public class ObjectPoolManager : MonoBehaviour
     /// </summary>
     public ProjectileController GetProjectile()
     {
-        if (_projectilePrefab == null) return null;
-
         ProjectileController proj;
+
         if (_projectilePool.Count > 0)
         {
             proj = _projectilePool.Dequeue();
         }
-        else
+        else if (_projectilePrefab != null)
         {
             var go = Instantiate(_projectilePrefab, transform);
             proj = go.GetComponent<ProjectileController>();
         }
-        proj.gameObject.SetActive(true);
+        else
+        {
+            // 無 prefab 時動態建立
+            proj = CreateFallbackProjectile();
+        }
+
+        if (proj != null) proj.gameObject.SetActive(true);
         return proj;
+    }
+
+    private ProjectileController CreateFallbackProjectile()
+    {
+        var go = new GameObject("Projectile_Runtime");
+        go.transform.SetParent(transform);
+        go.layer = 8;
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = 5;
+        // 建立圓形 placeholder
+        var tex = new Texture2D(16, 16);
+        var colors = new Color[16 * 16];
+        float center = 8f;
+        for (int i = 0; i < 16; i++)
+            for (int j = 0; j < 16; j++)
+                colors[i * 16 + j] = Vector2.Distance(new Vector2(j, i), new Vector2(center, center)) < 7 ? Color.white : Color.clear;
+        tex.SetPixels(colors);
+        tex.Apply();
+        sr.sprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16);
+        sr.color = new Color(1f, 0.5f, 0f);
+
+        var rb = go.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
+        rb.freezeRotation = true;
+
+        var col = go.AddComponent<CircleCollider2D>();
+        col.radius = 0.12f;
+        col.isTrigger = true;
+
+        go.AddComponent<ProjectileController>();
+        go.transform.localScale = Vector3.one * 0.3f;
+
+        return go.GetComponent<ProjectileController>();
     }
 
     /// <summary>

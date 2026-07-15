@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_Sprite: {fileID: -2526766562849799000, guid: f1842836c0c13734e928235a4abc84ac, type: 3}
-  m_Color: {r: 0.9, g: 0.3, b: 0.9, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -214,8 +214,8 @@ MonoBehaviour:
   _baseCD: 0.8
   _thrustWidth: 0.66
   _knockbackRadius: 1.6
-  _thrustEffectPrefab: {fileID: 0}
-  _shockwaveEffectPrefab: {fileID: 0}
+  _thrustEffectPrefab: {fileID: 4830911867150023889, guid: d67aa37d3eb125f4eb5b22ccc329a88d, type: 3}
+  _shockwaveEffectPrefab: {fileID: 5686541555043267931, guid: 656aae8b4b1cc034abf1e83bd204d8c6, type: 3}
 --- !u!114 &8693693156740367789
 MonoBehaviour:
   m_ObjectHideFlags: 0

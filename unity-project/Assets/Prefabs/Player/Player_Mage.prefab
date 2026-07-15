@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_Sprite: {fileID: -735432509038490489, guid: 2748281cf89d3544588994426b8c6c53, type: 3}
-  m_Color: {r: 0.27, g: 0.53, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -207,7 +207,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _projectileSpeed: 8
   _lifetime: 2
-  _fireExplosionPrefab: {fileID: 0}
+  _fireExplosionPrefab: {fileID: 1074643565053656701, guid: 4ec14ee6cd086c74e918a4fb6c3225ff, type: 3}
 --- !u!114 &7867171609718465810
 MonoBehaviour:
   m_ObjectHideFlags: 0

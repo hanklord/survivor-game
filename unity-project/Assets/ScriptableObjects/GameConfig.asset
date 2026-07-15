@@ -73,7 +73,7 @@ MonoBehaviour:
   - level: 1
     idleFrames: []
     size: 0.72
-    color: {r: 0.27, g: 1, b: 0.27, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 12
     speed: 1.8
     damage: 5
@@ -82,7 +82,7 @@ MonoBehaviour:
   - level: 2
     idleFrames: []
     size: 0.68
-    color: {r: 0.53, g: 0.27, b: 0.67, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 16
     speed: 2.16
     damage: 6
@@ -91,7 +91,7 @@ MonoBehaviour:
   - level: 3
     idleFrames: []
     size: 0.83
-    color: {r: 0.13, g: 0.27, b: 0.67, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 10
     speed: 1.68
     damage: 8
@@ -100,7 +100,7 @@ MonoBehaviour:
   - level: 4
     idleFrames: []
     size: 0.86
-    color: {r: 0.2, g: 0.4, b: 0.2, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 20
     speed: 2.04
     damage: 9
@@ -109,7 +109,7 @@ MonoBehaviour:
   - level: 5
     idleFrames: []
     size: 0.76
-    color: {r: 0.27, g: 0.53, b: 0.27, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 8
     speed: 1.56
     damage: 10
@@ -118,7 +118,7 @@ MonoBehaviour:
   - level: 6
     idleFrames: []
     size: 0.79
-    color: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 14
     speed: 2.4
     damage: 9
@@ -127,7 +127,7 @@ MonoBehaviour:
   - level: 7
     idleFrames: []
     size: 1.19
-    color: {r: 0.27, g: 0.13, b: 0, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 10
     speed: 1.32
     damage: 12
@@ -136,7 +136,7 @@ MonoBehaviour:
   - level: 8
     idleFrames: []
     size: 0.79
-    color: {r: 0.13, g: 0, b: 0.27, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 18
     speed: 2.28
     damage: 14
@@ -145,7 +145,7 @@ MonoBehaviour:
   - level: 9
     idleFrames: []
     size: 0.94
-    color: {r: 1, g: 0.27, b: 0, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 30
     speed: 1.2
     damage: 16
@@ -154,7 +154,7 @@ MonoBehaviour:
   - level: 10
     idleFrames: []
     size: 1.01
-    color: {r: 0.27, g: 0, b: 0.27, a: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
     hp: 20
     speed: 1.08
     damage: 20
