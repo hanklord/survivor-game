@@ -452,12 +452,12 @@
     if (state.comboVisual) {
       var cv = state.comboVisual;
       var fontSize = Math.min(24, 14 + cv.count);
-      ctx.font = 'bold ' + fontSize + 'px ' + (window.GAME_FONT || 'Cinzel, serif');
+      ctx.font = 'italic bold ' + fontSize + 'px ' + (window.GAME_FONT || 'Cinzel, serif');
       ctx.fillStyle = cv.flash ? '#ffff00' : (cv.count >= 20 ? '#ff4400' : cv.count >= 10 ? '#ffaa00' : '#ffffff');
       ctx.textAlign = 'left';
       ctx.fillText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 130);
       if (cv.count >= 10) {
-        ctx.font = '11px ' + (window.GAME_FONT || 'Cinzel, serif');
+        ctx.font = 'italic 11px ' + (window.GAME_FONT || 'Cinzel, serif');
         ctx.fillStyle = '#ffcc00';
         ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 145);
       }
