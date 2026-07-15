@@ -169,7 +169,7 @@
     this._drawEnemies(state.enemies, camX, camY);
     this._drawBosses(state.bosses, camX, camY);
     this._drawProjectiles(state.projectiles, camX, camY);
-    this._drawPlayer(player, state.hardcoreLevel || 0, state.ultimateReady);
+    this._drawPlayer(player, state.hardcoreLevel || 0, state.ultimateReady, state.ultimateCharge);
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
     // 近戰揮砍視覺（綁定角色位置的紫色弧形斬擊）
     if (state.meleeVisual) {
@@ -513,20 +513,7 @@
       ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
     }
 
-    // 絕招集氣視覺（環繞角色 + 滿氣金光限非透明像素）
-    if (state.ultimateCharge !== undefined && state.player) {
-      var ux = state.player.x, uy = state.player.y;
-      var pScale = state.player.scale || 1;
-      var pSize = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * pScale;
-      var ringR = pSize * 0.65; // 環繞角色（1.3 倍半徑）
-      // 環形進度條（包圍角色）
-      ctx.beginPath(); ctx.arc(ux, uy, ringR, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(100,100,100,0.4)'; ctx.lineWidth = 3; ctx.stroke();
-      if (state.ultimateCharge > 0) {
-        ctx.beginPath(); ctx.arc(ux, uy, ringR, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * state.ultimateCharge);
-        ctx.strokeStyle = state.ultimateReady ? '#ffd700' : '#ffaa00'; ctx.lineWidth = 3; ctx.stroke();
-      }
-    }
+    // （絕招集氣已移至 _drawPlayer 內以橫條呈現）
 
     // Debug Hitbox 顯示
     if (state.debugHitbox) {
@@ -809,7 +796,7 @@
     }
   };
 
-  Renderer.prototype._drawPlayer = function(player, hardcoreLevel, ultimateReady) {
+  Renderer.prototype._drawPlayer = function(player, hardcoreLevel, ultimateReady, ultimateCharge) {
     var ctx = this.ctx;
     var ps = ((this.imgConfig.player && this.imgConfig.player.size) || 40) * (player.scale || 1.0);
 
@@ -889,15 +876,40 @@
     ctx.arc(player.x, player.y, player.pickupRange, 0, Math.PI * 2);
     ctx.stroke();
 
-    // 玩家血條（角色頭上）
+    // HP 數值（血條上方）
     var hpBarW = ps * 0.7;
     var hpBarH = 4;
     var hpBarY = player.y - ps / 2 - 10;
     var hpRatio = Math.max(0, player.hp / player.maxHp);
+    ctx.font = '10px ' + (window.GAME_FONT || 'Cinzel, serif');
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(Math.ceil(player.hp) + '/' + Math.ceil(player.maxHp), player.x, hpBarY - 2);
+
+    // 玩家血條（角色頭上）
     ctx.fillStyle = '#222';
     ctx.fillRect(player.x - hpBarW / 2, hpBarY, hpBarW, hpBarH);
     ctx.fillStyle = hpRatio > 0.5 ? '#44dd44' : hpRatio > 0.25 ? '#ddaa00' : '#dd2222';
     ctx.fillRect(player.x - hpBarW / 2, hpBarY, hpBarW * hpRatio, hpBarH);
+
+    // 絕招蓄力橫條（血條下方）
+    if (ultimateCharge !== undefined) {
+      var ultBarH = 3;
+      var ultBarY = hpBarY + hpBarH + 2;
+      ctx.fillStyle = '#222';
+      ctx.fillRect(player.x - hpBarW / 2, ultBarY, hpBarW, ultBarH);
+      if (ultimateCharge > 0) {
+        if (ultimateReady) {
+          // 滿氣金色閃爍
+          var flash = Math.sin(Date.now() / 150) * 0.3 + 0.7;
+          ctx.fillStyle = 'rgba(255, 215, 0, ' + flash + ')';
+        } else {
+          ctx.fillStyle = '#ffaa00';
+        }
+        ctx.fillRect(player.x - hpBarW / 2, ultBarY, hpBarW * ultimateCharge, ultBarH);
+      }
+    }
   };
 
   Renderer.prototype._drawParticles = function(particles, camX, camY) {
