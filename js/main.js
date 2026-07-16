@@ -403,6 +403,7 @@
     this.player.attackType = this._selectedCharacter.attackType;
     this.player.scale = this._selectedCharacter.scale || 1.0;
     this.player.hitboxRadius = this._selectedCharacter.hitboxRadius || PLAYER_HITBOX;
+    this.player.critChance = this._selectedCharacter.baseCritRate || 0;
     this.meta.applyToPlayer(this.player);
     this._eliteSpawner = new SG.EliteSpawner(this.player);
     this._combo = new SG.ComboSystem();
@@ -614,12 +615,24 @@
       var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < valkHits.length; i++) this._handleKill(valkHits[i]);
       var vhits = this._valkyrieAttack.getLastHits();
-      for (var i = 0; i < vhits.length; i++) if (!this._lowQuality) this._damageNumbers.add(vhits[i].x, vhits[i].y, vhits[i].dmg, false);
+      for (var i = 0; i < vhits.length; i++) {
+        if (!this._lowQuality) {
+          var vc = this.player.critChance && Math.random() < this.player.critChance;
+          if (vc) { vhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          this._damageNumbers.add(vhits[i].x, vhits[i].y, vhits[i].dmg, vc);
+        }
+      }
     } else if (this.player.attackType === 'melee' && this._meleeAttack) {
       var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
       var mhits = this._meleeAttack.getLastHits();
-      for (var i = 0; i < mhits.length; i++) if (!this._lowQuality) this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, false);
+      for (var i = 0; i < mhits.length; i++) {
+        if (!this._lowQuality) {
+          var mc = this.player.critChance && Math.random() < this.player.critChance;
+          if (mc) { mhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, mc);
+        }
+      }
     } else if (this.player.attackType === 'archer' && this._archerAttack) {
       var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
       if (this._archerAttack.didFire()) { this.audio.playArrowShoot(); this.player.triggerAttack(); }
@@ -633,7 +646,13 @@
       var paHits = pa.update(dt, this.enemies, this.bosses);
       for (var i = 0; i < paHits.length; i++) this._handleKill(paHits[i]);
       for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
-      for (var i = 0; i < ahits.length; i++) if (!this._lowQuality) this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, false);
+      for (var i = 0; i < ahits.length; i++) {
+        if (!this._lowQuality) {
+          var ac = this.player.critChance && Math.random() < this.player.critChance;
+          if (ac) { ahits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, ac);
+        }
+      }
     } else {
       this.player.fireTimer -= dt;
       if (this.player.fireTimer <= 0) {
@@ -663,7 +682,7 @@
           // 暴擊判定
           var dmg = p.damage * (this.player.damageMultiplier || 1);
           var isCrit = this.player.critChance && Math.random() < this.player.critChance;
-          if (isCrit) dmg *= 2;
+          if (isCrit) { dmg *= 2; this.renderer.shake(0.12, 4); }
           dmg = Math.round(dmg);
           e.hp -= dmg;
           if (!this._lowQuality) this._damageNumbers.add(e.x, e.y, dmg, isCrit);

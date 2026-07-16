@@ -3,11 +3,11 @@
   window.SG = window.SG || {};
 
   var CHARACTERS = [
-    { id: 'ranged', name: '法師', desc: '火球魔法攻擊', color: '#ff6600', attackType: 'ranged', scale: 1.0, hitboxRadius: 20, icon: 'assets/ui/chars/mage.png' },
-    // { id: 'melee', name: '近戰劍士', desc: '劍氣斬擊周圍敵人', color: '#ff4466', attackType: 'melee', scale: 1.0, hitboxRadius: 20, icon: 'assets/ui/chars/melee.png' },
-    { id: 'archer', name: '弓手', desc: '弓箭擴散射擊', color: '#44cc44', attackType: 'archer', scale: 1.0, hitboxRadius: 20, icon: 'assets/ui/chars/archer.png' },
-    { id: 'knight', name: '黃金騎士', desc: '高防禦近戰攻擊', color: '#ffcc00', attackType: 'melee', scale: 1.5, hitboxRadius: 30, icon: 'assets/ui/chars/knight.png' },
-    { id: 'valkyrie', name: '女武神', desc: '長槍貫穿攻擊', color: '#ccddff', attackType: 'valkyrie', scale: 1.7, hitboxRadius: 20, icon: 'assets/ui/chars/valkyrie.png' }
+    { id: 'ranged', name: '法師', desc: '火球魔法攻擊', color: '#ff6600', attackType: 'ranged', scale: 1.0, hitboxRadius: 20, baseCritRate: 0.10, icon: 'assets/ui/chars/mage.png' },
+    // { id: 'melee', name: '近戰劍士', desc: '劍氣斬擊周圍敵人', color: '#ff4466', attackType: 'melee', scale: 1.0, hitboxRadius: 20, baseCritRate: 0.10, icon: 'assets/ui/chars/melee.png' },
+    { id: 'archer', name: '弓手', desc: '弓箭擴散射擊', color: '#44cc44', attackType: 'archer', scale: 1.0, hitboxRadius: 20, baseCritRate: 0.15, icon: 'assets/ui/chars/archer.png' },
+    { id: 'knight', name: '黃金騎士', desc: '高防禦近戰攻擊', color: '#ffcc00', attackType: 'melee', scale: 1.5, hitboxRadius: 30, baseCritRate: 0.10, icon: 'assets/ui/chars/knight.png' },
+    { id: 'valkyrie', name: '女武神', desc: '長槍貫穿攻擊', color: '#ccddff', attackType: 'valkyrie', scale: 1.7, hitboxRadius: 20, baseCritRate: 0.10, icon: 'assets/ui/chars/valkyrie.png' }
   ];
 
   function CharacterSelect(onSelect) {
