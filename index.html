@@ -14,19 +14,19 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 #game { z-index: 1; }
 #ui { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; font-family: 'Segoe UI', sans-serif; color: #fff; z-index: 2; }
 #hud { display: flex; justify-content: space-between; padding: 10px 15px; align-items: center; }
-#hud > div { text-shadow: 0 0 5px #000; font-size: 14px; }
+#hud > div { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 5px #000; font-size: 14px; }
 #hp-bar { width: 200px; height: 16px; background: #333; border-radius: 8px; overflow: hidden; border: 1px solid #555; }
 #hp-fill { height: 100%; background: linear-gradient(90deg, #ff4444, #ff6666); transition: width 0.2s; }
 #xp-bar { width: 100%; height: 8px; background: #222; }
 #xp-fill { height: 100%; background: linear-gradient(90deg, #00ff88, #44ffaa); transition: width 0.2s; }
 #level-up { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: all; text-align: center; z-index: 10; }
 #level-up h2 { font-size: 28px; margin-bottom: 20px; color: #ffdd44; text-shadow: 0 0 10px #ffdd44; }
-.upgrade-btn { display: block; width: 280px; margin: 10px auto; padding: 15px; background: rgba(30,30,60,0.95); border: 2px solid #5555ff; border-radius: 10px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s; }
+.upgrade-btn { display: block; width: 280px; margin: 10px auto; padding: 15px; background: rgba(30,30,60,0.95); border: 2px solid #5555ff; border-radius: 10px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
 .upgrade-btn:hover { background: rgba(50,50,100,0.95); border-color: #8888ff; transform: scale(1.05); }
 .upgrade-btn { touch-action: manipulation; -webkit-tap-highlight-color: rgba(255,255,255,0.2); user-select: none; -webkit-user-select: none; }
 #game-over { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: all; z-index: 10; }
 #game-over h1 { font-size: 48px; color: #ff4444; text-shadow: 0 0 20px #ff0000; }
-#game-over p { font-size: 20px; margin: 15px 0; }
+#game-over p { font-size: 20px; margin: 15px 0; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
 #game-over button { padding: 12px 30px; font-size: 18px; background: #4444ff; border: none; color: #fff; border-radius: 8px; cursor: pointer; }
 #leaderboard { display: none; margin-top: 15px; text-align: left; font-size: 14px; }
 #leaderboard h3 { text-align: center; margin-bottom: 8px; }

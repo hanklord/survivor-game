@@ -455,10 +455,14 @@
       ctx.font = 'italic bold ' + fontSize + 'px ' + (window.GAME_FONT || 'Cinzel, serif');
       ctx.fillStyle = cv.flash ? '#ffff00' : (cv.count >= 20 ? '#ff4400' : cv.count >= 10 ? '#ffaa00' : '#ffffff');
       ctx.textAlign = 'left';
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 3;
+      ctx.strokeText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 130);
       ctx.fillText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 130);
       if (cv.count >= 10) {
         ctx.font = 'italic 11px ' + (window.GAME_FONT || 'Cinzel, serif');
         ctx.fillStyle = '#ffcc00';
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 2;
+        ctx.strokeText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 145);
         ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 145);
       }
       ctx.textAlign = 'left';
@@ -510,6 +514,8 @@
     if (state.fps !== undefined) {
       ctx.fillStyle = state.lowQuality ? '#ff4444' : '#44ff44';
       ctx.font = '12px ' + (window.GAME_FONT || 'Cinzel, serif');
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 2;
+      ctx.strokeText('FPS: ' + state.fps, camX + 10, camY + 20);
       ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
     }
 
@@ -633,6 +639,8 @@
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 12px ' + (window.GAME_FONT || 'Cinzel, serif');
       ctx.textAlign = 'center';
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 3;
+      ctx.strokeText('👹 ' + bName, W / 2, barY + barH + 14);
       ctx.fillText('👹 ' + bName, W / 2, barY + barH + 14);
       ctx.textAlign = 'left';
     }
@@ -885,6 +893,8 @@
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
+    ctx.strokeStyle = '#000000'; ctx.lineWidth = 2;
+    ctx.strokeText(Math.ceil(player.hp) + '/' + Math.ceil(player.maxHp), player.x, hpBarY - 2);
     ctx.fillText(Math.ceil(player.hp) + '/' + Math.ceil(player.maxHp), player.x, hpBarY - 2);
 
     // 玩家血條（角色頭上）
