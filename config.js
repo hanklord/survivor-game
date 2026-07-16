@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V228";
+window.GAME_VERSION = "V229";
 window.HARDCORE_HP_MULTIPLIER = 3.0;
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.DEBUG_SHOW_HITBOX = false;
@@ -39,7 +39,7 @@ window.GAME_CONFIG = {
   "audio": { "enabled": true, "volume": 0.5 },
   "levels": [
     { "name": "草地", "bgColor": "#1a2e1a", "bgImage": "assets/backgrounds/grass.png", "duration": 90, "enemySpeedMult": 1.0, "enemyIndices": [0, 3, 4], "bossIndices": [0, 1] },
-    { "name": "沙漠", "bgColor": "#2e2a1a", "bgImage": "assets/backgrounds/desert.png", "duration": 100, "enemySpeedMult": 1.2, "enemyIndices": [1, 2], "bossIndices": [2, 3] },
+    { "name": "沙漠", "bgColor": "#2e2a1a", "bgImage": "assets/backgrounds/desert.png", "bgm": "assets/audio/bgm_desert.mp3", "duration": 100, "enemySpeedMult": 1.2, "enemyIndices": [1, 2], "bossIndices": [2, 3] },
     { "name": "洞窟", "bgColor": "#1a1a2e", "bgImage": "assets/backgrounds/cave.png", "bgm": "assets/audio/bgm_level2.mp3", "duration": 120, "enemySpeedMult": 1.5, "enemyIndices": [3, 4, 5, 6], "bossIndices": [4, 5] },
     { "name": "沼澤", "bgColor": "#1a2e2a", "bgImage": "assets/backgrounds/swamp.png", "bgm": "assets/audio/bgm_level3.mp3", "duration": 150, "enemySpeedMult": 2.0, "enemyIndices": [5, 6, 7, 8], "bossIndices": [6, 7] },
     { "name": "火山", "bgColor": "#2e1a1a", "bgImage": "assets/backgrounds/volcano.png", "bgm": "assets/audio/bgm_level4.mp3", "duration": 180, "enemySpeedMult": 2.5, "enemyIndices": [7, 8, 9, 10], "bossIndices": [8, 9] },
