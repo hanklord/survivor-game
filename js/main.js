@@ -351,6 +351,8 @@
     load('valkyrie_sprite_run', 'assets/strips/valkyrie_run_6f.png');
     load('spear_attack', 'assets/strips/spear_attack.png');
     load('fire_zone', 'assets/strips/fire_zone_8f.png');
+    load('chest_img', 'assets/chest.png');
+    load('magnet_img', 'assets/magnet.png');
     load('shield_icon', 'assets/shield_orbit.png');
     load('slash_effect', 'assets/strips/slash_effect_4f.png');
     // 載入各關卡背景圖
