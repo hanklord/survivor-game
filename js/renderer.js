@@ -456,14 +456,14 @@
       ctx.fillStyle = cv.flash ? '#ffff00' : (cv.count >= 20 ? '#ff4400' : cv.count >= 10 ? '#ffaa00' : '#ffffff');
       ctx.textAlign = 'left';
       ctx.strokeStyle = '#000000'; ctx.lineWidth = 3;
-      ctx.strokeText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 130);
-      ctx.fillText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 130);
+      ctx.strokeText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 140);
+      ctx.fillText('🔥 ' + cv.count + ' COMBO', camX + 12, camY + 140);
       if (cv.count >= 10) {
         ctx.font = 'italic 11px ' + (window.GAME_FONT || 'Cinzel, serif');
         ctx.fillStyle = '#ffcc00';
         ctx.strokeStyle = '#000000'; ctx.lineWidth = 2;
-        ctx.strokeText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 145);
-        ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 145);
+        ctx.strokeText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 155);
+        ctx.fillText('XP x' + (cv.count >= 20 ? '2.0' : '1.5'), camX + 12, camY + 155);
       }
       ctx.textAlign = 'left';
     }
