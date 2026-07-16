@@ -14,13 +14,13 @@
   }
 
   // 更新波次計時，回傳需要生成的敵人陣列
-  WaveManager.prototype.updateWaves = function(dt, player, W, H, gameTime) {
+  WaveManager.prototype.updateWaves = function(dt, player, W, H, gameTime, enemyIndices) {
     var spawned = [];
     this.waveTimer += dt;
     if (this.waveTimer >= WAVE_INTERVAL) {
       this.waveTimer = 0;
       this.wave++;
-      spawned = SG.Enemy.spawnWave(this.wave, player, W, H, this.imgConfig, gameTime);
+      spawned = SG.Enemy.spawnWave(this.wave, player, W, H, this.imgConfig, gameTime, enemyIndices);
     }
     return spawned;
   };

@@ -785,7 +785,7 @@
     }
 
     // 波次
-    var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime);
+    var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this.levelManager.getCurrent().enemyIndices);
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
       // Hardcore HP 倍率

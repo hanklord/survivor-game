@@ -38,9 +38,16 @@
     this.animator.update(dt);
   };
 
-  // 根據遊戲時間選擇敵人設定
-  Enemy.pickConfig = function(imgConfig, gameTime) {
+  // 根據遊戲時間選擇敵人設定（支援 per-level enemyIndices）
+  Enemy.pickConfig = function(imgConfig, gameTime, enemyIndices) {
     var elist = imgConfig.enemies || [{ level: 1, size: 36, color: '#ff4444', hp: 3, speed: 90, damage: 5 }];
+    // 如果有指定 enemyIndices，從中隨機選取
+    if (enemyIndices && enemyIndices.length > 0) {
+      var pick = enemyIndices[Math.floor(Math.random() * enemyIndices.length)];
+      var idx = Math.min(pick, elist.length - 1);
+      return { cfg: elist[idx], idx: idx };
+    }
+    // fallback: 全域漸進解鎖
     var maxLevel = 1;
     if (gameTime > LEVEL_UNLOCK_START) maxLevel = Math.min(elist.length, 1 + Math.floor((gameTime - LEVEL_UNLOCK_START) / LEVEL_UNLOCK_INTERVAL));
     var idx = Math.floor(Math.random() * maxLevel);
@@ -48,11 +55,11 @@
   };
 
   // 生成一波敵人
-  Enemy.spawnWave = function(wave, player, W, H, imgConfig, gameTime) {
+  Enemy.spawnWave = function(wave, player, W, H, imgConfig, gameTime, enemyIndices) {
     var count = Math.min(3 + wave * 2, 30);
     var spawned = [];
     for (var i = 0; i < count; i++) {
-      var pick = Enemy.pickConfig(imgConfig, gameTime);
+      var pick = Enemy.pickConfig(imgConfig, gameTime, enemyIndices);
       var angle = Math.random() * Math.PI * 2;
       var d = Math.max(W, H) * 0.6;
       var x = player.x + Math.cos(angle) * d;
