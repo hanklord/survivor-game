@@ -202,6 +202,9 @@
       this._bgTile.position.set(camX, camY);
     }
 
+    // Elite visuals (magnets + chests)
+    this._renderEliteVisuals(state.eliteVisuals, camX, camY);
+
     // Render entities
     this._renderXPGems(state.xpGems, camX, camY);
     this._renderEnemies(state.enemies, camX, camY);
@@ -227,9 +230,9 @@
       this._renderLevelUpEffect(state.levelUpEffect, player);
     }
 
-    // Hardcore VFX
-    if (state.hardcoreLevel > 0) {
-      this._renderHardcoreVFX(state.hardcoreVFX, state.hardcoreLevel);
+    // Debug hitbox
+    if (state.debugHitbox) {
+      this._renderDebugHitbox(state);
     }
 
     // HUD updates
@@ -237,36 +240,192 @@
     this._renderFPS(state.fps, state.lowQuality);
     this._renderBossHUD(state.activeBoss);
 
+    // Hardcore VFX (screen-space)
+    if (state.hardcoreLevel > 0) {
+      this._renderHardcoreVFX(state.hardcoreVFX, state.hardcoreLevel);
+    }
+
     // Flash effects
     if (state.ultimateFlash > 0) this._renderFlash(state.ultimateFlash);
     if (state.bombFlash) this._renderBombFlash();
 
-    // Damage numbers (Canvas 2D overlay with camera transform)
+    // Damage numbers (PixiJS Text pool)
     if (state.damageNumbers && !state.lowQuality) {
-      var dmgCtx = this._getDmgCtx();
-      dmgCtx.save();
-      dmgCtx.translate(-camX, -camY);
-      state.damageNumbers.draw(dmgCtx);
-      dmgCtx.restore();
+      this._renderDamageNumbers(state.damageNumbers, camX, camY);
     }
 
     // Trigger PixiJS render
     this.app.render();
   };
 
-  // Fallback: damage numbers still use Canvas 2D overlay
-  Renderer.prototype._getDmgCtx = function() {
-    // We'll keep a small overlay canvas for damage numbers for now
-    if (!this._dmgCanvas) {
-      this._dmgCanvas = document.createElement('canvas');
-      this._dmgCanvas.width = this.W;
-      this._dmgCanvas.height = this.H;
-      this._dmgCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:3;';
-      this.canvas.parentElement.appendChild(this._dmgCanvas);
-      this._dmgCtx = this._dmgCanvas.getContext('2d');
+  // === Phase 3: Damage Numbers (PIXI.Text pool) ===
+
+  Renderer.prototype._renderDamageNumbers = function(dmgNumbers, camX, camY) {
+    if (!this._dmgTextPool) {
+      this._dmgTextPool = [];
+      this._dmgTextContainer = new PIXI.Container();
+      this._gameContainer.addChild(this._dmgTextContainer);
     }
-    this._dmgCtx.clearRect(0, 0, this.W, this.H);
-    return this._dmgCtx;
+    var numbers = dmgNumbers.numbers;
+    var count = 0;
+    for (var i = 0; i < numbers.length; i++) {
+      var n = numbers[i];
+      var alpha = Math.min(1, n.timer / 0.3);
+      if (alpha <= 0) continue;
+      // Get or create text from pool
+      var txt;
+      if (count < this._dmgTextPool.length) {
+        txt = this._dmgTextPool[count];
+        txt.visible = true;
+      } else {
+        txt = new PIXI.Text('', new PIXI.TextStyle({
+          fontFamily: window.GAME_FONT || 'Cinzel, serif',
+          fontSize: 14,
+          fill: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 2
+        }));
+        this._dmgTextContainer.addChild(txt);
+        this._dmgTextPool.push(txt);
+      }
+      txt.text = n.text;
+      txt.position.set(n.x, n.y);
+      txt.alpha = alpha;
+      if (n.crit) {
+        txt.style.fontSize = 20;
+        txt.style.fontWeight = 'bold';
+        txt.style.fill = '#ffdd00';
+      } else {
+        txt.style.fontSize = 14;
+        txt.style.fontWeight = 'normal';
+        txt.style.fill = '#ffffff';
+      }
+      count++;
+    }
+    // Hide unused pool entries
+    for (var j = count; j < this._dmgTextPool.length; j++) {
+      this._dmgTextPool[j].visible = false;
+    }
+  };
+
+  // === Phase 3: Debug Hitbox ===
+
+  Renderer.prototype._renderDebugHitbox = function(state) {
+    if (!this._debugGfx) {
+      this._debugGfx = new PIXI.Graphics();
+      this._effectsContainer.addChild(this._debugGfx);
+    }
+    this._debugGfx.clear();
+    var g = this._debugGfx;
+    g.alpha = 0.6;
+
+    // Player hitbox (green)
+    g.lineStyle(1.5, 0x00ff00);
+    g.drawCircle(state.player.x, state.player.y, state.playerHitboxRadius);
+
+    // Enemy hitbox (red)
+    g.lineStyle(1.5, 0xff0000);
+    for (var i = 0; i < state.enemies.length; i++) {
+      var e = state.enemies[i];
+      g.drawCircle(e.x, e.y, e.hitboxRadius);
+    }
+
+    // Boss hitbox (red, thick)
+    g.lineStyle(2.5, 0xff0000);
+    for (var bi = 0; bi < state.bosses.length; bi++) {
+      var b = state.bosses[bi];
+      g.drawCircle(b.x, b.y, b.hitboxRadius);
+    }
+
+    // Projectile hitbox (yellow)
+    var pSize = (this.imgConfig && this.imgConfig.projectile && this.imgConfig.projectile.size) || 12;
+    g.lineStyle(1.5, 0xffff00);
+    for (var pi = 0; pi < state.projectiles.length; pi++) {
+      var p = state.projectiles[pi];
+      g.drawCircle(p.x, p.y, pSize / 2);
+    }
+
+    // Melee hitbox (blue arc)
+    if (state.meleeVisual) {
+      var mv = state.meleeVisual;
+      g.lineStyle(1.5, 0x4488ff);
+      g.arc(mv.x, mv.y, mv.range, mv.angle - 1.75, mv.angle + 1.75);
+      g.lineTo(mv.x, mv.y);
+      g.closePath();
+    }
+
+    // Valkyrie thrust hitbox (blue rect)
+    if (state.valkyrieVisual && state.valkyrieVisual.thrust) {
+      var vt = state.valkyrieVisual.thrust;
+      var cos = Math.cos(vt.angle);
+      var sin = Math.sin(vt.angle);
+      var px = state.player.x;
+      var py = state.player.y;
+      g.lineStyle(1.5, 0x4488ff);
+      // Draw rotated rectangle
+      var hw = 15;
+      var corners = [
+        [px + cos * 0 - sin * (-hw), py + sin * 0 + cos * (-hw)],
+        [px + cos * vt.range - sin * (-hw), py + sin * vt.range + cos * (-hw)],
+        [px + cos * vt.range - sin * hw, py + sin * vt.range + cos * hw],
+        [px + cos * 0 - sin * hw, py + sin * 0 + cos * hw]
+      ];
+      g.moveTo(corners[0][0], corners[0][1]);
+      for (var ci = 1; ci < 4; ci++) g.lineTo(corners[ci][0], corners[ci][1]);
+      g.closePath();
+    }
+  };
+
+  // === Phase 3: Elite Visuals (Magnets + Chests + Aura) ===
+
+  Renderer.prototype._renderEliteVisuals = function(eliteVisuals, camX, camY) {
+    if (!this._eliteGfx) {
+      this._eliteGfx = new PIXI.Graphics();
+      this._gameContainer.addChild(this._eliteGfx);
+    }
+    this._eliteGfx.clear();
+    if (!eliteVisuals) return;
+
+    var g = this._eliteGfx;
+
+    // Magnets
+    for (var mi = 0; mi < eliteVisuals.magnets.length; mi++) {
+      var mg = eliteVisuals.magnets[mi];
+      if (!this._isVisible(mg.x, mg.y, camX, camY, CULL_MARGIN)) continue;
+      // Red pole
+      g.beginFill(0xff2222);
+      g.drawCircle(mg.x - 6, mg.y - 5, 5);
+      g.endFill();
+      // Blue pole
+      g.beginFill(0x2222ff);
+      g.drawCircle(mg.x + 6, mg.y - 5, 5);
+      g.endFill();
+      // Arc
+      g.lineStyle(4, 0x888888);
+      g.arc(mg.x, mg.y - 5, 10, Math.PI, 0);
+    }
+
+    // Chests
+    for (var ci = 0; ci < eliteVisuals.chests.length; ci++) {
+      var ch = eliteVisuals.chests[ci];
+      if (!this._isVisible(ch.x, ch.y, camX, camY, CULL_MARGIN)) continue;
+      g.lineStyle(0);
+      // Chest body
+      g.beginFill(0xcc8800);
+      g.drawRect(ch.x - 12, ch.y - 6, 24, 16);
+      g.endFill();
+      // Chest face
+      g.beginFill(0xffcc00);
+      g.drawRect(ch.x - 10, ch.y - 4, 20, 12);
+      g.endFill();
+      // Lock
+      g.beginFill(0xffffff);
+      g.drawRect(ch.x - 3, ch.y, 6, 4);
+      g.endFill();
+      // Glow ring
+      g.lineStyle(1, 0xffcc00, 0.5);
+      g.drawCircle(ch.x, ch.y + 2, 14);
+    }
   };
 
   // === Entity Rendering ===
@@ -309,9 +468,22 @@
 
   Renderer.prototype._renderEnemies = function(enemies, camX, camY) {
     var count = 0;
+    // Elite aura graphics
+    if (!this._eliteAuraGfx) {
+      this._eliteAuraGfx = new PIXI.Graphics();
+      this._enemiesContainer.addChild(this._eliteAuraGfx);
+    }
+    this._eliteAuraGfx.clear();
+
     for (var i = 0; i < enemies.length; i++) {
       var e = enemies[i];
       if (!this._isVisible(e.x, e.y, camX, camY, CULL_MARGIN)) continue;
+
+      // Elite golden ring
+      if (e.isElite) {
+        this._eliteAuraGfx.lineStyle(3, 0xffc800, 0.6);
+        this._eliteAuraGfx.drawCircle(e.x, e.y, e.size / 2 + 8);
+      }
 
       var tex = this._textures['enemy_' + e.cfgIdx] || this._getAnimFrame(e) || null;
       var sprite = this._getOrCreateSprite(this._enemySprites, count, tex, this._enemiesContainer);
@@ -319,6 +491,7 @@
       sprite.width = e.size;
       sprite.height = e.size;
       if (!tex) sprite.tint = parseInt((e.color || '#ff4444').replace('#', ''), 16);
+      else sprite.tint = 0xffffff;
       if (e.facingLeft) sprite.scale.x = -Math.abs(sprite.scale.x);
       else sprite.scale.x = Math.abs(sprite.scale.x);
       count++;
@@ -372,10 +545,19 @@
       this._playerContainer.addChild(this._playerSprite);
     }
 
+    // Shine overlay sprite (for hardcore glow)
+    if (!this._shineSprite) {
+      this._shineSprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+      this._shineSprite.anchor.set(0.5);
+      this._shineSprite.visible = false;
+      this._playerContainer.addChild(this._shineSprite);
+    }
+
     // Try to get animated frame
     var tex = this._getAnimFrame(player);
     if (tex) {
       this._playerSprite.texture = tex;
+      this._playerSprite.tint = 0xffffff;
     } else {
       this._playerSprite.tint = 0x4488ff;
     }
@@ -385,16 +567,34 @@
     if (player.facingLeft) this._playerSprite.scale.x = -Math.abs(this._playerSprite.scale.x);
     else this._playerSprite.scale.x = Math.abs(this._playerSprite.scale.x);
 
-    // Ultimate ready glow
-    if (ultimateReady) {
-      this._playerSprite.tint = 0xffd700;
-      this._playerSprite.alpha = 0.8 + Math.sin(Date.now() / 200) * 0.2;
+    // Invulnerability flash
+    if (player.invuln > 0) {
+      this._playerSprite.alpha = 0.5 + Math.sin(Date.now() / 50) * 0.3;
     } else {
       this._playerSprite.alpha = 1;
-      if (tex) this._playerSprite.tint = 0xffffff;
     }
 
-    // HP bar + text + ultimate bar are drawn as Graphics
+    // Hardcore shine effect (using tint overlay)
+    var shineTime = (Date.now() / 1000) % 3.5;
+    var shineDuration = 0.35;
+    var doShine = hardcoreLevel > 0 && shineTime < shineDuration;
+    if (doShine && tex) {
+      var shineColor = 0xffffff;
+      if (hardcoreLevel === 2) shineColor = 0xffd700;
+      else if (hardcoreLevel >= 3) shineColor = 0xb450ff;
+      // Flash the player sprite tint briefly
+      this._playerSprite.tint = shineColor;
+      this._playerSprite.alpha = 0.7 + (shineTime / shineDuration) * 0.3;
+    }
+
+    // Ultimate ready golden glow
+    if (ultimateReady) {
+      var glowPulse = Math.sin(Date.now() / 200) * 0.15 + 0.85;
+      this._playerSprite.tint = 0xffd700;
+      this._playerSprite.alpha = glowPulse;
+    }
+
+    // HP bar + text + ultimate bar
     this._renderPlayerHUD(player, ps, ultimateCharge, ultimateReady);
   };
 
