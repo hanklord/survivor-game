@@ -2,7 +2,7 @@
 (function() {
   window.SG = window.SG || {};
 
-  var BASE_RANGE = 160;
+  var BASE_RANGE = 110;
   var BASE_DAMAGE = 15;
   var BASE_CD = 0.6;
   var HITBOX_DURATION = 0.25;

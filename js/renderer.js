@@ -181,9 +181,12 @@
       // 黃金騎士：用 sprite strip 斬擊特效
       var slashImg = this.images.slash_effect;
       if (state.meleeIsKnight && slashImg) {
-        // 不用 lighter 合成（避免閃爍），用正常混合 + 平滑淡出
         ctx.globalCompositeOperation = 'source-over';
         var baseAlpha = Math.min(1, alpha * 1.5);
+        // Lv13+：黃色色調
+        if (state.player && state.player.level >= 13) {
+          ctx.filter = 'hue-rotate(60deg) saturate(1.5)';
+        }
         var slashFrames = 4;
         var fw = slashImg.width / slashFrames;
         var fh = slashImg.height;
@@ -243,6 +246,7 @@
         ctx.save();
         ctx.translate(mv.x, mv.y);
         ctx.globalCompositeOperation = 'source-over';
+        ctx.filter = 'hue-rotate(60deg) saturate(1.5)'; // 背後也黃色
         ctx.globalAlpha = bsAlpha;
         var bsFacing = (Math.abs(bs.angle) > Math.PI / 2);
         if (bsFacing) ctx.scale(-1, 1);
