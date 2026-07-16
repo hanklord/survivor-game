@@ -166,6 +166,26 @@
     return true;
   };
 
+  /** 取得當前幀資訊（供 PixiJS 渲染器使用） */
+  SpriteAnimator.prototype.getCurrentFrame = function() {
+    var anim = this._anims[this._state];
+    if (!anim || !anim.image || !anim.image.complete) return null;
+    if (!anim.frameWidth) {
+      anim.frameWidth = Math.floor(anim.image.width / anim.cols);
+      anim.frameHeight = Math.floor(anim.image.height / anim.rows);
+    }
+    var col = this._frameIndex % anim.cols;
+    var row = Math.floor(this._frameIndex / anim.cols);
+    return {
+      image: anim.image,
+      frameIndex: this._frameIndex,
+      sx: col * anim.frameWidth,
+      sy: row * anim.frameHeight,
+      sw: anim.frameWidth,
+      sh: anim.frameHeight
+    };
+  };
+
   SG.SpriteAnimator = SpriteAnimator;
   SG.parseSpriteInfo = parseSpriteInfo;
   SG.parseFrameCount = parseFrameCount;
