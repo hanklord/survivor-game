@@ -192,10 +192,6 @@
       if (state.meleeIsKnight && slashImg) {
         ctx.globalCompositeOperation = 'source-over';
         var baseAlpha = Math.min(1, alpha * 1.5);
-        // Lv13+：黃色色調
-        if (state.player && state.player.level >= 13) {
-          ctx.filter = 'hue-rotate(60deg) saturate(1.5)';
-        }
         var slashFrames = 4;
         var fw = slashImg.width / slashFrames;
         var fh = slashImg.height;
@@ -206,17 +202,49 @@
           ctx.scale(-1, 1);
         }
         // 16 幀插值：在 4 原始幀之間 crossfade
-        var virtualPos = mv.progress * (slashFrames - 1); // 0 ~ 3 之間的連續值
+        var virtualPos = mv.progress * (slashFrames - 1);
         var frameA = Math.min(Math.floor(virtualPos), slashFrames - 1);
         var frameB = Math.min(frameA + 1, slashFrames - 1);
-        var blend = virtualPos - frameA; // 0~1 之間，代表 B 幀的比例
-        // 繪製 A 幀
-        ctx.globalAlpha = baseAlpha * (1 - blend);
-        ctx.drawImage(slashImg, frameA * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
-        // 繪製 B 幀（crossfade 疊加）
-        if (blend > 0.01 && frameB !== frameA) {
-          ctx.globalAlpha = baseAlpha * blend;
-          ctx.drawImage(slashImg, frameB * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+        var blend = virtualPos - frameA;
+
+        // Lv13+：用離屏 canvas 加黃色 tint
+        var useYellow = state.player && state.player.level >= 13;
+        if (useYellow) {
+          var oSize = Math.ceil(drawSize) + 4;
+          if (!this._slashOC || this._slashOC.width !== oSize) {
+            this._slashOC = document.createElement('canvas');
+            this._slashOC.width = oSize;
+            this._slashOC.height = oSize;
+          }
+          var oc = this._slashOC;
+          var octx = oc.getContext('2d');
+          octx.clearRect(0, 0, oSize, oSize);
+          // 繪製 A 幀
+          octx.globalAlpha = 1 - blend;
+          octx.drawImage(slashImg, frameA * fw, 0, fw, fh, 0, 0, oSize, oSize);
+          if (blend > 0.01 && frameB !== frameA) {
+            octx.globalAlpha = blend;
+            octx.drawImage(slashImg, frameB * fw, 0, fw, fh, 0, 0, oSize, oSize);
+          }
+          // 黃色覆蓋（source-atop）
+          octx.globalCompositeOperation = 'source-atop';
+          octx.globalAlpha = 0.5;
+          octx.fillStyle = '#ffcc00';
+          octx.fillRect(0, 0, oSize, oSize);
+          octx.globalCompositeOperation = 'source-over';
+          octx.globalAlpha = 1;
+          // 畫到主 canvas
+          ctx.globalAlpha = baseAlpha;
+          ctx.drawImage(oc, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+        } else {
+          // 繪製 A 幀（正常色）
+          ctx.globalAlpha = baseAlpha * (1 - blend);
+          ctx.drawImage(slashImg, frameA * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+          // 繪製 B 幀（crossfade 疊加）
+          if (blend > 0.01 && frameB !== frameA) {
+            ctx.globalAlpha = baseAlpha * blend;
+            ctx.drawImage(slashImg, frameB * fw, 0, fw, fh, -drawSize * 0.2, -drawSize / 2, drawSize, drawSize);
+          }
         }
       } else {
         ctx.rotate(mv.angle);
@@ -255,8 +283,6 @@
         ctx.save();
         ctx.translate(mv.x, mv.y);
         ctx.globalCompositeOperation = 'source-over';
-        ctx.filter = 'hue-rotate(60deg) saturate(1.5)'; // 背後也黃色
-        ctx.globalAlpha = bsAlpha;
         var bsFacing = (Math.abs(bs.angle) > Math.PI / 2);
         if (bsFacing) ctx.scale(-1, 1);
         var bsVP = bs.progress * (4 - 1);
@@ -266,12 +292,30 @@
         var bsFW = slashImg.width / 4;
         var bsFH = slashImg.height;
         var bsDS = mv.range * 1.2;
-        ctx.globalAlpha = bsAlpha * (1 - bsBlend);
-        ctx.drawImage(slashImg, bsA * bsFW, 0, bsFW, bsFH, -bsDS * 0.2, -bsDS / 2, bsDS, bsDS);
-        if (bsBlend > 0.01 && bsB !== bsA) {
-          ctx.globalAlpha = bsAlpha * bsBlend;
-          ctx.drawImage(slashImg, bsB * bsFW, 0, bsFW, bsFH, -bsDS * 0.2, -bsDS / 2, bsDS, bsDS);
+        // 離屏黃色 tint（背後揮砍永遠是黃色，因為 Lv13+ 才有）
+        var bsOSize = Math.ceil(bsDS) + 4;
+        if (!this._slashOC || this._slashOC.width !== bsOSize) {
+          this._slashOC = document.createElement('canvas');
+          this._slashOC.width = bsOSize;
+          this._slashOC.height = bsOSize;
         }
+        var bsOC = this._slashOC;
+        var bsOctx = bsOC.getContext('2d');
+        bsOctx.clearRect(0, 0, bsOSize, bsOSize);
+        bsOctx.globalAlpha = 1 - bsBlend;
+        bsOctx.drawImage(slashImg, bsA * bsFW, 0, bsFW, bsFH, 0, 0, bsOSize, bsOSize);
+        if (bsBlend > 0.01 && bsB !== bsA) {
+          bsOctx.globalAlpha = bsBlend;
+          bsOctx.drawImage(slashImg, bsB * bsFW, 0, bsFW, bsFH, 0, 0, bsOSize, bsOSize);
+        }
+        bsOctx.globalCompositeOperation = 'source-atop';
+        bsOctx.globalAlpha = 0.5;
+        bsOctx.fillStyle = '#ffcc00';
+        bsOctx.fillRect(0, 0, bsOSize, bsOSize);
+        bsOctx.globalCompositeOperation = 'source-over';
+        bsOctx.globalAlpha = 1;
+        ctx.globalAlpha = bsAlpha;
+        ctx.drawImage(bsOC, -bsDS * 0.2, -bsDS / 2, bsDS, bsDS);
         ctx.restore();
       }
     }
