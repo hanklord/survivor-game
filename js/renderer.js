@@ -694,11 +694,11 @@
       ctx.strokeRect(barX, barY, barW, barH);
       // 名稱在血條下方
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px ' + (window.GAME_FONT || 'Cinzel, serif');
+      ctx.font = 'bold 24px ' + (window.GAME_FONT || 'Cinzel, serif');
       ctx.textAlign = 'center';
       ctx.strokeStyle = '#000000'; ctx.lineWidth = 3;
-      ctx.strokeText('👹 ' + bName, W / 2, barY + barH + 14);
-      ctx.fillText('👹 ' + bName, W / 2, barY + barH + 14);
+      ctx.strokeText('👹 ' + bName, W / 2, barY + barH + 22);
+      ctx.fillText('👹 ' + bName, W / 2, barY + barH + 22);
       ctx.textAlign = 'left';
     }
   };
