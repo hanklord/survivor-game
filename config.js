@@ -20,7 +20,7 @@ window.GAME_CONFIG = {
     { "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 6 } }, "size": 101, "hitboxRadius": 51, "color": "#440044", "hp": 20, "speed": 54, "damage": 20 }
   ],
   "bosses": [
-    { "name": "紫龍", "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "hitboxRadius": 72, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 30 },
+    { "name": "綠魔", "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "hitboxRadius": 72, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 30 },
     { "name": "大猩猩", "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gorilla_idle_8f.png", "fps": 7 } }, "size": 234, "hitboxRadius": 117, "color": "#553311", "hp": 800, "speed": 24, "damage": 22, "spawnTime": 60 },
     { "name": "蠍子王", "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_boss_scorpion_king_8f_4c2r.png", "fps": 8 } }, "size": 180, "hitboxRadius": 90, "hp": 600, "speed": 33, "damage": 20, "spawnTime": 30 },
     { "name": "沙蟲", "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_boss_sandworm_8f_4c2r.png", "fps": 8 } }, "size": 200, "hitboxRadius": 100, "hp": 900, "speed": 27, "damage": 24, "spawnTime": 60 },
@@ -30,7 +30,7 @@ window.GAME_CONFIG = {
     { "name": "牛頭怪", "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gnu_idle_5f.png", "fps": 7 } }, "size": 198, "hitboxRadius": 99, "color": "#44ccff", "hp": 2000, "speed": 18, "damage": 35, "spawnTime": 60 },
     { "name": "暗法師", "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage3_idle_4f.png", "fps": 6 } }, "size": 216, "hitboxRadius": 108, "color": "#008844", "hp": 2500, "speed": 21, "damage": 40, "spawnTime": 30 },
     { "name": "機械龍", "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_machine_dragon_idle_4f.png", "fps": 6 } }, "size": 162, "hitboxRadius": 81, "color": "#4400ff", "hp": 2000, "speed": 30, "damage": 45, "spawnTime": 60 },
-    { "name": "史萊姆王", "level": 11, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 180, "hitboxRadius": 90, "color": "#ffcc00", "hp": 3000, "speed": 27, "damage": 50, "spawnTime": 30 },
+    { "name": "原始法師", "level": 11, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 180, "hitboxRadius": 90, "color": "#ffcc00", "hp": 3000, "speed": 27, "damage": 50, "spawnTime": 30 },
     { "name": "暗黑巨龍", "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dark_dragon_8f_4c2r.png", "fps": 6 } }, "size": 432, "hitboxRadius": 216, "color": "#000000", "hp": 8000, "speed": 24, "damage": 60, "spawnTime": 60 }
   ],
   "projectile": { "image": null, "color": "#ff6600", "size": 24 },
@@ -38,7 +38,7 @@ window.GAME_CONFIG = {
   "background": { "color": "#1a1a2e", "image": null },
   "audio": { "enabled": true, "volume": 0.5 },
   "levels": [
-    { "name": "草地", "bgColor": "#1a2e1a", "bgImage": "assets/backgrounds/grass.png", "bgm": "assets/audio/bgm.mp3", "duration": 90, "enemySpeedMult": 1.0, "enemyIndices": [0, 3, 4], "bossIndices": [0, 1] },
+    { "name": "草原", "bgColor": "#1a2e1a", "bgImage": "assets/backgrounds/grass.png", "bgm": "assets/audio/bgm.mp3", "duration": 90, "enemySpeedMult": 1.0, "enemyIndices": [0, 3, 4], "bossIndices": [0, 1] },
     { "name": "沙漠", "bgColor": "#2e2a1a", "bgImage": "assets/backgrounds/desert.png", "bgm": "assets/audio/bgm_desert.mp3", "duration": 100, "enemySpeedMult": 1.2, "enemyIndices": [1, 2], "bossIndices": [2, 3] },
     { "name": "洞窟", "bgColor": "#1a1a2e", "bgImage": "assets/backgrounds/cave.png", "bgm": "assets/audio/bgm_level2.mp3", "duration": 120, "enemySpeedMult": 1.5, "enemyIndices": [3, 4, 5, 6], "bossIndices": [4, 5] },
     { "name": "沼澤", "bgColor": "#1a2e2a", "bgImage": "assets/backgrounds/swamp.png", "bgm": "assets/audio/bgm_level3.mp3", "duration": 150, "enemySpeedMult": 2.0, "enemyIndices": [5, 6, 7, 8], "bossIndices": [6, 7] },
