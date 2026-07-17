@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V235";
+window.GAME_VERSION = "V236";
 window.HARDCORE_HP_MULTIPLIER = 3.0; 
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.DEBUG_SHOW_HITBOX = false;
@@ -20,18 +20,18 @@ window.GAME_CONFIG = {
     { "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 6 } }, "size": 101, "hitboxRadius": 51, "color": "#440044", "hp": 20, "speed": 54, "damage": 20 }
   ],
   "bosses": [
-    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "hitboxRadius": 72, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 30 },
-    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gorilla_idle_8f.png", "fps": 7 } }, "size": 234, "hitboxRadius": 117, "color": "#553311", "hp": 800, "speed": 24, "damage": 22, "spawnTime": 60 },
-    { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_boss_scorpion_king_8f_4c2r.png", "fps": 8 } }, "size": 180, "hitboxRadius": 90, "hp": 600, "speed": 33, "damage": 20, "spawnTime": 30 },
-    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_boss_sandworm_8f_4c2r.png", "fps": 8 } }, "size": 200, "hitboxRadius": 100, "hp": 900, "speed": 27, "damage": 24, "spawnTime": 60 },
-    { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_beetle_knight_idle_3f.png", "fps": 8 } }, "size": 180, "hitboxRadius": 90, "color": "#1a3366", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 30 },
-    { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dragon_8f_4c2r.png", "fps": 6 } }, "size": 216, "hitboxRadius": 108, "color": "#ff0066", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 60 },
-    { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_skeletonking_9f.png", "fps": 6 } }, "size": 171, "hitboxRadius": 86, "color": "#ff4400", "hp": 1500, "speed": 33, "damage": 30, "spawnTime": 30 },
-    { "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gnu_idle_5f.png", "fps": 7 } }, "size": 198, "hitboxRadius": 99, "color": "#44ccff", "hp": 2000, "speed": 18, "damage": 35, "spawnTime": 60 },
-    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage3_idle_4f.png", "fps": 6 } }, "size": 216, "hitboxRadius": 108, "color": "#008844", "hp": 2500, "speed": 21, "damage": 40, "spawnTime": 30 },
-    { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_machine_dragon_idle_4f.png", "fps": 6 } }, "size": 162, "hitboxRadius": 81, "color": "#4400ff", "hp": 2000, "speed": 30, "damage": 45, "spawnTime": 60 },
-    { "level": 11, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 180, "hitboxRadius": 90, "color": "#ffcc00", "hp": 3000, "speed": 27, "damage": 50, "spawnTime": 30 },
-    { "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dark_dragon_8f_4c2r.png", "fps": 6 } }, "size": 432, "hitboxRadius": 216, "color": "#000000", "hp": 8000, "speed": 24, "damage": 60, "spawnTime": 60 }
+    { "name": "紫龍", "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "hitboxRadius": 72, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 30 },
+    { "name": "大猩猩", "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gorilla_idle_8f.png", "fps": 7 } }, "size": 234, "hitboxRadius": 117, "color": "#553311", "hp": 800, "speed": 24, "damage": 22, "spawnTime": 60 },
+    { "name": "蠍子王", "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_boss_scorpion_king_8f_4c2r.png", "fps": 8 } }, "size": 180, "hitboxRadius": 90, "hp": 600, "speed": 33, "damage": 20, "spawnTime": 30 },
+    { "name": "沙蟲", "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_boss_sandworm_8f_4c2r.png", "fps": 8 } }, "size": 200, "hitboxRadius": 100, "hp": 900, "speed": 27, "damage": 24, "spawnTime": 60 },
+    { "name": "甲蟲騎士", "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_beetle_knight_idle_3f.png", "fps": 8 } }, "size": 180, "hitboxRadius": 90, "color": "#1a3366", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 30 },
+    { "name": "火龍", "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dragon_8f_4c2r.png", "fps": 6 } }, "size": 216, "hitboxRadius": 108, "color": "#ff0066", "hp": 1200, "speed": 27, "damage": 28, "spawnTime": 60 },
+    { "name": "骷髏王", "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_skeletonking_9f.png", "fps": 6 } }, "size": 171, "hitboxRadius": 86, "color": "#ff4400", "hp": 1500, "speed": 33, "damage": 30, "spawnTime": 30 },
+    { "name": "牛頭怪", "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_gnu_idle_5f.png", "fps": 7 } }, "size": 198, "hitboxRadius": 99, "color": "#44ccff", "hp": 2000, "speed": 18, "damage": 35, "spawnTime": 60 },
+    { "name": "暗法師", "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_mage3_idle_4f.png", "fps": 6 } }, "size": 216, "hitboxRadius": 108, "color": "#008844", "hp": 2500, "speed": 21, "damage": 40, "spawnTime": 30 },
+    { "name": "機械龍", "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_machine_dragon_idle_4f.png", "fps": 6 } }, "size": 162, "hitboxRadius": 81, "color": "#4400ff", "hp": 2000, "speed": 30, "damage": 45, "spawnTime": 60 },
+    { "name": "史萊姆王", "level": 11, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_kingslime_idle_4f.png", "fps": 6 } }, "size": 180, "hitboxRadius": 90, "color": "#ffcc00", "hp": 3000, "speed": 27, "damage": 50, "spawnTime": 30 },
+    { "name": "暗黑巨龍", "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/big_dark_dragon_8f_4c2r.png", "fps": 6 } }, "size": 432, "hitboxRadius": 216, "color": "#000000", "hp": 8000, "speed": 24, "damage": 60, "spawnTime": 60 }
   ],
   "projectile": { "image": null, "color": "#ff6600", "size": 24 },
   "xpGem": { "image": "assets/xp_gem.png", "color": "#00ff88" },
