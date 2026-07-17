@@ -18,7 +18,7 @@
 
   function Game() {
     this.canvas = document.getElementById('game');
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = null; // PixiJS manages the canvas context
     this.W = 0;
     this.H = 0;
 
@@ -170,14 +170,16 @@
       targetH = screenH;
       targetW = Math.floor(targetH * 9 / 16);
     }
-    this.W = this.canvas.width = targetW;
-    this.H = this.canvas.height = targetH;
+    this.W = targetW;
+    this.H = targetH;
     var left = Math.floor((screenW - targetW) / 2);
     var top = Math.floor((screenH - targetH) / 2);
-    // Canvas 居中
+    // Canvas 居中（PixiJS 管理尺寸，只設定位置和 CSS 大小）
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = left + 'px';
     this.canvas.style.top = top + 'px';
+    this.canvas.style.width = targetW + 'px';
+    this.canvas.style.height = targetH + 'px';
     // UI 容器同步
     var container = document.getElementById('game-container');
     if (container) {
@@ -186,14 +188,10 @@
       container.style.width = targetW + 'px';
       container.style.height = targetH + 'px';
     }
-    // bg-canvas
+    // bg-canvas (unused with PixiJS, hide it)
     var bgCanvas = document.getElementById('bg-canvas');
     if (bgCanvas) {
-      bgCanvas.width = targetW;
-      bgCanvas.height = targetH;
-      bgCanvas.style.position = 'absolute';
-      bgCanvas.style.left = left + 'px';
-      bgCanvas.style.top = top + 'px';
+      bgCanvas.style.display = 'none';
     }
     this.renderer.onResize(this.W, this.H);
   };

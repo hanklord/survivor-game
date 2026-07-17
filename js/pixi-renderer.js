@@ -24,10 +24,11 @@
       view: canvas,
       width: this.W,
       height: this.H,
-      backgroundColor: 0x1a1a2e,
+      background: 0x1a1a2e,
       antialias: false,
       autoDensity: true,
-      autoStart: false
+      autoStart: false,
+      hello: false
     });
 
     // Containers (layers)
@@ -136,6 +137,11 @@
     this.W = W;
     this.H = H;
     this.app.renderer.resize(W, H);
+    // Update background tile size if exists
+    if (this._bgTile) {
+      this._bgTile.width = W * 3;
+      this._bgTile.height = H * 3;
+    }
   };
 
   Renderer.prototype.init = function(images, imgConfig) {
@@ -156,7 +162,9 @@
     } else {
       this._bgColor = color;
     }
-    this.app.renderer.background.color = this._bgColor;
+    if (this.app.renderer.background) {
+      this.app.renderer.background.color.setValue(this._bgColor);
+    }
   };
 
   Renderer.prototype.setBgImage = function(img) {
@@ -169,7 +177,6 @@
     if (img) {
       var tex = PIXI.Texture.from(img);
       this._bgTile = new PIXI.TilingSprite(tex, this.W * 3, this.H * 3);
-      this._bgTile.anchor = undefined; // TilingSprite doesn't use anchor
       this._bgContainer.addChild(this._bgTile);
     }
   };
