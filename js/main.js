@@ -298,6 +298,18 @@
         self.audio.enabled = false;
       }
     };
+
+    // Hitbox 開關
+    var hitboxCheck = document.getElementById('set-hitbox');
+    var savedHitbox = localStorage.getItem('survivor_hitbox');
+    window.DEBUG_SHOW_HITBOX = savedHitbox === 'on';
+    if (hitboxCheck) {
+      hitboxCheck.checked = window.DEBUG_SHOW_HITBOX;
+      hitboxCheck.onchange = function() {
+        window.DEBUG_SHOW_HITBOX = hitboxCheck.checked;
+        localStorage.setItem('survivor_hitbox', hitboxCheck.checked ? 'on' : 'off');
+      };
+    }
   };
 
   Game.prototype._loadImages = function() {
