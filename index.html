@@ -6,7 +6,7 @@
 <title>Endless Heroes</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cinzel', 'Noto Sans TC', serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cinzel', 'Noto Sans TC', serif; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 body { background: #000; overflow: hidden; touch-action: none; }
 #game-container { position: absolute; overflow: hidden; }
 canvas { display: block; position: absolute; top: 0; left: 0; }
@@ -81,6 +81,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 </div><!-- /game-container -->
 
 <!-- 依序載入模組（相容 file:// 協議） -->
+<script>document.addEventListener('contextmenu',function(e){e.preventDefault()});document.addEventListener('selectstart',function(e){e.preventDefault()});</script>
 <script src="config.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/object-pool.js"></script>
