@@ -3,7 +3,8 @@
   window.SG = window.SG || {};
 
   var MAX_DT = 0.05;
-  var MAX_ENEMIES = 30;
+  var MAX_ENEMIES = 60;
+  var TARGET_ENEMY_COUNT = 30; // 場上目標怪物數量（擊殺即補充）
   var MAX_XP_GEMS = 50;
   var MAX_DAMAGE_NUMBERS = 20;
   var LOW_FPS_THRESHOLD = 20;
@@ -502,6 +503,9 @@
     var startBgm = this.levelManager.getCurrent().bgm || 'assets/audio/bgm.mp3';
     this.audio.switchBGM(startBgm);
 
+    // 初始填充怪物到目標數量
+    this._fillEnemies();
+
     requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
   };
 
@@ -799,7 +803,7 @@
       if (!this.particles[i].update(dt)) { this.particlePool.release(this.particles[i]); this.particles.splice(i, 1); }
     }
 
-    // 波次
+    // 波次（作為加強波，補充超過 TARGET 的額外怪物）
     var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this.levelManager.getCurrent().enemyIndices);
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
@@ -811,6 +815,11 @@
         console.log('[Hardcore] Enemy HP:', spawned[i].hp, 'mult:', hcMult.toFixed(2));
       }
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
+    }
+
+    // 持續補充：確保場上怪物維持在目標數量
+    while (this.enemies.length < TARGET_ENEMY_COUNT) {
+      this._spawnOneEnemy();
     }
 
     // Boss 排程（擊殺數觸發：20 隻出第一隻 Boss，50 隻出第二隻）
@@ -885,6 +894,8 @@
       this._removeFrom(this.enemies, e);
       // 精英怪掉落寶箱
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
+      // 擊殺即補充：維持場上怪物數量
+      if (this.enemies.length < TARGET_ENEMY_COUNT) this._spawnOneEnemy();
     }
     this.kills++;
     if (!isBoss) this._levelKills++;
@@ -957,6 +968,8 @@
       self._levelKills = 0;
       self._bossesSpawnedThisLevel = 0;
       self.waveManager = new SG.WaveManager(self.imgConfig);
+      // 新關卡填充怪物
+      self._fillEnemies();
     });
   };
 
@@ -986,6 +999,9 @@
     // 隱藏結算畫面
     if (this.ui.els.levelClear) this.ui.els.levelClear.style.display = 'none';
 
+    // 填充怪物
+    this._fillEnemies();
+
     // 繼續遊戲循環
     var self = this;
     requestAnimationFrame(function(ts) { self.lastTime = ts; self._loop(ts); });
@@ -1006,6 +1022,30 @@
   Game.prototype._removeFrom = function(arr, obj) {
     var idx = arr.indexOf(obj);
     if (idx !== -1) arr.splice(idx, 1);
+  };
+
+  // 在螢幕外生成一隻敵人（擊殺即補充用）
+  Game.prototype._spawnOneEnemy = function() {
+    if (this.enemies.length >= MAX_ENEMIES) return;
+    var enemyIndices = this.levelManager.getCurrent().enemyIndices;
+    var pick = SG.Enemy.pickConfig(this.imgConfig, this.gameTime, enemyIndices);
+    // 隨機在螢幕外 60~120px 處生成
+    var angle = Math.random() * Math.PI * 2;
+    var dist = Math.max(this.W, this.H) * 0.55 + 60 + Math.random() * 60;
+    var x = this.player.x + Math.cos(angle) * dist;
+    var y = this.player.y + Math.sin(angle) * dist;
+    var enemy = new SG.Enemy(x, y, pick.cfg, pick.idx);
+    enemy.animator = this._buildAnimator('enemy_' + pick.idx, (this.imgConfig.enemies || [])[pick.idx]);
+    var hcMult = this.getHardcoreHPMult();
+    if (hcMult > 1) { enemy.hp = Math.round(enemy.hp * hcMult); enemy.maxHp = enemy.hp; }
+    this.enemies.push(enemy);
+  };
+
+  // 填充到目標數量（開場/關卡切換用）
+  Game.prototype._fillEnemies = function() {
+    while (this.enemies.length < TARGET_ENEMY_COUNT) {
+      this._spawnOneEnemy();
+    }
   };
 
   Game.prototype._showLevelUp = function() {
