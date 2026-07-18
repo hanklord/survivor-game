@@ -870,13 +870,18 @@
     var shineDuration = 0.35;
     var doShine = hardcoreLevel > 0 && shineTime < shineDuration;
 
-    // Lv10+ 天使翅膀（繪製在角色後方）
+    // Lv10+ 天使翅膀（繪製在角色後方，輕微拍動動畫）
     var wingsImg = this.images.wings_lv10;
     if (wingsImg && player.level >= 10) {
       var wingW = ps * 1.0;
-      var wingH = wingW * (wingsImg.height / wingsImg.width);
+      var wingBaseH = wingW * (wingsImg.height / wingsImg.width);
+      // Sin 波拍動：週期 1.2 秒，scaleY 0.92~1.0，Y 偏移 ±2px
+      var flapPhase = (Date.now() / 1200) * Math.PI * 2;
+      var flapScale = 0.96 + Math.sin(flapPhase) * 0.04; // 0.92~1.0
+      var flapOffsetY = Math.sin(flapPhase) * 2; // ±2px
+      var wingH = wingBaseH * flapScale;
       var wingX = player.x - wingW / 2;
-      var wingY = player.y - wingH * 0.45 - 5; // 上移 5 單位
+      var wingY = player.y - wingH * 0.45 - 5 + flapOffsetY;
       ctx.globalAlpha = 0.9;
       ctx.drawImage(wingsImg, wingX, wingY, wingW, wingH);
       ctx.globalAlpha = 1;
