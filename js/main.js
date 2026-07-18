@@ -367,6 +367,7 @@
     load('magnet_img', 'assets/magnet.png');
     load('shield_icon', 'assets/shield_orbit.png');
     load('slash_effect', 'assets/strips/slash_effect_4f.png');
+    load('wings_lv10', 'assets/accessories/wings_lv10.png');
     // 載入各關卡背景圖
     (cfg.levels || []).forEach(function(lv, i) {
       if (lv.bgImage) load('level_bg_' + i, lv.bgImage);

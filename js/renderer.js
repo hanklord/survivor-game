@@ -869,6 +869,18 @@
     var shineTime = (Date.now() / 1000) % 3.5;
     var shineDuration = 0.35;
     var doShine = hardcoreLevel > 0 && shineTime < shineDuration;
+
+    // Lv10+ 天使翅膀（繪製在角色後方）
+    var wingsImg = this.images.wings_lv10;
+    if (wingsImg && player.level >= 10) {
+      var wingW = ps * 2.0;
+      var wingH = wingW * (wingsImg.height / wingsImg.width);
+      var wingX = player.x - wingW / 2;
+      var wingY = player.y - wingH * 0.45; // 稍微偏上，對齊角色背部
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(wingsImg, wingX, wingY, wingW, wingH);
+      ctx.globalAlpha = 1;
+    }
     var shineColor = '#ffffff';
     if (hardcoreLevel === 2) shineColor = '#ffd700';
     else if (hardcoreLevel >= 3) shineColor = '#b450ff';
