@@ -873,10 +873,10 @@
     // Lv10+ 天使翅膀（繪製在角色後方）
     var wingsImg = this.images.wings_lv10;
     if (wingsImg && player.level >= 10) {
-      var wingW = ps * 2.0;
+      var wingW = ps * 1.0;
       var wingH = wingW * (wingsImg.height / wingsImg.width);
       var wingX = player.x - wingW / 2;
-      var wingY = player.y - wingH * 0.45; // 稍微偏上，對齊角色背部
+      var wingY = player.y - wingH * 0.45 - 5; // 上移 5 單位
       ctx.globalAlpha = 0.9;
       ctx.drawImage(wingsImg, wingX, wingY, wingW, wingH);
       ctx.globalAlpha = 1;
