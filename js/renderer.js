@@ -562,6 +562,49 @@
       }
     }
 
+    // Hardcore Boss 遠距離攻擊視覺
+    if (state.bossProjectiles) {
+      var bp = state.bossProjectiles;
+      // 能量彈 + 拖尾
+      for (var bpi = 0; bpi < bp.projectiles.length; bpi++) {
+        var bpp = bp.projectiles[bpi];
+        // 拖尾
+        for (var ti = 0; ti < bpp.trail.length; ti++) {
+          var t = bpp.trail[ti];
+          var trailAlpha = (ti + 1) / bpp.trail.length * 0.4;
+          ctx.globalAlpha = trailAlpha;
+          ctx.fillStyle = '#880000';
+          ctx.beginPath(); ctx.arc(t.x, t.y, bp.size * 0.4, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        // 能量彈本體（暗紅色發光球）
+        ctx.fillStyle = '#ff2200';
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.arc(bpp.x, bpp.y, bp.size / 2, 0, Math.PI * 2); ctx.fill();
+        // 內核
+        ctx.fillStyle = '#ffaa00';
+        ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.arc(bpp.x, bpp.y, bp.size * 0.25, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+      // 衝擊圈
+      for (var ii = 0; ii < bp.impacts.length; ii++) {
+        var imp = bp.impacts[ii];
+        var impAlpha = (1 - imp.progress) * 0.8;
+        var impRadius = 20 + imp.progress * 30;
+        ctx.globalAlpha = impAlpha;
+        ctx.strokeStyle = '#ff4400';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(imp.x, imp.y, impRadius, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(imp.x, imp.y, impRadius * 0.5, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1;
+    }
+
     // 升級聖光特效
     if (state.levelUpEffect && state.levelUpEffect.active) {
       state.levelUpEffect.draw(ctx, camX, camY, W, H);

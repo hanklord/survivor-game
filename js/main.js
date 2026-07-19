@@ -424,6 +424,7 @@
     this._eliteSpawner = new SG.EliteSpawner(this.player);
     this._combo = new SG.ComboSystem();
     this._bomb = new SG.BombSystem();
+    this._bossProjectiles = new SG.BossProjectileSystem();
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -592,6 +593,7 @@
       levelUpEffect: this._levelUpEffect,
       hardcoreVFX: this._hardcoreVFX,
       hardcoreLevel: this.hardcoreLevel,
+      bossProjectiles: this._bossProjectiles ? this._bossProjectiles.getVisual() : null,
       debugHitbox: window.DEBUG_SHOW_HITBOX,
       playerHitboxRadius: this.player.hitboxRadius,
       dt: dt
@@ -758,6 +760,15 @@
       b.updateAnimation(dt);
       if (SG.dist(this.player, b) < (this.player.hitboxRadius + b.hitboxRadius)) {
         if (this._playerTakeDamage(b.damage, b)) return;
+      }
+    }
+
+    // Hardcore Boss 遠距離攻擊
+    if (this.hardcoreLevel > 0 && this._bossProjectiles) {
+      this._bossProjectiles.update(dt, this.bosses, this.player, this.hardcoreLevel);
+      var bpDmg = this._bossProjectiles.getHits();
+      if (bpDmg > 0) {
+        if (this._playerTakeDamage(bpDmg, null)) return;
       }
     }
 
@@ -967,6 +978,7 @@
       self.bosses = [];
       self._levelKills = 0;
       self._bossesSpawnedThisLevel = 0;
+      if (self._bossProjectiles) self._bossProjectiles.reset();
       self.waveManager = new SG.WaveManager(self.imgConfig);
       // 新關卡填充怪物
       self._fillEnemies();
@@ -988,6 +1000,7 @@
     this.bosses = [];
     this._levelKills = 0;
     this._bossesSpawnedThisLevel = 0;
+    if (this._bossProjectiles) this._bossProjectiles.reset();
 
     // 套用背景
     this._applyLevelBg();
