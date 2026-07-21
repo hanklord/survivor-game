@@ -151,6 +151,7 @@
     this._selectedCharacter = null;
     this._archerAttack = null;
     this._valkyrieAttack = null;
+    this._boomerangAttack = null;
     this._passiveItems = new SG.PassiveItems();
     this._rushWave = new SG.RushWave();
     this._eliteSpawner = new SG.EliteSpawner(null);
@@ -461,6 +462,13 @@
       this.player.spriteDefaultRight = true;
       this._archerAttack = new SG.ArcherAttack(this.player);
       this._meleeAttack = null;
+    } else if (this._selectedCharacter.id === 'boomerang') {
+      var boomCfg = { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_run_8f.png', fps: 10 } } };
+      this.player.animator = this._buildAnimator('boomerang', boomCfg);
+      this.player.spriteDefaultRight = true;
+      this._boomerangAttack = new SG.BoomerangAttack(this.player);
+      this._meleeAttack = null;
+      this._archerAttack = null;
     } else {
       this.player.animator = this._buildAnimator('player', this.imgConfig.player);
       this.player.spriteDefaultRight = true; // 法師面向右
@@ -576,6 +584,8 @@
       archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
       archerFireZones: this._archerAttack ? this._archerAttack.getFireZones() : [],
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
+      boomerangVisual: this._boomerangAttack ? this._boomerangAttack.getVisual() : null,
+      boomerangChainVisual: this._boomerangAttack ? this._boomerangAttack.getChainVisual() : null,
       eliteVisuals: this._eliteSpawner.getVisuals(),
       piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,
       damageNumbers: this._damageNumbers,
@@ -672,6 +682,17 @@
           var ac = this.player.critChance && Math.random() < this.player.critChance;
           if (ac) { ahits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
           this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, ac);
+        }
+      }
+    } else if (this.player.attackType === 'boomerang' && this._boomerangAttack) {
+      var boomHits = this._boomerangAttack.update(dt, this.enemies, this.bosses);
+      for (var i = 0; i < boomHits.length; i++) this._handleKill(boomHits[i]);
+      var bhits = this._boomerangAttack.getLastHits();
+      for (var i = 0; i < bhits.length; i++) {
+        if (!this._lowQuality) {
+          var bc = this.player.critChance && Math.random() < this.player.critChance;
+          if (bc) { bhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          this._damageNumbers.add(bhits[i].x, bhits[i].y, bhits[i].dmg, bc);
         }
       }
     } else {
@@ -1068,6 +1089,7 @@
     this.player.damage *= 1.01;
     if (this._meleeAttack) this._meleeAttack.damage *= 1.01;
     if (this._valkyrieAttack) this._valkyrieAttack.damage *= 1.01;
+    if (this._boomerangAttack) this._boomerangAttack.damage *= 1.01;
     this.audio.playLevelUp();
     // 觸發聖光特效（遊戲不暫停，繼續跑）
     if (this._levelUpEffect) this._levelUpEffect.trigger(this.player.x, this.player.y, this.player);
@@ -1078,7 +1100,7 @@
       self._levelUpPending = false;
       self.ui.showLevelUp(self.player, self.weaponManager, self.skillTree, function() {
         self.levelingUp = false;
-      }, self._meleeAttack, self._archerAttack, self._passiveItems, self._valkyrieAttack);
+      }, self._meleeAttack, self._archerAttack, self._passiveItems, self._valkyrieAttack, self._boomerangAttack);
     }, 1500); // 1.3s + 0.2s
   };
 

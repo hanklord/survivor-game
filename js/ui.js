@@ -116,7 +116,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -168,6 +168,12 @@
       var nextType = valkyrieAttack.getNextUpgradeType();
       var desc = nextType === 'range' ? '距離延長' : '頻率提升';
       pool.push({ name: '🔱 長槍強化 Lv.' + (valkyrieAttack.level + 1) + ' (' + desc + ')', action: function() { valkyrieAttack.upgrade(); } });
+    }
+
+    // 迴力鏢手專屬
+    if (boomerangAttack && boomerangAttack.level < 20) {
+      var bDesc = (boomerangAttack.level % 2 === 0) ? '數量+1' : '頻率提升';
+      pool.push({ name: '🪃 迴力鏢強化 Lv.' + (boomerangAttack.level + 1) + ' (' + bDesc + ')', action: function() { boomerangAttack.upgrade(); } });
     }
 
     // 被動道具

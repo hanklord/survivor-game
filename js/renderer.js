@@ -354,6 +354,7 @@
       }
       drawThrust(vvData.thrust);
       drawThrust(vvData.thrust2);
+      drawThrust(vvData.thrust3);
       // 震退波（跟隨玩家位置）
       if (vvData.shockwaves) {
         for (var si = 0; si < vvData.shockwaves.length; si++) {
@@ -499,6 +500,57 @@
         ctx.globalAlpha = 1;
         ctx.restore();
       }
+    }
+    // 迴力鏢視覺
+    if (state.boomerangVisual) {
+      var booms = state.boomerangVisual;
+      for (var bi = 0; bi < booms.length; bi++) {
+        var bm = booms[bi];
+        if (!this._isVisible(bm.x, bm.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(bm.x, bm.y);
+        ctx.rotate(bm.angle);
+        // V 形迴力鏢
+        ctx.strokeStyle = '#ddaa44';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.moveTo(-10, -8);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(-10, 8);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    }
+    // 迴力鏢連鎖閃電
+    if (state.boomerangChainVisual) {
+      var chains = state.boomerangChainVisual;
+      ctx.save();
+      ctx.globalAlpha = 0.8;
+      ctx.strokeStyle = '#ffffff';
+      ctx.shadowColor = '#aa44ff';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 2.5;
+      for (var cci = 0; cci < chains.length; cci++) {
+        var segs = chains[cci].segments;
+        for (var si = 0; si < segs.length; si++) {
+          var seg = segs[si];
+          ctx.beginPath();
+          ctx.moveTo(seg.x1, seg.y1);
+          var dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+          for (var zi = 1; zi < 4; zi++) {
+            var t = zi / 4;
+            ctx.lineTo(seg.x1 + dx * t + (Math.random() - 0.5) * 15, seg.y1 + dy * t + (Math.random() - 0.5) * 15);
+          }
+          ctx.lineTo(seg.x2, seg.y2);
+          ctx.stroke();
+        }
+      }
+      ctx.shadowBlur = 0;
+      ctx.restore();
     }
     if (!state.lowQuality) this._drawParticles(state.particles, camX, camY);
 

@@ -16,6 +16,7 @@
     this.timer = 0;
     this._visual = null;
     this._visual2 = null;
+    this._visual3 = null;
     this._shockwaves = [];
     this._lastHits = [];
     this.level = 0;
@@ -91,6 +92,14 @@
           this._visual = firstVisual;   // 恢復第一支
         }
 
+        // Lv20+（player.level >= 20）：三刺（第三支隨機方向）
+        if (this.player.level >= 20) {
+          var randomAngle3 = Math.random() * Math.PI * 2;
+          this._doThrust(randomAngle3, targets, hits);
+          this._visual3 = this._visual; // 第三支視覺
+          this._visual = firstVisual;   // 恢復第一支
+        }
+
         // 觸發攻擊動畫
         this.player.triggerAttack();
       }
@@ -100,6 +109,12 @@
     if (this._visual2) {
       this._visual2.progress += dt / VISUAL_DURATION;
       if (this._visual2.progress >= 1) this._visual2 = null;
+    }
+
+    // 更新第三支視覺
+    if (this._visual3) {
+      this._visual3.progress += dt / VISUAL_DURATION;
+      if (this._visual3.progress >= 1) this._visual3 = null;
     }
 
     return hits;
@@ -161,6 +176,7 @@
     return {
       thrust: this._visual,
       thrust2: this._visual2 || null,
+      thrust3: this._visual3 || null,
       shockwaves: this._shockwaves || []
     };
   };
