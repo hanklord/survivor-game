@@ -209,6 +209,12 @@
           baseSkill = pool.splice(bi, 1)[0]; break;
         }
       }
+    } else if (player.attackType === 'boomerang') {
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('迴力鏢強化') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
     }
 
     // 組合選項：基礎技能(1) + 隨機(2)
