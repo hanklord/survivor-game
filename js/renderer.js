@@ -510,16 +510,17 @@
         ctx.save();
         ctx.translate(bm.x, bm.y);
         ctx.rotate(bm.angle);
-        // V 形迴力鏢
+        // V 形迴力鏢（大小隨 hitboxSize 縮放）
+        var bs = (bm.size || 12) / 12; // scale factor
         ctx.strokeStyle = '#ddaa44';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 4 * bs;
         ctx.lineCap = 'round';
         ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 6 * bs;
         ctx.beginPath();
-        ctx.moveTo(-10, -8);
+        ctx.moveTo(-10 * bs, -8 * bs);
         ctx.lineTo(0, 0);
-        ctx.lineTo(-10, 8);
+        ctx.lineTo(-10 * bs, 8 * bs);
         ctx.stroke();
         ctx.shadowBlur = 0;
         ctx.restore();

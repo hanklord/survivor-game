@@ -14,6 +14,8 @@
     this.player = player;
     this.cd = BASE_CD;
     this.damage = BASE_DAMAGE;
+    this.speed = SPEED;
+    this.hitboxSize = 12;     // 碰撞半徑
     this.timer = 0;
     this.level = 0;
     this.count = 1;           // 同時飛行數量
@@ -42,7 +44,7 @@
         // Going out
         b.x += b.vx * dt;
         b.y += b.vy * dt;
-        b.traveled += SPEED * dt;
+        b.traveled += b.speed * dt;
         if (b.traveled >= MAX_RANGE) {
           b.phase = 'return';
         }
@@ -56,7 +58,7 @@
           this.boomerangs.splice(i, 1);
           continue;
         }
-        var returnSpeed = SPEED * 1.2;
+        var returnSpeed = b.speed * 1.2;
         b.x += (dx / dist) * returnSpeed * dt;
         b.y += (dy / dist) * returnSpeed * dt;
       }
@@ -67,7 +69,7 @@
         var t = targets[j];
         if (t.hp <= 0) continue;
         if (b.hitIds[t.id]) continue;
-        if (SG.dist(b, t) < (t.hitboxRadius + 12)) {
+        if (SG.dist(b, t) < (t.hitboxRadius + this.hitboxSize)) {
           t.hp -= this.damage;
           b.hitIds[t.id] = true;
           this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
@@ -118,8 +120,10 @@
       this.boomerangs.push({
         x: this.player.x,
         y: this.player.y,
-        vx: Math.cos(spreadAngle) * SPEED,
-        vy: Math.sin(spreadAngle) * SPEED,
+        vx: Math.cos(spreadAngle) * this.speed,
+        vy: Math.sin(spreadAngle) * this.speed,
+        speed: this.speed,
+        size: this.hitboxSize,
         angle: 0,
         time: 0,
         traveled: 0,
@@ -172,6 +176,11 @@
       // Even: faster fire rate
       this.cd = Math.max(0.4, this.cd - 0.1);
     }
+    // 每級飛行速度 ×1.05
+    this.speed *= 1.05;
+    // 10 級攻擊範圍 2 倍，20 級 3 倍
+    if (this.level === 10) this.hitboxSize = 24;
+    if (this.level === 20) this.hitboxSize = 36;
   };
 
   BoomerangAttack.prototype.getVisual = function() {
