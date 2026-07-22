@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V256";
+window.GAME_VERSION = "V257";
 window.HARDCORE_HP_MULTIPLIER = 3.0; 
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.DEBUG_SHOW_HITBOX = false;

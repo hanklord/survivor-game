@@ -364,7 +364,7 @@
     load('valkyrie_sprite_idle', 'assets/strips/valkyrie_idle_6f.png');
     load('valkyrie_sprite_run', 'assets/strips/valkyrie_run_6f.png');
     load('boomerang_sprite_idle', 'assets/strips/boomerang_idle_8f.png');
-    load('boomerang_sprite_run', 'assets/strips/boomerang_walk_8f.png');
+    load('boomerang_sprite_run', 'assets/strips/boomerang_run_8f.png');
     load('spear_attack', 'assets/strips/spear_attack.png');
     load('fire_zone', 'assets/strips/fire_zone_8f.png');
     load('chest_img', 'assets/chest.png');
@@ -465,7 +465,7 @@
       this._archerAttack = new SG.ArcherAttack(this.player);
       this._meleeAttack = null;
     } else if (this._selectedCharacter.id === 'boomerang') {
-      var boomCfg = { sprites: { idle: { file: 'assets/strips/boomerang_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/boomerang_walk_8f.png', fps: 10 } } };
+      var boomCfg = { sprites: { idle: { file: 'assets/strips/boomerang_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/boomerang_run_8f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('boomerang', boomCfg);
       this.player.spriteDefaultRight = true;
       this._boomerangAttack = new SG.BoomerangAttack(this.player);
