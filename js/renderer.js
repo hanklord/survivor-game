@@ -553,6 +553,27 @@
       ctx.shadowBlur = 0;
       ctx.restore();
     }
+    // 忍者手裏劍視覺
+    if (state.ninjaVisual) {
+      var shurikens = state.ninjaVisual;
+      for (var si = 0; si < shurikens.length; si++) {
+        var sh = shurikens[si];
+        if (!this._isVisible(sh.x, sh.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(sh.x, sh.y);
+        ctx.rotate(sh.angle);
+        // 四角星手裏劍
+        ctx.fillStyle = '#aaaaaa';
+        ctx.strokeStyle = '#666666';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -8); ctx.lineTo(3, -3); ctx.lineTo(8, 0);
+        ctx.lineTo(3, 3); ctx.lineTo(0, 8); ctx.lineTo(-3, 3);
+        ctx.lineTo(-8, 0); ctx.lineTo(-3, -3); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+    }
     if (!state.lowQuality) this._drawParticles(state.particles, camX, camY);
 
     // 傷害數字（低效能時跳過）

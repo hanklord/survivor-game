@@ -116,7 +116,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack, ninjaAttack) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -176,6 +176,13 @@
       pool.push({ name: '🪃 迴力鏢強化 Lv.' + (boomerangAttack.level + 1) + ' (' + bDesc + ')', action: function() { boomerangAttack.upgrade(); } });
     }
 
+    // 忍者專屬
+    if (ninjaAttack && ninjaAttack.level < 20) {
+      var nDesc = (ninjaAttack.level % 2 === 0) ? '數量+1' : '頻率提升';
+      if (ninjaAttack.level === 9) nDesc = '貫穿解鎖!';
+      pool.push({ name: '🌀 手裏劍強化 Lv.' + (ninjaAttack.level + 1) + ' (' + nDesc + ')', action: function() { ninjaAttack.upgrade(); } });
+    }
+
     // 被動道具
     if (passiveItems) {
       var pc = passiveItems.getChoices(3);
@@ -212,6 +219,12 @@
     } else if (player.attackType === 'boomerang') {
       for (var bi = 0; bi < pool.length; bi++) {
         if (pool[bi].name.indexOf('迴力鏢強化') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
+    } else if (player.attackType === 'ninja') {
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('手裏劍強化') >= 0) {
           baseSkill = pool.splice(bi, 1)[0]; break;
         }
       }
