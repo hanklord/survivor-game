@@ -488,6 +488,7 @@
       var amazonCfg = { sprites: { idle: { file: 'assets/strips/amazon_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/amazon_run_8f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('amazon', amazonCfg);
       this.player.spriteDefaultRight = true;
+      this.player.spriteWidthRatio = 0.667; // 160:240 原始比例
       this._amazonAttack = new SG.AmazonAttack(this.player);
       this._meleeAttack = null;
       this._archerAttack = null;
