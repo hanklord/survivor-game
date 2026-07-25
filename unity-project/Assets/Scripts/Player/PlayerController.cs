@@ -2,8 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// PlayerController — 玩家控制器
-/// 對應原始架構: player.js Player class
+/// 對應原始架構: player.js (V263)
 /// 管理移動、狀態、經驗值、動畫
+/// 支援鍵盤 + 手把 (Gamepad) 輸入
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(SpriteAnimatorController))]
@@ -17,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public float BaseDamage { get; private set; }
     public float DamageMultiplier { get; private set; } = 1f;
     public float FireRate { get; private set; }
+    public float FireRateMultiplier { get; private set; } = 1f;
     public int ProjectileCount { get; private set; }
     public float BasePickupRange { get; private set; }
     public float PickupRange { get; private set; }
@@ -27,6 +29,8 @@ public class PlayerController : MonoBehaviour
     public CharacterType CharacterType { get; private set; }
     public AttackType AttackType { get; private set; }
     public bool FacingLeft { get; private set; }
+    public Vector2 MoveDirection => _moveDirection;
+    public Vector2 AimDirection => _aimDirection;
 
     // === 常數 ===
     private const int BASE_XP_NEEDED = 8;
@@ -39,11 +43,12 @@ public class PlayerController : MonoBehaviour
     private float _invulnTimer;
     private float _fireTimer;
     private Vector2 _moveDirection;
+    private Vector2 _aimDirection = Vector2.right;
     private IPlayerAttack _attackSystem;
 
     // === 事件 ===
     public System.Action OnLevelUp;
-    public System.Action<float, float> OnHPChanged; // current, max
+    public System.Action<float, float> OnHPChanged;
 
     private void Awake()
     {
@@ -54,23 +59,6 @@ public class PlayerController : MonoBehaviour
             _rb.gravityScale = 0f;
             _rb.freezeRotation = true;
         }
-
-        // 如果沒有 Sprite，建立一個 placeholder 方塊
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null && sr.sprite == null)
-        {
-            sr.sprite = CreatePlaceholderSprite();
-        }
-    }
-
-    private static Sprite CreatePlaceholderSprite()
-    {
-        var tex = new Texture2D(32, 32);
-        var colors = new Color[32 * 32];
-        for (int i = 0; i < colors.Length; i++) colors[i] = Color.white;
-        tex.SetPixels(colors);
-        tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32);
     }
 
     /// <summary>
@@ -85,6 +73,7 @@ public class PlayerController : MonoBehaviour
         CurrentSpeed = stats.speed;
         BaseDamage = stats.damage;
         FireRate = stats.fireRate;
+        FireRateMultiplier = 1f;
         ProjectileCount = stats.projectileCount;
         BasePickupRange = stats.pickupRange;
         PickupRange = stats.pickupRange;
@@ -96,30 +85,24 @@ public class PlayerController : MonoBehaviour
         transform.localScale = Vector3.one * stats.scale;
 
         // 設定攻擊類型
-        switch (type)
+        AttackType = type switch
         {
-            case CharacterType.Mage:
-                AttackType = AttackType.Ranged;
-                break;
-            case CharacterType.Archer:
-                AttackType = AttackType.Archer;
-                break;
-            case CharacterType.Knight:
-                AttackType = AttackType.Melee;
-                break;
-            case CharacterType.Valkyrie:
-                AttackType = AttackType.Valkyrie;
-                break;
-        }
+            CharacterType.Mage => AttackType.Ranged,
+            CharacterType.Archer => AttackType.Archer,
+            CharacterType.Knight => AttackType.Melee,
+            CharacterType.Valkyrie => AttackType.Valkyrie,
+            CharacterType.Boomerang => AttackType.Boomerang,
+            CharacterType.Ninja => AttackType.Ninja,
+            _ => AttackType.Ranged
+        };
 
         _attackSystem = GetComponent<IPlayerAttack>();
 
-        Debug.Log($"[Player] Initialized: {type}, Speed={CurrentSpeed}, HP={MaxHP}, Attack={_attackSystem?.GetType().Name ?? "NULL"}");
+        Debug.Log($"[Player] Initialized: {type}, Speed={CurrentSpeed}, HP={MaxHP}");
     }
 
     private void Update()
     {
-        // 防護：如果尚未初始化或遊戲暫停/結束，不處理輸入
         if (CurrentSpeed <= 0) return;
         if (GameManager.Instance == null) return;
         if (GameManager.Instance.IsGameOver || GameManager.Instance.IsPaused) return;
@@ -140,26 +123,45 @@ public class PlayerController : MonoBehaviour
     {
         float h = 0f, v = 0f;
 
-        // 直接用 KeyCode（不依賴 Input Manager 設定）
+        // 鍵盤
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) h -= 1f;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) h += 1f;
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) v += 1f;
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) v -= 1f;
 
+        // 手把 (Gamepad) - 左搖桿移動
+        float gpH = Input.GetAxis("Horizontal");
+        float gpV = Input.GetAxis("Vertical");
+        if (Mathf.Abs(gpH) > 0.1f || Mathf.Abs(gpV) > 0.1f)
+        {
+            h = gpH;
+            v = gpV;
+        }
+
         _moveDirection = new Vector2(h, v).normalized;
 
+        // 更新面向方向
         if (h != 0) FacingLeft = h < 0;
 
-        // 大招
-        if (Input.GetKeyDown(KeyCode.Space))
+        // 瞄準方向（右搖桿或移動方向）
+        float aimH = Input.GetAxis("RightStickHorizontal");
+        float aimV = Input.GetAxis("RightStickVertical");
+        if (Mathf.Abs(aimH) > 0.1f || Mathf.Abs(aimV) > 0.1f)
+        {
+            _aimDirection = new Vector2(aimH, aimV).normalized;
+        }
+        else if (_moveDirection.sqrMagnitude > 0.01f)
+        {
+            _aimDirection = _moveDirection;
+        }
+
+        // 大招（空白鍵或手把按鈕）
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetButtonDown("Fire2"))
         {
             GameManager.Instance.ActivateUltimate();
         }
     }
 
-    /// <summary>
-    /// 依方向與速度移動
-    /// </summary>
     private void Move()
     {
         _rb.linearVelocity = _moveDirection * CurrentSpeed;
@@ -179,14 +181,13 @@ public class PlayerController : MonoBehaviour
         _fireTimer -= Time.deltaTime;
         if (_fireTimer <= 0f)
         {
-            _fireTimer = 1f / FireRate;
+            _fireTimer = 1f / (FireRate * FireRateMultiplier);
             if (_attackSystem != null)
             {
-                _attackSystem.Attack(this);
+                _attackSystem.Attack(_aimDirection);
             }
             else
             {
-                // 嘗試重新取得攻擊元件
                 _attackSystem = GetComponent<IPlayerAttack>();
             }
         }
@@ -199,9 +200,8 @@ public class PlayerController : MonoBehaviour
         _animator.SetFlipX(FacingLeft);
     }
 
-    /// <summary>
-    /// 受傷並觸發無敵
-    /// </summary>
+    // === Public API ===
+
     public void TakeDamage(float damage)
     {
         if (IsInvulnerable) return;
@@ -211,23 +211,20 @@ public class PlayerController : MonoBehaviour
         IsInvulnerable = true;
 
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
-
-        // 閃爍效果
         StartCoroutine(InvulnerabilityFlash());
+
+        if (CurrentHP <= 0)
+        {
+            GameManager.Instance.OnPlayerDeath();
+        }
     }
 
-    /// <summary>
-    /// 回復生命
-    /// </summary>
     public void Heal(float amount)
     {
         CurrentHP = Mathf.Min(MaxHP, CurrentHP + amount);
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
     }
 
-    /// <summary>
-    /// 增加經驗值，回傳是否升級
-    /// </summary>
     public bool AddXP(int value)
     {
         XP += value;
@@ -236,35 +233,30 @@ public class PlayerController : MonoBehaviour
             XP -= XPNeeded;
             Level++;
             XPNeeded = BASE_XP_NEEDED + (Level - 1) * XP_PER_LEVEL;
-            BaseDamage *= 1.01f; // 每級 +1% 傷害
-
+            BaseDamage *= 1.01f;
             OnLevelUp?.Invoke();
             return true;
         }
         return false;
     }
 
-    public void UpgradeAttack()
-    {
-        _attackSystem?.Upgrade();
-    }
+    /// <summary>取得攻擊倍率（供 Attack 系統用）</summary>
+    public float GetDamageMultiplier() => DamageMultiplier;
+
+    /// <summary>取得攻速倍率</summary>
+    public float GetFireRateMultiplier() => FireRateMultiplier;
+
+    /// <summary>取得面向方向 (Vector2)</summary>
+    public Vector2 GetFacingDirection() => FacingLeft ? Vector2.left : Vector2.right;
 
     // === Setter 方法（供升級系統使用）===
 
-    public void SetSpeed(float speed)
-    {
-        CurrentSpeed = speed;
-    }
-
-    public void SetPickupRange(float range)
-    {
-        PickupRange = range;
-    }
-
-    public void SetDamageMultiplier(float mult)
-    {
-        DamageMultiplier = mult;
-    }
+    public void SetSpeed(float speed) => CurrentSpeed = speed;
+    public void SetPickupRange(float range) => PickupRange = range;
+    public void SetDamageMultiplier(float mult) => DamageMultiplier = mult;
+    public void SetFireRateMultiplier(float mult) => FireRateMultiplier = mult;
+    public void SetFireRate(float rate) => FireRate = rate;
+    public void SetProjectileCount(int count) => ProjectileCount = count;
 
     public void IncreaseMaxHP(float amount)
     {
@@ -273,20 +265,7 @@ public class PlayerController : MonoBehaviour
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
     }
 
-    public void SetFireRate(float rate)
-    {
-        FireRate = rate;
-    }
-
-    public void SetProjectileCount(int count)
-    {
-        ProjectileCount = count;
-    }
-
-    public float GetTotalDamage()
-    {
-        return BaseDamage * DamageMultiplier;
-    }
+    public float GetTotalDamage() => BaseDamage * DamageMultiplier;
 
     private System.Collections.IEnumerator InvulnerabilityFlash()
     {

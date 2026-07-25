@@ -1,0 +1,36 @@
+# Unity generated
+unity-project/Library/
+unity-project/Temp/
+unity-project/Obj/
+unity-project/Build/
+unity-project/Builds/
+unity-project/Logs/
+unity-project/MemoryCaptures/
+unity-project/Recording/
+
+# Asset Store
+unity-project/Assets/AssetStoreTools*
+
+# IDE
+unity-project/.idea/
+unity-project/.vs/
+unity-project/*.csproj
+unity-project/*.sln
+*.swp
+*.suo
+*.user
+*.pidb
+*.booproj
+
+# OS
+.DS_Store
+Thumbs.db
+*.meta.bak
+
+# Crash reports
+unity-project/sysinfo.txt
+unity-project/crashlytics-build.properties
+
+# Build results
+[Bb]uild/
+[Bb]uilds/

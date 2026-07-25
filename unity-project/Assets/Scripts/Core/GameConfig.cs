@@ -3,16 +3,19 @@ using System;
 
 /// <summary>
 /// GameConfig — 全域遊戲設定 ScriptableObject
-/// 對應原始架構: config.js
+/// 對應原始架構: config.js (V263)
+/// Unity 6 + URP + ECS/DOTS 版本
 /// </summary>
 [CreateAssetMenu(fileName = "GameConfig", menuName = "EndlessHeroes/GameConfig")]
 public class GameConfig : ScriptableObject
 {
     // === 全域常數 ===
-    public const string GAME_VERSION = "V221";
+    public const string GAME_VERSION = "V263";
     public const float HARDCORE_HP_MULTIPLIER = 3.0f;
     public const float LEVEL_CLEAR_HEAL_PERCENT = 0.5f;
     public const bool DEBUG_SHOW_HITBOX = false;
+    public const int MAX_ENEMIES = 30;
+    public const int BOMB_KILL_THRESHOLD = 30;
 
     [Header("Player")]
     public CharacterConfig[] characters;
@@ -56,7 +59,7 @@ public class CharacterConfig
 {
     public CharacterType type;
     public string displayName;
-    public Sprite portrait;        // 角色選擇畫面頭像（可選）
+    public Sprite portrait;
     public CharacterStats stats;
     public AttackType attackType;
     public GameObject prefab;
@@ -66,7 +69,7 @@ public class CharacterConfig
 public class CharacterStats
 {
     public float hp = 100f;
-    public float speed = 3.6f; // Unity units/s (原 180px/s ÷ 50 pixel per unit)
+    public float speed = 3.6f;
     public float damage = 10f;
     public float fireRate = 1.0f;
     public int projectileCount = 1;
@@ -81,6 +84,7 @@ public class CharacterStats
 public class EnemyConfig
 {
     public int level;
+    public string enemyName;
     public Sprite[] idleFrames;
     public float size = 0.72f;
     public Color color = Color.red;
@@ -106,6 +110,8 @@ public class BossConfig
     public float damage = 15f;
     public float spawnTime = 30f;
     public int xpValue = 50;
+    public bool hasRangedAttack = false; // Hardcore mode ranged attack
+    public float rangedAttackInterval = 3f;
     public GameObject prefab;
 }
 
@@ -132,21 +138,19 @@ public class XPGemConfig
     public float pickupRadius = 0.3f;
 }
 
-// === 關卡設定 ===
+// === 關卡設定 (6 Levels) ===
 
-/// <summary>
-/// 關卡設定
-/// </summary>
 [Serializable]
 public class LevelConfig
 {
     public string levelName;
     public Color bgColor;
-    public Texture2D bgTexture;     // 背景紋理（Repeat 平鋪）
-    public Sprite bgImage;          // 備用（Sprite 模式）
+    public Texture2D bgTexture;
+    public Sprite bgImage;
     public AudioClip bgm;
     public float duration = 90f;
     public float enemySpeedMult = 1.0f;
+    public int[] enemyIndices;   // 此關卡使用的敵人 index
     public int[] bossIndices;
     public AudioClip ambientSound;
 }
@@ -156,26 +160,33 @@ public class LevelConfig
 [Serializable]
 public class AudioConfig
 {
-    public bool enabled = true;
+    public bool bgmEnabled = true;
+    public bool sfxEnabled = true;
     [Range(0f, 1f)]
-    public float volume = 0.5f;
+    public float bgmVolume = 0.5f;
+    [Range(0f, 1f)]
+    public float sfxVolume = 0.7f;
     public AudioClip defaultBGM;
 }
 
-// === 列舉 ===
+// === 列舉 (6 角色) ===
 
 public enum CharacterType
 {
-    Mage = 0,
-    Archer = 1,
-    Knight = 2,
-    Valkyrie = 3
+    Mage = 0,       // 法師 (火球 + AOE)
+    Archer = 1,     // 弓手 (展開箭 + 火DOT)
+    Knight = 2,     // 黃金騎士 (扇形斬 + 背斬)
+    Valkyrie = 3,   // 女武神 (矛刺 + 衝擊波 + 雙刺 + 三刺)
+    Boomerang = 4,  // 迴力鏢手 (迴力鏢 + 連鎖閃電)
+    Ninja = 5       // 忍者 (手裏劍連射 + 貫穿)
 }
 
 public enum AttackType
 {
-    Ranged,
-    Archer,
-    Melee,
-    Valkyrie
+    Ranged,         // 法師
+    Archer,         // 弓手
+    Melee,          // 騎士
+    Valkyrie,       // 女武神
+    Boomerang,      // 迴力鏢
+    Ninja           // 忍者
 }

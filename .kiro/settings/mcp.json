@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "agend-unity-dev-lead-t12050": {
+      "command": "/home/tsechingchang/.agend/instances/unity-dev-lead-t12050/mcp-wrapper-agend.sh",
+      "args": []
+    }
+  }
+}
