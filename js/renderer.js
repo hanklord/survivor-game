@@ -574,6 +574,40 @@
         ctx.restore();
       }
     }
+    // 亞馬遜標槍視覺
+    if (state.amazonVisual) {
+      var av = state.amazonVisual;
+      // 標槍
+      for (var ji = 0; ji < av.javelins.length; ji++) {
+        var jv = av.javelins[ji];
+        if (!this._isVisible(jv.x, jv.y, camX, camY, CULL_MARGIN)) continue;
+        ctx.save();
+        ctx.translate(jv.x, jv.y);
+        ctx.rotate(jv.angle);
+        // 長矛形狀
+        ctx.strokeStyle = '#8B5E3C';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(12, 0); ctx.stroke();
+        // 矛頭
+        ctx.fillStyle = '#cccccc';
+        ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(10, -4); ctx.lineTo(10, 4); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      // 爆裂視覺
+      for (var bvi = 0; bvi < av.bursts.length; bvi++) {
+        var bv = av.bursts[bvi];
+        var bvAlpha = (1 - bv.progress) * 0.6;
+        var bvRadius = 60 * (0.3 + bv.progress * 0.7);
+        ctx.save();
+        ctx.globalAlpha = bvAlpha;
+        ctx.strokeStyle = '#44aa66';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(bv.x, bv.y, bvRadius, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = 'rgba(68,170,102,0.2)';
+        ctx.beginPath(); ctx.arc(bv.x, bv.y, bvRadius * 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
     if (!state.lowQuality) this._drawParticles(state.particles, camX, camY);
 
     // 傷害數字（低效能時跳過）

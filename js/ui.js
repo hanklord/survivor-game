@@ -116,7 +116,7 @@
   };
 
   // 顯示升級選單（含武器 + 被動技能選項）
-  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack, ninjaAttack) {
+  UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack, ninjaAttack, amazonAttack) {
     var self = this;
     this.els.choices.innerHTML = '';
 
@@ -183,6 +183,14 @@
       pool.push({ name: '🌀 手裏劍強化 Lv.' + (ninjaAttack.level + 1) + ' (' + nDesc + ')', action: function() { ninjaAttack.upgrade(); } });
     }
 
+    // 亞馬遜專屬
+    if (amazonAttack && amazonAttack.level < 20) {
+      var amDesc = (amazonAttack.level % 2 === 0) ? '數量+1' : '傷害/頻率';
+      if (amazonAttack.level === 9) amDesc = '貫穿+1!';
+      if (amazonAttack.level === 14) amDesc = '爆裂解鎖!';
+      pool.push({ name: '🏹 標槍強化 Lv.' + (amazonAttack.level + 1) + ' (' + amDesc + ')', action: function() { amazonAttack.upgrade(); } });
+    }
+
     // 被動道具
     if (passiveItems) {
       var pc = passiveItems.getChoices(3);
@@ -225,6 +233,12 @@
     } else if (player.attackType === 'ninja') {
       for (var bi = 0; bi < pool.length; bi++) {
         if (pool[bi].name.indexOf('手裏劍強化') >= 0) {
+          baseSkill = pool.splice(bi, 1)[0]; break;
+        }
+      }
+    } else if (player.attackType === 'amazon') {
+      for (var bi = 0; bi < pool.length; bi++) {
+        if (pool[bi].name.indexOf('標槍強化') >= 0) {
           baseSkill = pool.splice(bi, 1)[0]; break;
         }
       }
