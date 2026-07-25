@@ -185,9 +185,8 @@
 
     // 亞馬遜專屬
     if (amazonAttack && amazonAttack.level < 20) {
-      var amDesc = (amazonAttack.level % 2 === 0) ? '數量+1' : '傷害/頻率';
-      if (amazonAttack.level === 9) amDesc = '貫穿+1!';
-      if (amazonAttack.level === 14) amDesc = '爆裂解鎖!';
+      var amDesc = (amazonAttack.level % 2 === 0) ? '頻率提升' : '貫通+1';
+      if (amazonAttack.level === 9) amDesc = '連鎖閃電解鎖!';
       pool.push({ name: '🏹 標槍強化 Lv.' + (amazonAttack.level + 1) + ' (' + amDesc + ')', action: function() { amazonAttack.upgrade(); } });
     }
 

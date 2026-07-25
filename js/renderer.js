@@ -593,18 +593,30 @@
         ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(10, -4); ctx.lineTo(10, 4); ctx.closePath(); ctx.fill();
         ctx.restore();
       }
-      // 爆裂視覺
-      for (var bvi = 0; bvi < av.bursts.length; bvi++) {
-        var bv = av.bursts[bvi];
-        var bvAlpha = (1 - bv.progress) * 0.6;
-        var bvRadius = 60 * (0.3 + bv.progress * 0.7);
+      // 連鎖閃電視覺
+      if (av.chains) {
         ctx.save();
-        ctx.globalAlpha = bvAlpha;
-        ctx.strokeStyle = '#44aa66';
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(bv.x, bv.y, bvRadius, 0, Math.PI * 2); ctx.stroke();
-        ctx.fillStyle = 'rgba(68,170,102,0.2)';
-        ctx.beginPath(); ctx.arc(bv.x, bv.y, bvRadius * 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.8;
+        ctx.strokeStyle = '#ffffff';
+        ctx.shadowColor = '#44aaff';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 2.5;
+        for (var aci = 0; aci < av.chains.length; aci++) {
+          var segs = av.chains[aci].segments;
+          for (var asi = 0; asi < segs.length; asi++) {
+            var seg = segs[asi];
+            ctx.beginPath();
+            ctx.moveTo(seg.x1, seg.y1);
+            var dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+            for (var zi = 1; zi < 4; zi++) {
+              var t = zi / 4;
+              ctx.lineTo(seg.x1 + dx * t + (Math.random() - 0.5) * 15, seg.y1 + dy * t + (Math.random() - 0.5) * 15);
+            }
+            ctx.lineTo(seg.x2, seg.y2);
+            ctx.stroke();
+          }
+        }
+        ctx.shadowBlur = 0;
         ctx.restore();
       }
     }
