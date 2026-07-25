@@ -38,9 +38,9 @@
     subtitle.textContent = '選擇角色';
     wrapper.appendChild(subtitle);
     
-    // 3. 角色卡片容器
+    // 3. 角色卡片容器（上 3 下 3 置中排列）
     var container = document.createElement('div');
-    container.style.cssText = 'display:flex; flex-wrap:nowrap; gap:12px; justify-content:center; align-items:stretch;';
+    container.style.cssText = 'display:flex; flex-wrap:wrap; gap:12px; justify-content:center; align-items:stretch; max-width:348px;';
 
     for (var i = 0; i < CHARACTERS.length; i++) {
       (function(ch) {
