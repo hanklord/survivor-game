@@ -367,6 +367,7 @@
     load('valkyrie_sprite_run', 'assets/strips/valkyrie_run_6f.png');
     load('boomerang_sprite_idle', 'assets/strips/boomerang_idle_8f.png');
     load('boomerang_sprite_run', 'assets/strips/boomerang_run_8f.png');
+    load('shuriken', 'assets/strips/shuriken.png');
     load('ninja_sprite_idle', 'assets/strips/ninja_idle_8f.png');
     load('ninja_sprite_run', 'assets/strips/ninja_run_8f.png');
     load('amazon_sprite_idle', 'assets/strips/amazon_idle_8f.png');

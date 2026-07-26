@@ -504,22 +504,28 @@
     // 忍者手裏劍視覺（迴力鏢機制，手裏劍外觀）
     if (state.boomerangVisual) {
       var booms = state.boomerangVisual;
+      var shurikenImg = this.images.shuriken;
       for (var bi = 0; bi < booms.length; bi++) {
         var bm = booms[bi];
         if (!this._isVisible(bm.x, bm.y, camX, camY, CULL_MARGIN)) continue;
         ctx.save();
         ctx.translate(bm.x, bm.y);
         ctx.rotate(bm.angle);
-        // 四角星手裏劍（大小隨 hitboxSize 縮放）
-        var bs = (bm.size || 12) / 12;
-        ctx.fillStyle = '#aaaaaa';
-        ctx.strokeStyle = '#666666';
-        ctx.lineWidth = 1 * bs;
-        ctx.beginPath();
-        ctx.moveTo(0, -8 * bs); ctx.lineTo(3 * bs, -3 * bs); ctx.lineTo(8 * bs, 0);
-        ctx.lineTo(3 * bs, 3 * bs); ctx.lineTo(0, 8 * bs); ctx.lineTo(-3 * bs, 3 * bs);
-        ctx.lineTo(-8 * bs, 0); ctx.lineTo(-3 * bs, -3 * bs); ctx.closePath();
-        ctx.fill(); ctx.stroke();
+        var bs = (bm.size || 48) / 48;
+        var drawSize = 32 * bs;
+        if (shurikenImg) {
+          ctx.drawImage(shurikenImg, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+        } else {
+          // Fallback: 四角星手裏劍
+          ctx.fillStyle = '#aaaaaa';
+          ctx.strokeStyle = '#666666';
+          ctx.lineWidth = 1 * bs;
+          ctx.beginPath();
+          ctx.moveTo(0, -8 * bs); ctx.lineTo(3 * bs, -3 * bs); ctx.lineTo(8 * bs, 0);
+          ctx.lineTo(3 * bs, 3 * bs); ctx.lineTo(0, 8 * bs); ctx.lineTo(-3 * bs, 3 * bs);
+          ctx.lineTo(-8 * bs, 0); ctx.lineTo(-3 * bs, -3 * bs); ctx.closePath();
+          ctx.fill(); ctx.stroke();
+        }
         ctx.restore();
       }
     }

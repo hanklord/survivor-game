@@ -4,7 +4,7 @@
 
   var BASE_CD = 1.2;
   var BASE_DAMAGE = 12;
-  var SPEED = 250;           // px/s
+  var SPEED = 500;           // px/s
   var MAX_RANGE = 200;       // 去程距離
   var MAX_BOOMERANGS = 5;
   var CHAIN_DAMAGE_RATIO = 0.3;
@@ -38,7 +38,7 @@
     for (var i = this.boomerangs.length - 1; i >= 0; i--) {
       var b = this.boomerangs[i];
       b.time += dt;
-      b.angle += 8 * dt; // spin
+      b.angle += 16 * dt; // spin
 
       if (b.phase === 'out') {
         // Going out
