@@ -501,7 +501,7 @@
         ctx.restore();
       }
     }
-    // 迴力鏢視覺
+    // 忍者手裏劍視覺（迴力鏢機制，手裏劍外觀）
     if (state.boomerangVisual) {
       var booms = state.boomerangVisual;
       for (var bi = 0; bi < booms.length; bi++) {
@@ -510,19 +510,16 @@
         ctx.save();
         ctx.translate(bm.x, bm.y);
         ctx.rotate(bm.angle);
-        // V 形迴力鏢（大小隨 hitboxSize 縮放）
-        var bs = (bm.size || 12) / 12; // scale factor
-        ctx.strokeStyle = '#ddaa44';
-        ctx.lineWidth = 4 * bs;
-        ctx.lineCap = 'round';
-        ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = 6 * bs;
+        // 四角星手裏劍（大小隨 hitboxSize 縮放）
+        var bs = (bm.size || 12) / 12;
+        ctx.fillStyle = '#aaaaaa';
+        ctx.strokeStyle = '#666666';
+        ctx.lineWidth = 1 * bs;
         ctx.beginPath();
-        ctx.moveTo(-10 * bs, -8 * bs);
-        ctx.lineTo(0, 0);
-        ctx.lineTo(-10 * bs, 8 * bs);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        ctx.moveTo(0, -8 * bs); ctx.lineTo(3 * bs, -3 * bs); ctx.lineTo(8 * bs, 0);
+        ctx.lineTo(3 * bs, 3 * bs); ctx.lineTo(0, 8 * bs); ctx.lineTo(-3 * bs, 3 * bs);
+        ctx.lineTo(-8 * bs, 0); ctx.lineTo(-3 * bs, -3 * bs); ctx.closePath();
+        ctx.fill(); ctx.stroke();
         ctx.restore();
       }
     }
