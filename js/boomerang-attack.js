@@ -15,7 +15,7 @@
     this.cd = BASE_CD;
     this.damage = BASE_DAMAGE;
     this.speed = SPEED;
-    this.hitboxSize = 12;     // 碰撞半徑
+    this.hitboxSize = 48;     // 碰撞半徑
     this.timer = 0;
     this.level = 0;
     this.count = 1;           // 同時飛行數量
@@ -179,8 +179,8 @@
     // 每級飛行速度 ×1.05
     this.speed *= 1.05;
     // 10 級攻擊範圍 2 倍，20 級 3 倍
-    if (this.level === 10) this.hitboxSize = 24;
-    if (this.level === 20) this.hitboxSize = 36;
+    if (this.level === 10) this.hitboxSize = 96;
+    if (this.level === 20) this.hitboxSize = 144;
   };
 
   BoomerangAttack.prototype.getVisual = function() {
