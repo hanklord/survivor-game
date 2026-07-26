@@ -470,18 +470,11 @@
       this.player.spriteDefaultRight = true;
       this._archerAttack = new SG.ArcherAttack(this.player);
       this._meleeAttack = null;
-    } else if (this._selectedCharacter.id === 'boomerang') {
-      var boomCfg = { sprites: { idle: { file: 'assets/strips/boomerang_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/boomerang_run_8f.png', fps: 10 } } };
-      this.player.animator = this._buildAnimator('boomerang', boomCfg);
-      this.player.spriteDefaultRight = true;
-      this._boomerangAttack = new SG.BoomerangAttack(this.player);
-      this._meleeAttack = null;
-      this._archerAttack = null;
     } else if (this._selectedCharacter.id === 'ninja') {
       var ninjaCfg = { sprites: { idle: { file: 'assets/strips/ninja_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/ninja_run_8f.png', fps: 10 } } };
       this.player.animator = this._buildAnimator('ninja', ninjaCfg);
       this.player.spriteDefaultRight = true;
-      this._ninjaAttack = new SG.NinjaAttack(this.player);
+      this._boomerangAttack = new SG.BoomerangAttack(this.player);
       this._meleeAttack = null;
       this._archerAttack = null;
     } else if (this._selectedCharacter.id === 'amazon') {
@@ -609,7 +602,6 @@
       explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
       boomerangVisual: this._boomerangAttack ? this._boomerangAttack.getVisual() : null,
       boomerangChainVisual: this._boomerangAttack ? this._boomerangAttack.getChainVisual() : null,
-      ninjaVisual: this._ninjaAttack ? this._ninjaAttack.getVisual() : null,
       amazonVisual: this._amazonAttack ? this._amazonAttack.getVisual() : null,
       eliteVisuals: this._eliteSpawner.getVisuals(),
       piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,
@@ -718,17 +710,6 @@
           var bc = this.player.critChance && Math.random() < this.player.critChance;
           if (bc) { bhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
           this._damageNumbers.add(bhits[i].x, bhits[i].y, bhits[i].dmg, bc);
-        }
-      }
-    } else if (this.player.attackType === 'ninja' && this._ninjaAttack) {
-      var ninjaHits = this._ninjaAttack.update(dt, this.enemies, this.bosses);
-      for (var i = 0; i < ninjaHits.length; i++) this._handleKill(ninjaHits[i]);
-      var nhits = this._ninjaAttack.getLastHits();
-      for (var i = 0; i < nhits.length; i++) {
-        if (!this._lowQuality) {
-          var nc = this.player.critChance && Math.random() < this.player.critChance;
-          if (nc) { nhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
-          this._damageNumbers.add(nhits[i].x, nhits[i].y, nhits[i].dmg, nc);
         }
       }
     } else if (this.player.attackType === 'amazon' && this._amazonAttack) {
@@ -1137,7 +1118,7 @@
     if (this._meleeAttack) this._meleeAttack.damage *= 1.01;
     if (this._valkyrieAttack) this._valkyrieAttack.damage *= 1.01;
     if (this._boomerangAttack) this._boomerangAttack.damage *= 1.01;
-    if (this._ninjaAttack) this._ninjaAttack.damage *= 1.01;
+
     if (this._amazonAttack) this._amazonAttack.damage *= 1.01;
     this.audio.playLevelUp();
     // 觸發聖光特效（遊戲不暫停，繼續跑）
@@ -1149,7 +1130,7 @@
       self._levelUpPending = false;
       self.ui.showLevelUp(self.player, self.weaponManager, self.skillTree, function() {
         self.levelingUp = false;
-      }, self._meleeAttack, self._archerAttack, self._passiveItems, self._valkyrieAttack, self._boomerangAttack, self._ninjaAttack, self._amazonAttack);
+      }, self._meleeAttack, self._archerAttack, self._passiveItems, self._valkyrieAttack, self._boomerangAttack, self._amazonAttack);
     }, 1500); // 1.3s + 0.2s
   };
 
