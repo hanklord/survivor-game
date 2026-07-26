@@ -512,7 +512,7 @@
         ctx.translate(bm.x, bm.y);
         ctx.rotate(bm.angle);
         var bs = (bm.size || 48) / 48;
-        var drawSize = 32 * bs;
+        var drawSize = 48 * bs;
         if (shurikenImg) {
           ctx.drawImage(shurikenImg, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
         } else {
