@@ -5,7 +5,7 @@
   var BASE_CD = 0.5;
   var BASE_DAMAGE = 8;
   var SHURIKEN_SPEED = 350;
-  var SHURIKEN_SIZE = 10;
+  var SHURIKEN_SIZE = 5;
   var MAX_RANGE = 300;
   var SPIN_SPEED = 12; // rad/s
 
