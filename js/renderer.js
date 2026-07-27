@@ -715,22 +715,33 @@
             ctx.beginPath(); ctx.arc(gx, gy, 20, 0, Math.PI * 2); ctx.fill();
           }
           break;
-        case 'radial': // 女武神：放射狀矛刺
+        case 'radial': // 女武神：放射狀矛刺（使用長槍圖片）
+          var spearUltImg = this.images.spear_attack;
           ctx.globalAlpha = 1 - uv.progress;
           for (var ri = 0; ri < uv.thrusts.length; ri++) {
             var th = uv.thrusts[ri];
             var rLen = 180 * Math.min(1, uv.progress * 3);
-            ctx.strokeStyle = '#ccddff'; ctx.lineWidth = 4;
-            ctx.shadowColor = '#aabbff'; ctx.shadowBlur = 8;
-            var rx = uv.x + Math.cos(th.angle) * rLen;
-            var ry = uv.y + Math.sin(th.angle) * rLen;
-            ctx.beginPath(); ctx.moveTo(uv.x, uv.y); ctx.lineTo(rx, ry); ctx.stroke();
-            // 矛頭
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.moveTo(rx + Math.cos(th.angle) * 10, ry + Math.sin(th.angle) * 10);
-            ctx.lineTo(rx + Math.cos(th.angle + 2.5) * 8, ry + Math.sin(th.angle + 2.5) * 8);
-            ctx.lineTo(rx + Math.cos(th.angle - 2.5) * 8, ry + Math.sin(th.angle - 2.5) * 8);
-            ctx.closePath(); ctx.fill();
+            if (spearUltImg) {
+              ctx.save();
+              ctx.translate(uv.x, uv.y);
+              ctx.rotate(th.angle);
+              var spW = rLen;
+              var spH = spW * 0.25;
+              ctx.drawImage(spearUltImg, 0, -spH / 2, spW, spH);
+              ctx.restore();
+            } else {
+              // Fallback: 線條+矛頭
+              ctx.strokeStyle = '#ccddff'; ctx.lineWidth = 4;
+              ctx.shadowColor = '#aabbff'; ctx.shadowBlur = 8;
+              var rx = uv.x + Math.cos(th.angle) * rLen;
+              var ry = uv.y + Math.sin(th.angle) * rLen;
+              ctx.beginPath(); ctx.moveTo(uv.x, uv.y); ctx.lineTo(rx, ry); ctx.stroke();
+              ctx.fillStyle = '#ffffff';
+              ctx.beginPath(); ctx.moveTo(rx + Math.cos(th.angle) * 10, ry + Math.sin(th.angle) * 10);
+              ctx.lineTo(rx + Math.cos(th.angle + 2.5) * 8, ry + Math.sin(th.angle + 2.5) * 8);
+              ctx.lineTo(rx + Math.cos(th.angle - 2.5) * 8, ry + Math.sin(th.angle - 2.5) * 8);
+              ctx.closePath(); ctx.fill();
+            }
           }
           ctx.shadowBlur = 0;
           break;
