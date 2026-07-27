@@ -762,25 +762,50 @@
             ctx.stroke();
           }
           break;
-        case 'arc': // 亞馬遜：電弧環擴散
+        case 'arc': // 亞馬遜：電弧環擴散（鋸齒閃電放射）
           var arcR = 300 * uv.progress;
           var arcAlpha = (1 - uv.progress) * 0.9;
           ctx.globalAlpha = arcAlpha;
-          ctx.strokeStyle = '#88ccff'; ctx.lineWidth = 6;
-          ctx.shadowColor = '#4488ff'; ctx.shadowBlur = 15;
+          // 外環
+          ctx.strokeStyle = 'rgba(136,204,255,0.4)'; ctx.lineWidth = 4;
+          ctx.shadowColor = '#4488ff'; ctx.shadowBlur = 12;
           ctx.beginPath(); ctx.arc(uv.x, uv.y, arcR, 0, Math.PI * 2); ctx.stroke();
-          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(uv.x, uv.y, arcR * 0.8, 0, Math.PI * 2); ctx.stroke();
-          // Lightning sparks on ring
-          for (var li = 0; li < 8; li++) {
-            var la = (li / 8) * Math.PI * 2 + uv.progress * 4;
-            var lx = uv.x + Math.cos(la) * arcR;
-            var ly = uv.y + Math.sin(la) * arcR;
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(lx, ly);
-            ctx.lineTo(lx + (Math.random()-0.5)*20, ly + (Math.random()-0.5)*20);
+          // 放射狀鋸齒閃電（10 條）
+          var boltCount = 10;
+          for (var li = 0; li < boltCount; li++) {
+            var la = (li / boltCount) * Math.PI * 2 + uv.progress * 3;
+            // 從中心向外的鋸齒閃電
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#88ccff';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(uv.x, uv.y);
+            var segments = 6;
+            for (var si = 1; si <= segments; si++) {
+              var t = si / segments;
+              var bx = uv.x + Math.cos(la) * arcR * t;
+              var by = uv.y + Math.sin(la) * arcR * t;
+              // 垂直於放射方向的隨機偏移（鋸齒）
+              var perpX = -Math.sin(la) * (Math.random() - 0.5) * 25;
+              var perpY = Math.cos(la) * (Math.random() - 0.5) * 25;
+              if (si < segments) {
+                ctx.lineTo(bx + perpX, by + perpY);
+              } else {
+                ctx.lineTo(bx, by); // 末端精確到環上
+              }
+            }
             ctx.stroke();
+            // 末端火花
+            var ex = uv.x + Math.cos(la) * arcR;
+            var ey = uv.y + Math.sin(la) * arcR;
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.beginPath(); ctx.arc(ex, ey, 4, 0, Math.PI * 2); ctx.fill();
           }
+          // 內層薄環
+          ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 0;
+          ctx.beginPath(); ctx.arc(uv.x, uv.y, arcR * 0.6, 0, Math.PI * 2); ctx.stroke();
           ctx.shadowBlur = 0;
           break;
       }
