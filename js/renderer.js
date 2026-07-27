@@ -672,6 +672,122 @@
       ctx.fillRect(camX, camY, W, H);
     }
 
+    // 角色專屬大招視覺
+    if (state.ultimateVisual) {
+      var uv = state.ultimateVisual;
+      ctx.save();
+      switch (uv.type) {
+        case 'explosion': // 法師：火焰爆炸環
+          var expAlpha = (1 - uv.progress) * 0.8;
+          var expR = uv.radius * (0.2 + uv.progress * 0.8);
+          ctx.globalAlpha = expAlpha;
+          ctx.strokeStyle = '#ff4400'; ctx.lineWidth = 8;
+          ctx.beginPath(); ctx.arc(uv.x, uv.y, expR, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.arc(uv.x, uv.y, expR * 0.7, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,100,0,0.2)';
+          ctx.beginPath(); ctx.arc(uv.x, uv.y, expR, 0, Math.PI * 2); ctx.fill();
+          break;
+        case 'arrowrain': // 弓手：360 度箭雨
+          for (var ai = 0; ai < uv.arrows.length; ai++) {
+            var ar = uv.arrows[ai];
+            ctx.save(); ctx.translate(ar.x, ar.y); ctx.rotate(ar.angle);
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke();
+            ctx.fillStyle = '#ffdd00';
+            ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(6, -3); ctx.lineTo(6, 3); ctx.closePath(); ctx.fill();
+            ctx.restore();
+          }
+          break;
+        case 'dash': // 騎士：黃金衝刺拖尾
+          ctx.globalAlpha = 1 - uv.progress;
+          ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 20;
+          ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 20;
+          ctx.beginPath(); ctx.moveTo(uv.start.x, uv.start.y); ctx.lineTo(uv.x, uv.y); ctx.stroke();
+          ctx.shadowBlur = 0;
+          // 殘影
+          for (var di = 0; di < 4; di++) {
+            var t = di / 4;
+            var gx = uv.start.x + (uv.x - uv.start.x) * t;
+            var gy = uv.start.y + (uv.y - uv.start.y) * t;
+            ctx.globalAlpha = (1 - t) * 0.3 * (1 - uv.progress);
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath(); ctx.arc(gx, gy, 20, 0, Math.PI * 2); ctx.fill();
+          }
+          break;
+        case 'radial': // 女武神：放射狀矛刺
+          ctx.globalAlpha = 1 - uv.progress;
+          for (var ri = 0; ri < uv.thrusts.length; ri++) {
+            var th = uv.thrusts[ri];
+            var rLen = 180 * Math.min(1, uv.progress * 3);
+            ctx.strokeStyle = '#ccddff'; ctx.lineWidth = 4;
+            ctx.shadowColor = '#aabbff'; ctx.shadowBlur = 8;
+            var rx = uv.x + Math.cos(th.angle) * rLen;
+            var ry = uv.y + Math.sin(th.angle) * rLen;
+            ctx.beginPath(); ctx.moveTo(uv.x, uv.y); ctx.lineTo(rx, ry); ctx.stroke();
+            // 矛頭
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.moveTo(rx + Math.cos(th.angle) * 10, ry + Math.sin(th.angle) * 10);
+            ctx.lineTo(rx + Math.cos(th.angle + 2.5) * 8, ry + Math.sin(th.angle + 2.5) * 8);
+            ctx.lineTo(rx + Math.cos(th.angle - 2.5) * 8, ry + Math.sin(th.angle - 2.5) * 8);
+            ctx.closePath(); ctx.fill();
+          }
+          ctx.shadowBlur = 0;
+          break;
+        case 'spiral': // 忍者：螺旋手裏劍
+          if (uv.spiral) {
+            var shurikenImg = this.images.shuriken;
+            ctx.save(); ctx.translate(uv.spiral.x, uv.spiral.y); ctx.rotate(uv.spiral.angle * 2);
+            var sSize = 64;
+            if (shurikenImg) {
+              ctx.drawImage(shurikenImg, -sSize/2, -sSize/2, sSize, sSize);
+            } else {
+              ctx.fillStyle = '#aaaaaa'; ctx.beginPath();
+              ctx.moveTo(0,-sSize/2); ctx.lineTo(sSize/6,-sSize/6); ctx.lineTo(sSize/2,0);
+              ctx.lineTo(sSize/6,sSize/6); ctx.lineTo(0,sSize/2); ctx.lineTo(-sSize/6,sSize/6);
+              ctx.lineTo(-sSize/2,0); ctx.lineTo(-sSize/6,-sSize/6); ctx.closePath(); ctx.fill();
+            }
+            ctx.restore();
+            // Spiral trail
+            ctx.strokeStyle = 'rgba(170,170,170,0.3)'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (var si = 0; si < 20; si++) {
+              var sa = uv.spiral.angle - si * 0.4;
+              var sr = uv.spiral.radius - si * 8;
+              if (sr < 0) break;
+              var sx = uv.cx + Math.cos(sa) * sr;
+              var sy = uv.cy + Math.sin(sa) * sr;
+              if (si === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+          }
+          break;
+        case 'arc': // 亞馬遜：電弧環擴散
+          var arcR = 300 * uv.progress;
+          var arcAlpha = (1 - uv.progress) * 0.9;
+          ctx.globalAlpha = arcAlpha;
+          ctx.strokeStyle = '#88ccff'; ctx.lineWidth = 6;
+          ctx.shadowColor = '#4488ff'; ctx.shadowBlur = 15;
+          ctx.beginPath(); ctx.arc(uv.x, uv.y, arcR, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(uv.x, uv.y, arcR * 0.8, 0, Math.PI * 2); ctx.stroke();
+          // Lightning sparks on ring
+          for (var li = 0; li < 8; li++) {
+            var la = (li / 8) * Math.PI * 2 + uv.progress * 4;
+            var lx = uv.x + Math.cos(la) * arcR;
+            var ly = uv.y + Math.sin(la) * arcR;
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(lx, ly);
+            ctx.lineTo(lx + (Math.random()-0.5)*20, ly + (Math.random()-0.5)*20);
+            ctx.stroke();
+          }
+          ctx.shadowBlur = 0;
+          break;
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
     // 火球爆炸 AOE 視覺
     if (state.fireExplosions && state.fireExplosions.length > 0) {
       for (var fi = 0; fi < state.fireExplosions.length; fi++) {

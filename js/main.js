@@ -90,12 +90,11 @@
     this.input._onDebugLevelUp = function() { self._debugLevelUp(); };
     this.input._onUltimate = function() {
       if (!self._ultimateReady || self.gameOver || self.paused) return;
-      var killed = self._bomb.activate(self.enemies);
+      var killed = self._ultimate.activate(self.enemies, self.bosses);
       for (var i = 0; i < killed.length; i++) self._handleKill(killed[i]);
-      self.enemies = [];
       self._ultimateCharge = 0;
       self._ultimateReady = false;
-      self._ultimateFlash = 0.5;
+      self._ultimateFlash = 0.3;
     };
     this._resize();
     // 絕招：點擊角色施放（集氣滿時）
@@ -119,12 +118,11 @@
       var dist = Math.sqrt((wx - self2.player.x) * (wx - self2.player.x) + (wy - self2.player.y) * (wy - self2.player.y));
       if (dist < 60) {
         // 施放絕招
-        var killed = self2._bomb.activate(self2.enemies);
+        var killed = self2._ultimate.activate(self2.enemies, self2.bosses);
         for (var i = 0; i < killed.length; i++) self2._handleKill(killed[i]);
-        self2.enemies = [];
         self2._ultimateCharge = 0;
         self2._ultimateReady = false;
-        self2._ultimateFlash = 0.5; // 全畫面閃光
+        self2._ultimateFlash = 0.3;
       }
     };
     this.canvas.addEventListener('click', doUltimate);
@@ -499,6 +497,11 @@
     this.meta = new SG.MetaProgression();
     }
 
+    // 角色專屬大招
+    this._ultimate = new SG.UltimateSystem(this.player);
+    var ultTypes = { ranged: 'mage_explosion', archer: 'archer_arrowrain', melee: 'knight_dash', valkyrie: 'valkyrie_radial', boomerang: 'ninja_spiral', amazon: 'amazon_arc' };
+    this._ultimate.type = ultTypes[this.player.attackType] || 'mage_explosion';
+
     this.enemies = [];
     this.projectiles = [];
     this.particles = [];
@@ -614,6 +617,7 @@
       ultimateCharge: this._ultimateCharge,
       ultimateReady: this._ultimateReady,
       ultimateFlash: this._ultimateFlash,
+      ultimateVisual: this._ultimate ? this._ultimate.getVisual() : null,
       fireExplosions: this._fireExplosions || [],
       activeBoss: this.bosses.length > 0 ? this.bosses[0] : null,
       bombProgress: this._bomb.getProgress(),
@@ -925,6 +929,11 @@
     this.player.updateInvuln(dt);
     this._combo.update(dt);
     this._bomb.update(dt);
+    // 角色專屬大招更新
+    if (this._ultimate && this._ultimate.isActive()) {
+      var ultHits = this._ultimate.update(dt, this.enemies, this.bosses);
+      for (var ui = 0; ui < ultHits.length; ui++) this._handleKill(ultHits[ui]);
+    }
     this._damageNumbers.update(dt);
     this.ui.updateHUD(this.player, this.gameTime, this.kills);
     this.ui.updateSkillIcons(this.skillTree);
