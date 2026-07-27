@@ -882,6 +882,13 @@
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
+    // 安全清除：移除 HP <= 0 但未被正常清除的敵人
+    for (var ci = this.enemies.length - 1; ci >= 0; ci--) {
+      if (this.enemies[ci].hp <= 0) {
+        this._handleKill(this.enemies[ci]);
+      }
+    }
+
     // 持續補充：確保場上怪物維持在目標數量
     while (this.enemies.length < TARGET_ENEMY_COUNT) {
       this._spawnOneEnemy();

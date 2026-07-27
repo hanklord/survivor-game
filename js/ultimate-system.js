@@ -100,7 +100,7 @@
   // === Mage: Center Explosion ===
   UltimateSystem.prototype._activateMageExplosion = function(targets) {
     var hits = [];
-    var dmg = Math.round(this.player.damage * 5);
+    var dmg = Math.round(this.player.damage * 5) || 50;
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (t.hp <= 0) continue;
@@ -129,7 +129,7 @@
 
   UltimateSystem.prototype._updateArrows = function(dt, targets) {
     var hits = [];
-    var dmg = Math.round(this.player.damage * 3);
+    var dmg = Math.round(this.player.damage * 3) || 30;
     for (var i = this._arrows.length - 1; i >= 0; i--) {
       var a = this._arrows[i];
       a.x += a.vx * dt;
@@ -159,7 +159,7 @@
 
   UltimateSystem.prototype._updateDash = function(dt, targets) {
     var hits = [];
-    var dmg = Math.round(this.player.damage * 4);
+    var dmg = Math.round(this.player.damage * 4) || 40;
     // Move player
     this.player.x += this._dashDir.x * DASH_SPEED * dt;
     this.player.y += this._dashDir.y * DASH_SPEED * dt;
@@ -179,7 +179,8 @@
   // === Valkyrie: Radial Thrusts ===
   UltimateSystem.prototype._activateValkyrieRadial = function(targets) {
     var hits = [];
-    var dmg = Math.round(this.player.damage * 3);
+    var hitSet = {};
+    var dmg = Math.round(this.player.damage * 3) || 30;
     this._thrusts = [];
     for (var i = 0; i < THRUST_DIRECTIONS; i++) {
       var angle = (i / THRUST_DIRECTIONS) * Math.PI * 2;
@@ -187,7 +188,7 @@
       // Damage in thrust direction
       for (var j = 0; j < targets.length; j++) {
         var t = targets[j];
-        if (t.hp <= 0) continue;
+        if (t.hp <= 0 || hitSet[t.id]) continue;
         var dx = t.x - this.player.x, dy = t.y - this.player.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
         if (dist > 180) continue;
@@ -197,6 +198,7 @@
         while (diff < -Math.PI) diff += Math.PI * 2;
         if (Math.abs(diff) < 0.3) { // narrow cone
           t.hp -= dmg;
+          hitSet[t.id] = true; // prevent double-hit
           if (t.hp <= 0) hits.push(t);
         }
       }
@@ -213,7 +215,7 @@
     var hits = [];
     if (!this._spiral) return hits;
     var s = this._spiral;
-    var dmg = Math.round(this.player.damage * 2);
+    var dmg = Math.round(this.player.damage * 2) || 20;
     s.angle += 8 * dt;
     s.radius += SPIRAL_SPEED * dt;
     s.x = this.player.x + Math.cos(s.angle) * s.radius;
@@ -235,7 +237,7 @@
   // === Amazon: Electric Arc Expansion ===
   UltimateSystem.prototype._activateAmazonArc = function(targets) {
     var hits = [];
-    var dmg = Math.round(this.player.damage * 4);
+    var dmg = Math.round(this.player.damage * 4) || 40;
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (t.hp <= 0) continue;
