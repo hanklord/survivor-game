@@ -281,6 +281,14 @@
       self.audio.resumeBGM();
     };
 
+    // 返回選單（重新載入頁面回到角色選擇）
+    var backBtn = document.getElementById('set-back-menu');
+    if (backBtn) {
+      backBtn.onclick = function() {
+        window.location.reload();
+      };
+    }
+
     bgmCheck.onchange = function() {
       if (bgmCheck.checked) {
         localStorage.setItem('survivor_bgm', 'on');
