@@ -391,7 +391,7 @@
     });
     // Tilemap tile 列表（第一關草地用）
     this._tileFiles = [];
-    for (var ti = 0; ti < 175; ti++) {
+    for (var ti = 0; ti < 82; ti++) {
       var num = String(ti).padStart(3, '0');
       this._tileFiles.push('assets/tiles/grass/tile_' + num + '.png');
     }

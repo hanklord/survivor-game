@@ -36,6 +36,10 @@
     this.mapCanvas.height = MAP_TILES_H * TILE_SIZE;
     var ctx = this.mapCanvas.getContext('2d');
 
+    // 填滿草綠底色，防止透明空白
+    ctx.fillStyle = '#4a7a2e';
+    ctx.fillRect(0, 0, this.mapCanvas.width, this.mapCanvas.height);
+
     // 隨機拼接
     for (var y = 0; y < MAP_TILES_H; y++) {
       for (var x = 0; x < MAP_TILES_W; x++) {
