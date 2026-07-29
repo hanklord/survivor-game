@@ -897,9 +897,15 @@
       }
     }
 
-    // 持續補充：確保場上怪物維持在目標數量
-    while (this.enemies.length < TARGET_ENEMY_COUNT) {
-      this._spawnOneEnemy();
+    // 漸進補充：每 0.3~0.5 秒生成 2~4 隻
+    if (!this._spawnTimer) this._spawnTimer = 0;
+    this._spawnTimer -= dt;
+    if (this._spawnTimer <= 0 && this.enemies.length < TARGET_ENEMY_COUNT) {
+      var spawnCount = 2 + Math.floor(Math.random() * 3); // 2~4 隻
+      for (var sp = 0; sp < spawnCount && this.enemies.length < TARGET_ENEMY_COUNT; sp++) {
+        this._spawnOneEnemy();
+      }
+      this._spawnTimer = 0.3 + Math.random() * 0.2; // 0.3~0.5 秒間隔
     }
 
     // Boss 排程（擊殺數觸發：20 隻出第一隻 Boss，50 隻出第二隻）
@@ -979,8 +985,6 @@
       this._removeFrom(this.enemies, e);
       // 精英怪掉落寶箱
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
-      // 擊殺即補充：維持場上怪物數量
-      if (this.enemies.length < TARGET_ENEMY_COUNT) this._spawnOneEnemy();
     }
     this.kills++;
     if (!isBoss) this._levelKills++;
@@ -1118,7 +1122,7 @@
     var pick = SG.Enemy.pickConfig(this.imgConfig, this.gameTime, enemyIndices);
     // 隨機在螢幕外 60~120px 處生成
     var angle = Math.random() * Math.PI * 2;
-    var dist = Math.max(this.W, this.H) * 0.55 + 60 + Math.random() * 60;
+    var dist = Math.max(this.W, this.H) * 0.5 + 50 + Math.random() * 150;
     var x = this.player.x + Math.cos(angle) * dist;
     var y = this.player.y + Math.sin(angle) * dist;
     var enemy = new SG.Enemy(x, y, pick.cfg, pick.idx);
