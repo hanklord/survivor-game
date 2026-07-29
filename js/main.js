@@ -1026,7 +1026,7 @@
   Game.prototype._applyLevelBg = function() {
     var self = this;
     var idx = this.levelManager.currentLevel;
-    // 第一關：使用 tilemap 隨機地圖
+    /* Tilemap 暫時停用（保留程式碼，未來可用於其他關卡）
     if (idx === 0 && this._tilemap && this._tileFiles && this._tileFiles.length > 0) {
       if (!this._tilemap.ready) {
         this._tilemap.loadTiles(this._tileFiles, function() {
@@ -1037,7 +1037,8 @@
       }
       return;
     }
-    // 其他關卡或 tilemap 未初始化：使用原有背景
+    */
+    // 使用原有背景
     this.renderer.setTilemapCanvas(null);
     var bgImg = this.images['level_bg_' + idx];
     if (bgImg) {
