@@ -1,10 +1,10 @@
-window.GAME_VERSION = "V280";
+window.GAME_VERSION = "V281";
 window.HARDCORE_HP_MULTIPLIER = 3.0; 
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.DEBUG_SHOW_HITBOX = false;
 window.GAME_FONT = "Cinzel, 'Noto Sans TC', serif";
 window.GAME_CONFIG = {
-  "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/mage_idle_4f.png", "fps": 6 }, "run": { "file": "assets/strips/mage_run_4f.png", "fps": 10 } }, "size": 66 },
+  "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/mage_idle_8f.png", "fps": 6 }, "run": { "file": "assets/strips/mage_run_8f.png", "fps": 10 } }, "size": 66 },
   "enemies": [
     { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_slime2_idle_4f.png", "fps": 8 } }, "size": 97, "hitboxRadius": 25, "color": "#44ff44", "hp": 12, "speed": 54, "damage": 5 },
     { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_scorpion_6f.png", "fps": 8 } }, "size": 80, "hitboxRadius": 40, "color": "#cc8800", "hp": 14, "speed": 58, "damage": 6 },
