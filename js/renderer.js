@@ -83,6 +83,12 @@
     this._lastCamX = null; // 強制重繪背景
   };
 
+  // 設定 tilemap canvas（覆蓋背景 pattern）
+  Renderer.prototype.setTilemapCanvas = function(canvas) {
+    this._tilemapCanvas = canvas;
+    this._lastCamX = null; // 強制重繪背景
+  };
+
   // 判斷物件是否在可見區域內
   Renderer.prototype._isVisible = function(x, y, camX, camY, margin) {
     return x >= camX - margin && x <= camX + this.W + margin &&
@@ -1037,7 +1043,22 @@
   };
 
   Renderer.prototype._drawBackground = function(ctx, camX, camY, W, H) {
-    if (this.bgPattern) {
+    if (this._tilemapCanvas) {
+      // Tilemap 背景：繪製 offscreen canvas 的可見區域
+      var mapW = this._tilemapCanvas.width;
+      var mapH = this._tilemapCanvas.height;
+      // 先填充底色（地圖外區域）
+      ctx.fillStyle = '#2d5a1e';
+      ctx.fillRect(camX, camY, W, H);
+      // 繪製地圖可見部分
+      var sx = Math.max(0, camX);
+      var sy = Math.max(0, camY);
+      var ex = Math.min(mapW, camX + W);
+      var ey = Math.min(mapH, camY + H);
+      if (ex > sx && ey > sy) {
+        ctx.drawImage(this._tilemapCanvas, sx, sy, ex - sx, ey - sy, sx, sy, ex - sx, ey - sy);
+      }
+    } else if (this.bgPattern) {
       // 使用 setTransform 重置矩陣讓 pattern 以螢幕座標填充，
       // 用 modulo 偏移模擬鏡頭平移的無限重複背景效果。
       var bgImg = this._bgPatternImg || (this.images && this.images.background);

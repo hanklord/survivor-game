@@ -389,6 +389,12 @@
     (cfg.levels || []).forEach(function(lv, i) {
       if (lv.bgImage) load('level_bg_' + i, lv.bgImage);
     });
+    // Tilemap tile 列表（第一關草地用）
+    this._tileFiles = [];
+    for (var ti = 0; ti < 175; ti++) {
+      var num = String(ti).padStart(3, '0');
+      this._tileFiles.push('assets/tiles/grass/tile_' + num + '.png');
+    }
     Promise.all(promises).then(function() { self._start(); });
   };
 
@@ -532,6 +538,9 @@
     this._magnetDelay = 0;
     this._magnetAllXP = false;
 
+    // 初始化 tilemap 生成器
+    this._tilemap = new SG.TilemapGenerator();
+
     // 設定初始關卡背景
     this._applyLevelBg();
     this.ui.updateLevelName(this._getLevelDisplayName());
@@ -605,6 +614,7 @@
       projectiles: this.projectiles,
       particles: this.particles,
       xpGems: this.xpGems,
+      tilemapCanvas: (this._tilemap && this._tilemap.ready) ? this._tilemap.getMapCanvas() : null,
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
       valkyrieVisual: this._valkyrieAttack ? this._valkyrieAttack.getVisual() : null,
@@ -1014,7 +1024,21 @@
 
   // 套用當前關卡的背景圖片/顏色
   Game.prototype._applyLevelBg = function() {
+    var self = this;
     var idx = this.levelManager.currentLevel;
+    // 第一關：使用 tilemap 隨機地圖
+    if (idx === 0 && this._tilemap && this._tileFiles && this._tileFiles.length > 0) {
+      if (!this._tilemap.ready) {
+        this._tilemap.loadTiles(this._tileFiles, function() {
+          self.renderer.setTilemapCanvas(self._tilemap.getMapCanvas());
+        });
+      } else {
+        this.renderer.setTilemapCanvas(this._tilemap.getMapCanvas());
+      }
+      return;
+    }
+    // 其他關卡或 tilemap 未初始化：使用原有背景
+    this.renderer.setTilemapCanvas(null);
     var bgImg = this.images['level_bg_' + idx];
     if (bgImg) {
       this.renderer.setBgImage(bgImg);
