@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V277";
+window.GAME_VERSION = "V278";
 window.HARDCORE_HP_MULTIPLIER = 3.0; 
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.DEBUG_SHOW_HITBOX = false;
@@ -6,18 +6,18 @@ window.GAME_FONT = "Cinzel, 'Noto Sans TC', serif";
 window.GAME_CONFIG = {
   "player": { "image": null, "sprites": { "idle": { "file": "assets/strips/mage_idle_4f.png", "fps": 6 }, "run": { "file": "assets/strips/mage_run_4f.png", "fps": 10 } }, "size": 66 },
   "enemies": [
-    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_slime2_idle_4f.png", "fps": 8 } }, "size": 97, "hitboxRadius": 25, "color": "#44ff44", "hp": 12, "speed": 90, "damage": 5 },
-    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_scorpion_6f.png", "fps": 8 } }, "size": 80, "hitboxRadius": 40, "color": "#cc8800", "hp": 14, "speed": 96, "damage": 6 },
-    { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_skeleton_8f_4c2r.png", "fps": 8 } }, "size": 85, "hitboxRadius": 43, "color": "#ddcc88", "hp": 16, "speed": 102, "damage": 7 },
-    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 68, "hitboxRadius": 34, "color": "#8844aa", "hp": 16, "speed": 108, "damage": 6 },
-    { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 8 } }, "size": 83, "hitboxRadius": 42, "color": "#2244aa", "hp": 10, "speed": 84, "damage": 8 },
-    { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/dark_knight_walk_8f.png", "fps": 8 } }, "size": 86, "hitboxRadius": 43, "color": "#336633", "hp": 20, "speed": 102, "damage": 9 },
-    { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/dragon_8f.png", "fps": 8 } }, "size": 76, "hitboxRadius": 38, "color": "#448844", "hp": 8, "speed": 78, "damage": 10 },
-    { "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/monster1_idle_3f.png", "fps": 8 } }, "size": 79, "hitboxRadius": 40, "color": "#666666", "hp": 14, "speed": 120, "damage": 9 },
-    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 119, "hitboxRadius": 60, "color": "#442200", "hp": 10, "speed": 66, "damage": 12 },
-    { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/dark_knight_walk_8f.png", "fps": 8 } }, "size": 79, "hitboxRadius": 40, "color": "#220044", "hp": 18, "speed": 114, "damage": 14 },
-    { "level": 11, "image": null, "sprites": { "idle": { "file": "assets/strips/dragon_8f.png", "fps": 8 } }, "size": 94, "hitboxRadius": 47, "color": "#ff4400", "hp": 30, "speed": 60, "damage": 16 },
-    { "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 6 } }, "size": 101, "hitboxRadius": 51, "color": "#440044", "hp": 20, "speed": 54, "damage": 20 }
+    { "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_slime2_idle_4f.png", "fps": 8 } }, "size": 97, "hitboxRadius": 25, "color": "#44ff44", "hp": 12, "speed": 54, "damage": 5 },
+    { "level": 2, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_scorpion_6f.png", "fps": 8 } }, "size": 80, "hitboxRadius": 40, "color": "#cc8800", "hp": 14, "speed": 58, "damage": 6 },
+    { "level": 3, "image": null, "sprites": { "idle": { "file": "assets/strips/desert_skeleton_8f_4c2r.png", "fps": 8 } }, "size": 85, "hitboxRadius": 43, "color": "#ddcc88", "hp": 16, "speed": 61, "damage": 7 },
+    { "level": 4, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 68, "hitboxRadius": 34, "color": "#8844aa", "hp": 16, "speed": 65, "damage": 6 },
+    { "level": 5, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 8 } }, "size": 83, "hitboxRadius": 42, "color": "#2244aa", "hp": 10, "speed": 50, "damage": 8 },
+    { "level": 6, "image": null, "sprites": { "idle": { "file": "assets/strips/dark_knight_walk_8f.png", "fps": 8 } }, "size": 86, "hitboxRadius": 43, "color": "#336633", "hp": 20, "speed": 61, "damage": 9 },
+    { "level": 7, "image": null, "sprites": { "idle": { "file": "assets/strips/dragon_8f.png", "fps": 8 } }, "size": 76, "hitboxRadius": 38, "color": "#448844", "hp": 8, "speed": 47, "damage": 10 },
+    { "level": 8, "image": null, "sprites": { "idle": { "file": "assets/strips/monster1_idle_3f.png", "fps": 8 } }, "size": 79, "hitboxRadius": 40, "color": "#666666", "hp": 14, "speed": 72, "damage": 9 },
+    { "level": 9, "image": null, "sprites": { "idle": { "file": "assets/strips/monster4_idle_4f.png", "fps": 8 } }, "size": 119, "hitboxRadius": 60, "color": "#442200", "hp": 10, "speed": 40, "damage": 12 },
+    { "level": 10, "image": null, "sprites": { "idle": { "file": "assets/strips/dark_knight_walk_8f.png", "fps": 8 } }, "size": 79, "hitboxRadius": 40, "color": "#220044", "hp": 18, "speed": 68, "damage": 14 },
+    { "level": 11, "image": null, "sprites": { "idle": { "file": "assets/strips/dragon_8f.png", "fps": 8 } }, "size": 94, "hitboxRadius": 47, "color": "#ff4400", "hp": 30, "speed": 36, "damage": 16 },
+    { "level": 12, "image": null, "sprites": { "idle": { "file": "assets/strips/enemy_beetle_idle_8f_4c2r.png", "fps": 6 } }, "size": 101, "hitboxRadius": 51, "color": "#440044", "hp": 20, "speed": 32, "damage": 20 }
   ],
   "bosses": [
     { "name": "綠魔", "level": 1, "image": null, "sprites": { "idle": { "file": "assets/strips/boss_demon_idle_8f.png", "fps": 8 } }, "size": 144, "hitboxRadius": 72, "color": "#44ff44", "hp": 300, "speed": 30, "damage": 15, "spawnTime": 30 },

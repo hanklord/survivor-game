@@ -3,8 +3,8 @@
   window.SG = window.SG || {};
 
   var MAX_DT = 0.05;
-  var MAX_ENEMIES = 60;
-  var TARGET_ENEMY_COUNT = 30; // 場上目標怪物數量（擊殺即補充）
+  var MAX_ENEMIES = 120;
+  var TARGET_ENEMY_COUNT = 60; // 場上目標怪物數量（擊殺即補充）
   var MAX_XP_GEMS = 50;
   var MAX_DAMAGE_NUMBERS = 20;
   var LOW_FPS_THRESHOLD = 20;
