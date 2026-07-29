@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 2394297835989495838}
   - component: {fileID: 3220701925851731755}
   - component: {fileID: 1914022081800165566}
-  - component: {fileID: 8693693156740367789}
+  - component: {fileID: 2056011292709374999}
+  - component: {fileID: 4583015212755333597}
   m_Layer: 6
   m_Name: Player_Valkyrie
   m_TagString: Player
@@ -33,7 +34,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.89, y: 0.89, z: 0.89}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -55,10 +56,13 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -92,7 +96,7 @@ SpriteRenderer:
   m_SpriteSortPoint: 0
 --- !u!50 &8372711047514451414
 Rigidbody2D:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -103,8 +107,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -115,7 +119,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 4
 --- !u!58 &2129690673764618602
 CircleCollider2D:
@@ -125,6 +129,7 @@ CircleCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6463248100760698412}
   m_Enabled: 1
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -148,9 +153,9 @@ CircleCollider2D:
     m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
   m_Radius: 0.3
 --- !u!114 &2394297835989495838
 MonoBehaviour:
@@ -185,6 +190,7 @@ MonoBehaviour:
   _attackAnim:
     frames: []
     fps: 8
+  _defaultState: 0
 --- !u!114 &3220701925851731755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,8 +221,8 @@ MonoBehaviour:
   _thrustWidth: 0.66
   _knockbackRadius: 1.6
   _thrustEffectPrefab: {fileID: 4830911867150023889, guid: d67aa37d3eb125f4eb5b22ccc329a88d, type: 3}
-  _shockwaveEffectPrefab: {fileID: 5686541555043267931, guid: 656aae8b4b1cc034abf1e83bd204d8c6, type: 3}
---- !u!114 &8693693156740367789
+  _shockwaveEffectPrefab: {fileID: 0}
+--- !u!114 &2056011292709374999
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -225,6 +231,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 6463248100760698412}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0386b93b12d522d4fab4f01e11d4b542, type: 3}
+  m_Script: {fileID: 11500000, guid: 1d729c8a74795b4499f8cf86c2c2d8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _idleAnim:
+    frames: []
+    fps: 8
+  _runAnim:
+    frames: []
+    fps: 8
+  _attackAnim:
+    frames: []
+    fps: 8
+  _defaultState: 0
+--- !u!114 &4583015212755333597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6463248100760698412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3946ddaf5e1b402e94ed91e69a46e296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

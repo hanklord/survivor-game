@@ -14,6 +14,7 @@ public class BackgroundImporter : Editor
         string[] bgPaths = new string[]
         {
             "Assets/Sprites/Backgrounds/grass.png",
+            "Assets/Sprites/Backgrounds/desert.png",
             "Assets/Sprites/Backgrounds/cave.png",
             "Assets/Sprites/Backgrounds/swamp.png",
             "Assets/Sprites/Backgrounds/volcano.png",
@@ -27,7 +28,7 @@ public class BackgroundImporter : Editor
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[EndlessHeroes] Background textures configured for tiling.");
+        Debug.Log("[EndlessHeroes] Background textures configured for tiling (Sprite mode + Repeat).");
     }
 
     private static void SetupBackgroundTexture(string assetPath)
@@ -39,17 +40,18 @@ public class BackgroundImporter : Editor
             return;
         }
 
-        // 背景紋理：不用 Sprite 模式，改用 Default（給 Quad Material 用）
-        importer.textureType = TextureImporterType.Default;
+        // 背景使用 Sprite 模式 (Single)，Wrap = Repeat，供 BackgroundScroller 的 SpriteRenderer 使用
+        importer.textureType = TextureImporterType.Sprite;
+        importer.spriteImportMode = SpriteImportMode.Single;
         importer.wrapMode = TextureWrapMode.Repeat;
         importer.filterMode = FilterMode.Bilinear;
         importer.textureCompression = TextureImporterCompression.Uncompressed;
-        importer.mipmapEnabled = true;
+        importer.spritePixelsPerUnit = 100;
+        importer.mipmapEnabled = false;
         importer.isReadable = false;
-        importer.maxTextureSize = 1024;
-        importer.npotScale = TextureImporterNPOTScale.ToNearest;
+        importer.maxTextureSize = 2048;
 
         importer.SaveAndReimport();
-        Debug.Log("  ✓ " + assetPath + " → Default, Repeat, Bilinear");
+        Debug.Log("  ✓ " + assetPath + " → Sprite, Repeat, Bilinear");
     }
 }

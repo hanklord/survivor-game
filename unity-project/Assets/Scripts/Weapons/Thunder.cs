@@ -48,7 +48,8 @@ public class Thunder : WeaponBase
         float totalDamage = _damage * player.DamageMultiplier;
 
         target.TakeDamage(totalDamage);
-        DamageNumberManager.Instance.Spawn(target.transform.position, totalDamage);
+        if (DamageNumberManager.Instance != null)
+            DamageNumberManager.Instance.Spawn(target.transform.position, totalDamage);
 
         if (target.CurrentHP <= 0)
         {

@@ -40,6 +40,23 @@ public class ValkyrieAttack : MonoBehaviour, IPlayerAttack
         _currentCD = _baseCD;
     }
 
+    public void Attack(Vector2 direction)
+    {
+        if (_player == null)
+            _player = GetComponent<PlayerController>();
+
+        if (_player != null)
+        {
+            Attack(_player);
+        }
+    }
+
+    public void OnLevelUp(int level)
+    {
+        _level = level;
+        Upgrade();
+    }
+
     public void Attack(PlayerController player)
     {
         _player = player;
@@ -102,14 +119,16 @@ public class ValkyrieAttack : MonoBehaviour, IPlayerAttack
             {
                 enemy.TakeDamage(totalDamage);
                 enemy.ApplyKnockback(dir * 3f);
-                DamageNumberManager.Instance.Spawn(enemy.transform.position, totalDamage);
+                if (DamageNumberManager.Instance != null)
+                    DamageNumberManager.Instance.Spawn(enemy.transform.position, totalDamage);
             }
 
             var boss = hit.collider.GetComponent<BossController>();
             if (boss != null)
             {
                 boss.TakeDamage(totalDamage);
-                DamageNumberManager.Instance.Spawn(boss.transform.position, totalDamage);
+                if (DamageNumberManager.Instance != null)
+                    DamageNumberManager.Instance.Spawn(boss.transform.position, totalDamage);
             }
         }
 

@@ -87,28 +87,60 @@ public class ObjectPoolManager : MonoBehaviour
 
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5;
-        // 建立圓形 placeholder
-        var tex = new Texture2D(16, 16);
-        var colors = new Color[16 * 16];
-        float center = 8f;
-        for (int i = 0; i < 16; i++)
-            for (int j = 0; j < 16; j++)
-                colors[i * 16 + j] = Vector2.Distance(new Vector2(j, i), new Vector2(center, center)) < 7 ? Color.white : Color.clear;
-        tex.SetPixels(colors);
-        tex.Apply();
-        sr.sprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16);
-        sr.color = new Color(1f, 0.5f, 0f);
+
+        // 嘗試從 Resources 載入實際投射物圖片
+        var loadedSprite = Resources.Load<Sprite>("Effects/projectile");
+        if (loadedSprite != null)
+        {
+            sr.sprite = loadedSprite;
+        }
+        else
+        {
+            // Fallback: 生成火球形狀 sprite（32x32 橘紅漸層圓形）
+            int size = 32;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            tex.filterMode = FilterMode.Point;
+            var colors = new Color[size * size];
+            float center = size / 2f;
+            float radius = size / 2f - 2f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                    if (dist < radius)
+                    {
+                        float t = dist / radius;
+                        Color c = Color.Lerp(
+                            new Color(1f, 0.95f, 0.4f),   // 中心亮黃
+                            new Color(1f, 0.3f, 0f),       // 邊緣橘紅
+                            t * t
+                        );
+                        c.a = Mathf.Lerp(1f, 0.4f, t * t);
+                        colors[y * size + x] = c;
+                    }
+                    else
+                    {
+                        colors[y * size + x] = Color.clear;
+                    }
+                }
+            }
+            tex.SetPixels(colors);
+            tex.Apply();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32f);
+        }
 
         var rb = go.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0;
         rb.freezeRotation = true;
 
         var col = go.AddComponent<CircleCollider2D>();
-        col.radius = 0.12f;
+        col.radius = 0.15f;
         col.isTrigger = true;
 
         go.AddComponent<ProjectileController>();
-        go.transform.localScale = Vector3.one * 0.3f;
+        go.transform.localScale = Vector3.one * 0.5f;
 
         return go.GetComponent<ProjectileController>();
     }
@@ -168,5 +200,54 @@ public class ObjectPoolManager : MonoBehaviour
     {
         if (_particleSpawner != null)
             _particleSpawner.SpawnBossDeathParticles(position);
+    }
+
+    /// <summary>
+    /// 通用物件池 Get — 從池中取得指定 prefab 的實例
+    /// 若池中無可用物件則 Instantiate 一個新的
+    /// </summary>
+    private Dictionary<int, Queue<GameObject>> _genericPools = new Dictionary<int, Queue<GameObject>>();
+
+    public GameObject Get(GameObject prefab)
+    {
+        if (prefab == null) return null;
+
+        int id = prefab.GetInstanceID();
+        if (!_genericPools.ContainsKey(id))
+        {
+            _genericPools[id] = new Queue<GameObject>();
+        }
+
+        GameObject go;
+        var pool = _genericPools[id];
+
+        if (pool.Count > 0)
+        {
+            go = pool.Dequeue();
+        }
+        else
+        {
+            go = Instantiate(prefab, transform);
+        }
+
+        go.SetActive(true);
+        return go;
+    }
+
+    /// <summary>
+    /// 通用物件池歸還
+    /// </summary>
+    public void Release(GameObject go, GameObject prefab)
+    {
+        if (go == null) return;
+        go.SetActive(false);
+
+        if (prefab != null)
+        {
+            int id = prefab.GetInstanceID();
+            if (!_genericPools.ContainsKey(id))
+                _genericPools[id] = new Queue<GameObject>();
+            _genericPools[id].Enqueue(go);
+        }
     }
 }

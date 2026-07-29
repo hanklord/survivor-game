@@ -144,8 +144,8 @@ public class PlayerController : MonoBehaviour
         if (h != 0) FacingLeft = h < 0;
 
         // 瞄準方向（右搖桿或移動方向）
-        float aimH = Input.GetAxis("RightStickHorizontal");
-        float aimV = Input.GetAxis("RightStickVertical");
+        float aimH = GetAxisSafe("RightStickHorizontal");
+        float aimV = GetAxisSafe("RightStickVertical");
         if (Mathf.Abs(aimH) > 0.1f || Mathf.Abs(aimV) > 0.1f)
         {
             _aimDirection = new Vector2(aimH, aimV).normalized;
@@ -156,7 +156,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // 大招（空白鍵或手把按鈕）
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetButtonDown("Fire2"))
+        if (Input.GetKeyDown(KeyCode.Space) || GetButtonDownSafe("Fire2"))
         {
             GameManager.Instance.ActivateUltimate();
         }
@@ -280,5 +280,32 @@ public class PlayerController : MonoBehaviour
             elapsed += 0.1f;
         }
         sr.enabled = true;
+    }
+
+    public void UpgradeAttack()
+    {
+        var attack = GetComponent<IPlayerAttack>();
+        if (attack != null)
+        {
+            attack.OnLevelUp(Level);
+        }
+    }
+
+    /// <summary>
+    /// 安全讀取軸值，避免未設定的軸拋出 ArgumentException
+    /// </summary>
+    private float GetAxisSafe(string axisName)
+    {
+        try { return Input.GetAxis(axisName); }
+        catch (System.ArgumentException) { return 0f; }
+    }
+
+    /// <summary>
+    /// 安全讀取按鈕，避免未設定的按鈕拋出 ArgumentException
+    /// </summary>
+    private bool GetButtonDownSafe(string buttonName)
+    {
+        try { return Input.GetButtonDown(buttonName); }
+        catch (System.ArgumentException) { return false; }
     }
 }

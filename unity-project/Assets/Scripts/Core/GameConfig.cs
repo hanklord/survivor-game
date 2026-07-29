@@ -43,12 +43,24 @@ public class GameConfig : ScriptableObject
 
     public GameObject GetPlayerPrefab(CharacterType type)
     {
-        return playerPrefabs[(int)type];
+        int index = (int)type;
+        if (playerPrefabs == null || index < 0 || index >= playerPrefabs.Length)
+        {
+            Debug.LogWarning($"[GameConfig] playerPrefabs not set or index {index} out of range (length={playerPrefabs?.Length ?? 0}). Use 'EndlessHeroes → 9. Auto Setup GameConfig Assets' to configure.");
+            return null;
+        }
+        return playerPrefabs[index];
     }
 
     public CharacterStats GetCharacterStats(CharacterType type)
     {
-        return characters[(int)type].stats;
+        int index = (int)type;
+        if (characters == null || index < 0 || index >= characters.Length)
+        {
+            Debug.LogWarning($"[GameConfig] characters not set or index {index} out of range.");
+            return new CharacterStats();
+        }
+        return characters[index].stats;
     }
 }
 
@@ -167,6 +179,8 @@ public class AudioConfig
     [Range(0f, 1f)]
     public float sfxVolume = 0.7f;
     public AudioClip defaultBGM;
+    public bool enabled { get; set; }
+    public float volume { get; set; }
 }
 
 // === 列舉 (6 角色) ===

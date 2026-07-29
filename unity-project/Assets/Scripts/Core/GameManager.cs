@@ -494,4 +494,10 @@ public class GameManager : MonoBehaviour
     {
         Bosses.Add(boss);
     }
+
+    public void OnPlayerDeath()
+    {
+        Debug.Log("[EndlessHeroes] Player died!");
+        EndGame();
+    }
 }

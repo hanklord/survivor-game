@@ -72,7 +72,8 @@ public class Nova : WeaponBase
             if (enemy != null)
             {
                 enemy.TakeDamage(totalDamage);
-                DamageNumberManager.Instance.Spawn(enemy.transform.position, totalDamage);
+                if (DamageNumberManager.Instance != null)
+                    DamageNumberManager.Instance.Spawn(enemy.transform.position, totalDamage);
 
                 if (enemy.CurrentHP <= 0)
                 {
@@ -84,7 +85,8 @@ public class Nova : WeaponBase
             if (boss != null)
             {
                 boss.TakeDamage(totalDamage);
-                DamageNumberManager.Instance.Spawn(boss.transform.position, totalDamage);
+                if (DamageNumberManager.Instance != null)
+                    DamageNumberManager.Instance.Spawn(boss.transform.position, totalDamage);
             }
         }
 

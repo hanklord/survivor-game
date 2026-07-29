@@ -75,7 +75,8 @@ public class ChainLightning : WeaponBase
             hitIds.Add(current.EntityID);
             current.TakeDamage(totalDamage);
             chainPositions.Add(current.transform.position);
-            DamageNumberManager.Instance.Spawn(current.transform.position, totalDamage);
+            if (DamageNumberManager.Instance != null)
+                DamageNumberManager.Instance.Spawn(current.transform.position, totalDamage);
 
             if (current.CurrentHP <= 0)
             {
@@ -137,5 +138,66 @@ public class ChainLightning : WeaponBase
         Level++;
         _chainCount = Mathf.Min(15, _chainCount + 1);
         _damage += 3f;
+    }
+
+    /// <summary>
+    /// 外部呼叫的 Fire 方法 — 從指定位置發射鏈式閃電（供迴力鏢等觸發用）
+    /// </summary>
+    public void Fire(Vector3 startPos, float chainRange, int chainBounces, float chainDamageMultiplier)
+    {
+        var enemies = GameManager.Instance.Enemies;
+        if (enemies.Count == 0) return;
+
+        // 找起始位置最近的敵人
+        EnemyBase firstTarget = null;
+        float minDist = chainRange;
+
+        foreach (var enemy in enemies)
+        {
+            float dist = Vector2.Distance(startPos, enemy.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                firstTarget = enemy;
+            }
+        }
+
+        if (firstTarget == null) return;
+
+        // 鏈式傷害
+        HashSet<int> hitIds = new HashSet<int>();
+        List<Vector3> chainPositions = new List<Vector3>();
+        chainPositions.Add(startPos);
+
+        EnemyBase current = firstTarget;
+        float baseDamage = _damage * chainDamageMultiplier;
+
+        for (int i = 0; i < chainBounces && current != null; i++)
+        {
+            hitIds.Add(current.EntityID);
+            current.TakeDamage(baseDamage);
+            chainPositions.Add(current.transform.position);
+
+            if (DamageNumberManager.Instance != null)
+                DamageNumberManager.Instance.Spawn(current.transform.position, baseDamage);
+
+            // 找下一個目標（使用自訂範圍）
+            EnemyBase next = null;
+            float nextMin = chainRange;
+            foreach (var enemy in enemies)
+            {
+                if (hitIds.Contains(enemy.EntityID)) continue;
+                float dist = Vector2.Distance(current.transform.position, enemy.transform.position);
+                if (dist < nextMin)
+                {
+                    nextMin = dist;
+                    next = enemy;
+                }
+            }
+            current = next;
+        }
+
+        // 視覺效果
+        ShowLightningEffect(chainPositions);
     }
 }

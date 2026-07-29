@@ -1,62 +1,33 @@
 using UnityEngine;
 
 /// <summary>
-/// BackgroundScroller — 無限背景平鋪
-/// 使用 MeshRenderer + Quad 配合紋理 Offset 實現無限滾動
-/// 不依賴 SpriteRenderer Tiled 模式（避免相容性問題）
+/// BackgroundScroller — 無限背景
+/// 背景固定在世界座標原點，尺寸足夠覆蓋相機可視範圍 + 玩家移動範圍。
+/// 不跟隨相機（讓玩家移動時有明顯的位移感）。
 /// </summary>
 public class BackgroundScroller : MonoBehaviour
 {
-    private MeshRenderer _renderer;
-    private Material _material;
-    private Transform _camera;
-    private float _textureScale = 3f; // 紋理重複次數（值越大背景越密）
+    private SpriteRenderer _sr;
+
+    // 背景覆蓋的世界範圍（正方形半邊長），足以讓玩家在範圍內移動時都看得到背景
+    private const float WORLD_COVERAGE = 60f;
 
     private void Awake()
     {
-        // 建立一個全螢幕 Quad
-        var meshFilter = gameObject.GetComponent<MeshFilter>();
-        if (meshFilter == null) meshFilter = gameObject.AddComponent<MeshFilter>();
-        meshFilter.mesh = CreateQuadMesh();
+        _sr = GetComponent<SpriteRenderer>();
+        if (_sr == null) _sr = gameObject.AddComponent<SpriteRenderer>();
+        _sr.sortingOrder = -100;
 
-        _renderer = gameObject.GetComponent<MeshRenderer>();
-        if (_renderer == null) _renderer = gameObject.AddComponent<MeshRenderer>();
+        // 固定在 z=10（在所有物件後面）
+        transform.position = new Vector3(0, 0, 10f);
 
-        // 建立材質
-        _material = new Material(Shader.Find("Unlit/Texture"));
-        _material.mainTextureScale = new Vector2(_textureScale, _textureScale);
-        _renderer.material = _material;
-        _renderer.sortingOrder = -100;
-
-        // 移除 SpriteRenderer（如果有的話）
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null) Destroy(sr);
+        // 預設顯示 grid 背景
+        SetGridBackground(new Color(0.08f, 0.08f, 0.14f), new Color(0.15f, 0.15f, 0.22f));
     }
 
     private void Start()
     {
-        _camera = Camera.main.transform;
-
-        // 大小覆蓋整個可視區域 + 預留空間
-        float camHeight = Camera.main.orthographicSize * 2f;
-        float camWidth = camHeight * Camera.main.aspect;
-        transform.localScale = new Vector3(camWidth + 4f, camHeight + 4f, 1f);
-    }
-
-    private void LateUpdate()
-    {
-        if (_camera == null) return;
-
-        // 跟隨相機
-        transform.position = new Vector3(_camera.position.x, _camera.position.y, 10f);
-
-        // 紋理 Offset 產生滾動效果
-        if (_material != null)
-        {
-            float offsetX = _camera.position.x * _textureScale / transform.localScale.x;
-            float offsetY = _camera.position.y * _textureScale / transform.localScale.y;
-            _material.mainTextureOffset = new Vector2(offsetX, offsetY);
-        }
+        FitToWorld();
     }
 
     /// <summary>
@@ -64,62 +35,105 @@ public class BackgroundScroller : MonoBehaviour
     /// </summary>
     public void SetBackground(Sprite sprite)
     {
-        if (sprite == null) return;
-        if (_material == null) return;
-        _material.mainTexture = sprite.texture;
+        if (sprite == null || _sr == null) return;
+        _sr.sprite = sprite;
+        _sr.color = Color.white;
+        FitToWorld();
     }
 
     /// <summary>
-    /// 動態切換背景紋理 (Texture2D)
+    /// 動態切換背景紋理 (Texture2D) — 轉為 Sprite 後套用
     /// </summary>
     public void SetBackgroundTexture(Texture2D texture)
     {
-        if (texture == null) return;
-        if (_material == null) return;
-        _material.mainTexture = texture;
+        if (texture == null || _sr == null) return;
+        var sprite = Sprite.Create(texture,
+            new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f), 100f);
+        _sr.sprite = sprite;
+        _sr.color = Color.white;
+        FitToWorld();
     }
 
     /// <summary>
-    /// 設定背景顏色（無圖片時）
+    /// 設定背景顏色（無圖片時用純色填充）
     /// </summary>
     public void SetBackgroundColor(Color color)
     {
-        if (_material == null) return;
-        _material.mainTexture = null;
-        _material.color = color;
+        if (_sr == null) return;
+        // 建立一個 4x4 純色 sprite
+        var tex = new Texture2D(4, 4);
+        var pixels = new Color[16];
+        for (int i = 0; i < 16; i++) pixels[i] = Color.white;
+        tex.SetPixels(pixels);
+        tex.Apply();
+        _sr.sprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
+        _sr.color = color;
+        FitToWorld();
     }
 
     /// <summary>
-    /// 設定平鋪密度（值越大重複越多、每格越小）
+    /// 設定平鋪密度（此版本預留介面）
     /// </summary>
     public void SetTileScale(float scale)
     {
-        _textureScale = scale;
-        if (_material != null)
-        {
-            _material.mainTextureScale = new Vector2(scale, scale);
-        }
+        // 預留介面
     }
 
-    private Mesh CreateQuadMesh()
+    /// <summary>
+    /// 拉伸 sprite 覆蓋整個遊戲世界範圍
+    /// </summary>
+    private void FitToWorld()
     {
-        var mesh = new Mesh();
-        mesh.vertices = new Vector3[]
+        if (_sr == null || _sr.sprite == null) return;
+
+        var bounds = _sr.sprite.bounds;
+        float spriteW = bounds.size.x;
+        float spriteH = bounds.size.y;
+
+        if (spriteW <= 0 || spriteH <= 0) return;
+
+        // 覆蓋 WORLD_COVERAGE × WORLD_COVERAGE 的世界空間
+        float targetSize = WORLD_COVERAGE * 2f;
+        float scaleX = targetSize / spriteW;
+        float scaleY = targetSize / spriteH;
+        float scale = Mathf.Max(scaleX, scaleY);
+
+        transform.localScale = new Vector3(scale, scale, 1f);
+    }
+
+    /// <summary>
+    /// 產生 Grid 格線背景（程式碼生成 Texture）
+    /// </summary>
+    /// <param name="bgColor">背景底色</param>
+    /// <param name="lineColor">格線顏色</param>
+    /// <param name="cellSize">每格像素大小</param>
+    /// <param name="lineWidth">線寬（像素）</param>
+    public void SetGridBackground(Color bgColor, Color lineColor, int cellSize = 32, int lineWidth = 1)
+    {
+        if (_sr == null) return;
+
+        int texSize = 256; // 256x256 tile（會被放大覆蓋世界）
+        var tex = new Texture2D(texSize, texSize, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Point;
+        tex.wrapMode = TextureWrapMode.Repeat;
+
+        var pixels = new Color[texSize * texSize];
+
+        for (int y = 0; y < texSize; y++)
         {
-            new Vector3(-0.5f, -0.5f, 0),
-            new Vector3(0.5f, -0.5f, 0),
-            new Vector3(0.5f, 0.5f, 0),
-            new Vector3(-0.5f, 0.5f, 0),
-        };
-        mesh.uv = new Vector2[]
-        {
-            new Vector2(0, 0),
-            new Vector2(1, 0),
-            new Vector2(1, 1),
-            new Vector2(0, 1),
-        };
-        mesh.triangles = new int[] { 0, 2, 1, 0, 3, 2 };
-        mesh.RecalculateNormals();
-        return mesh;
+            for (int x = 0; x < texSize; x++)
+            {
+                bool onLine = (x % cellSize < lineWidth) || (y % cellSize < lineWidth);
+                pixels[y * texSize + x] = onLine ? lineColor : bgColor;
+            }
+        }
+
+        tex.SetPixels(pixels);
+        tex.Apply();
+
+        _sr.sprite = Sprite.Create(tex, new Rect(0, 0, texSize, texSize), new Vector2(0.5f, 0.5f), 32f);
+        _sr.color = Color.white;
+        FitToWorld();
     }
 }

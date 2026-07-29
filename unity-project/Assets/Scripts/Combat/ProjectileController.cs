@@ -82,7 +82,8 @@ public class ProjectileController : MonoBehaviour
         if (enemy != null)
         {
             enemy.TakeDamage(Damage);
-            DamageNumberManager.Instance.Spawn(other.transform.position, Damage);
+            if (DamageNumberManager.Instance != null)
+                DamageNumberManager.Instance.Spawn(other.transform.position, Damage);
             OnHitCallback?.Invoke(other.transform.position);
 
             _pierceCount++;
@@ -98,7 +99,8 @@ public class ProjectileController : MonoBehaviour
         if (boss != null)
         {
             boss.TakeDamage(Damage);
-            DamageNumberManager.Instance.Spawn(other.transform.position, Damage);
+            if (DamageNumberManager.Instance != null)
+                DamageNumberManager.Instance.Spawn(other.transform.position, Damage);
             OnHitCallback?.Invoke(other.transform.position);
 
             _pierceCount++;
@@ -116,7 +118,11 @@ public class ProjectileController : MonoBehaviour
     {
         IsActive = false;
         gameObject.SetActive(false);
-        GameManager.Instance.PoolManager.ReleaseProjectile(this);
+        // 歸還到物件池（如果 PoolManager 存在且不為 null）
+        if (GameManager.Instance != null && GameManager.Instance.PoolManager != null)
+        {
+            GameManager.Instance.PoolManager.ReleaseProjectile(this);
+        }
     }
 }
 
@@ -129,7 +135,8 @@ public static class ProjectileFirer
     /// <summary>
     /// 向多目標發射多顆投射物
     /// </summary>
-    public static void FireAtTargets(PlayerController player, float projectileSpeed, float lifetime)
+    /// <param name="projectilePrefab">可選：指定投射物 prefab，null 則用預設池</param>
+    public static void FireAtTargets(PlayerController player, float projectileSpeed, float lifetime, GameObject projectilePrefab = null)
     {
         var enemies = GameManager.Instance.Enemies;
         var bosses = GameManager.Instance.Bosses;
@@ -148,7 +155,7 @@ public static class ProjectileFirer
             {
                 float spread = (i - count / 2f) * 10f;
                 Vector2 spreadDir = RotateVector(dir, spread);
-                SpawnProjectile(player.transform.position, spreadDir * projectileSpeed, player.GetTotalDamage(), lifetime);
+                SpawnProjectile(player.transform.position, spreadDir * projectileSpeed, player.GetTotalDamage(), lifetime, projectilePrefab);
             }
             return;
         }
@@ -167,15 +174,25 @@ public static class ProjectileFirer
             float spread = (i - count / 2f) * 5f;
             dir = RotateVector(dir, spread);
 
-            SpawnProjectile(player.transform.position, dir * projectileSpeed, player.GetTotalDamage(), lifetime);
+            SpawnProjectile(player.transform.position, dir * projectileSpeed, player.GetTotalDamage(), lifetime, projectilePrefab);
         }
 
-        GameManager.Instance.AudioManager.PlaySFX(SFXType.Shoot);
+        if (GameManager.Instance.AudioManager != null)
+            GameManager.Instance.AudioManager.PlaySFX(SFXType.Shoot);
     }
 
-    private static void SpawnProjectile(Vector3 pos, Vector2 velocity, float damage, float lifetime)
+    private static void SpawnProjectile(Vector3 pos, Vector2 velocity, float damage, float lifetime, GameObject prefab = null)
     {
-        var proj = GameManager.Instance.PoolManager.GetProjectile();
+        ProjectileController proj;
+        if (prefab != null)
+        {
+            var go = GameManager.Instance.PoolManager.Get(prefab);
+            proj = go != null ? go.GetComponent<ProjectileController>() : null;
+        }
+        else
+        {
+            proj = GameManager.Instance.PoolManager.GetProjectile();
+        }
         if (proj == null) return;
 
         proj.transform.position = pos;

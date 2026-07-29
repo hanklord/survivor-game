@@ -86,7 +86,18 @@ public class ArcherAttack : MonoBehaviour, IPlayerAttack
 
     private void SpawnArrow(Vector2 direction, float damage)
     {
-        var arrow = GameManager.Instance.PoolManager.GetProjectile();
+        ProjectileController arrow;
+        if (_arrowPrefab != null)
+        {
+            var go = GameManager.Instance.PoolManager.Get(_arrowPrefab);
+            arrow = go.GetComponent<ProjectileController>();
+        }
+        else
+        {
+            arrow = GameManager.Instance.PoolManager.GetProjectile();
+        }
+        if (arrow == null) return;
+
         arrow.transform.position = transform.position;
         arrow.Initialize(direction * _arrowSpeed, damage, _range / _arrowSpeed);
 
@@ -173,5 +184,22 @@ public class ArcherAttack : MonoBehaviour, IPlayerAttack
         float cos = Mathf.Cos(rad);
         float sin = Mathf.Sin(rad);
         return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
+    }
+
+    public void Attack(Vector2 direction)
+    {
+        if (_player == null)
+            _player = GetComponent<PlayerController>();
+
+        if (_player != null)
+        {
+            Attack(_player);
+        }
+    }
+
+    public void OnLevelUp(int level)
+    {
+        _level = level;
+        Upgrade();
     }
 }

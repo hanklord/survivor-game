@@ -63,16 +63,19 @@ public class GameBootstrap : MonoBehaviour
             return;
         }
 
-        if (_characterSelectUI != null)
+        // 如果沒有手動指定 CharacterSelectUI，自動建立一個
+        if (_characterSelectUI == null)
         {
-            _characterSelectUI.Show(OnCharacterSelected);
+            _characterSelectUI = FindObjectOfType<CharacterSelectUI>();
         }
-        else
+        if (_characterSelectUI == null)
         {
-            // 沒有角色選擇 UI，使用預設角色
-            Debug.Log("[EndlessHeroes] No CharacterSelectUI found, using default: " + _defaultCharacter);
-            OnCharacterSelected(_defaultCharacter);
+            var go = new GameObject("CharacterSelectUI");
+            _characterSelectUI = go.AddComponent<CharacterSelectUI>();
+            Debug.Log("[EndlessHeroes] Auto-created CharacterSelectUI");
         }
+
+        _characterSelectUI.Show(OnCharacterSelected);
     }
 
     private void OnCharacterSelected(CharacterType type)
@@ -83,11 +86,11 @@ public class GameBootstrap : MonoBehaviour
 
     /// <summary>
     /// 快速啟動（無 GameConfig 時的簡易模式）
-    /// 用於開發測試
+    /// 仍然顯示角色選擇
     /// </summary>
     private void QuickStart()
     {
-        Debug.Log("[EndlessHeroes] Quick-starting with " + _defaultCharacter);
-        OnCharacterSelected(_defaultCharacter);
+        Debug.Log("[EndlessHeroes] GameConfig not assigned, showing character select with defaults.");
+        ShowCharacterSelect();
     }
 }

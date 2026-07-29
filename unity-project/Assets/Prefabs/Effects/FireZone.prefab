@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4440657576343025119}
   - component: {fileID: 32248051122429876}
-  - component: {fileID: 2116934891424300677}
   - component: {fileID: 4743221612017723204}
   - component: {fileID: 9198781061180286621}
+  - component: {fileID: 2116934891424300677}
   m_Layer: 0
   m_Name: FireZone
   m_TagString: Untagged
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -52,10 +52,13 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -76,46 +79,17 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 5478756093139038639, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.28, y: 1.28}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2116934891424300677
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5475977199133850334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d729c8a74795b4499f8cf86c2c2d8e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _idleAnim:
-    frames:
-    - {fileID: 5478756093139038639, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: -6914961039705156493, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: -4995955766233679691, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: -3177972807203299728, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: -7953078555562877745, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: -4715007394925067859, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: -4768613919943458294, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    - {fileID: 144872435753090513, guid: 3b9079de453f4454a81a5b125aad22c5, type: 3}
-    fps: 12
-  _runAnim:
-    frames: []
-    fps: 8
-  _attackAnim:
-    frames: []
-    fps: 8
 --- !u!58 &4743221612017723204
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -124,6 +98,7 @@ CircleCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5475977199133850334}
   m_Enabled: 1
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -147,10 +122,10 @@ CircleCollider2D:
     m_Bits: 4294967295
   m_IsTrigger: 1
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 1
 --- !u!114 &9198781061180286621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,3 +138,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ae1f9529fbf55e43ab1c6f006e459a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2116934891424300677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5475977199133850334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d729c8a74795b4499f8cf86c2c2d8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _idleAnim:
+    frames: []
+    fps: 8
+  _runAnim:
+    frames: []
+    fps: 8
+  _attackAnim:
+    frames: []
+    fps: 8
+  _defaultState: 0

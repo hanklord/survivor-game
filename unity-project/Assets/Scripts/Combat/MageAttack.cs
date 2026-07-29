@@ -11,6 +11,9 @@ public class MageAttack : MonoBehaviour, IPlayerAttack
     [SerializeField] private float _projectileSpeed = 8f;
     [SerializeField] private float _lifetime = 2f;
 
+    [Header("Prefabs")]
+    [SerializeField] private GameObject _projectilePrefab;
+
     [Header("Fire AOE (Lv13+)")]
     [SerializeField] private GameObject _fireExplosionPrefab;
 
@@ -26,7 +29,7 @@ public class MageAttack : MonoBehaviour, IPlayerAttack
     public void Attack(PlayerController player)
     {
         _player = player;
-        ProjectileFirer.FireAtTargets(player, _projectileSpeed, _lifetime);
+        ProjectileFirer.FireAtTargets(player, _projectileSpeed, _lifetime, _projectilePrefab);
 
         // Lv13+ 機率觸發火焰 AOE
         if (_level >= FIRE_AOE_LEVEL && Random.value < FIRE_AOE_CHANCE)
@@ -94,4 +97,48 @@ public class MageAttack : MonoBehaviour, IPlayerAttack
     }
 
     public int GetLevel() => _level;
+
+    /// <summary>
+    /// IPlayerAttack 介面實作 — 由 PlayerController 呼叫
+    /// </summary>
+    public void Attack(Vector2 direction)
+    {
+        if (_player == null)
+            _player = GetComponent<PlayerController>();
+
+        if (_player != null)
+        {
+            ProjectileFirer.FireAtTargets(_player, _projectileSpeed, _lifetime, _projectilePrefab);
+
+            // Lv13+ 機率觸發火焰 AOE
+            if (_level >= FIRE_AOE_LEVEL && Random.value < FIRE_AOE_CHANCE)
+            {
+                var nearest = FindNearestEnemy();
+                if (nearest != null)
+                {
+                    SpawnFireAOE(nearest.transform.position);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// IPlayerAttack 介面實作 — 升級時呼叫
+    /// </summary>
+    public void OnLevelUp(int level)
+    {
+        _level = level;
+        // 奇數 = 投射物數量++，偶數 = 攻速++
+        if (_player == null) _player = GetComponent<PlayerController>();
+        if (_player == null) return;
+
+        if (_level % 2 == 1)
+        {
+            _player.SetProjectileCount(_player.ProjectileCount + 1);
+        }
+        else
+        {
+            _player.SetFireRate(_player.FireRate * 1.1f);
+        }
+    }
 }

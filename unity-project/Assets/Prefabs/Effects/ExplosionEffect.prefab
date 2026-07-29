@@ -50,10 +50,13 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -73,16 +76,16 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 15
-  m_Sprite: {fileID: -7871788300110944905, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
+  m_SortingOrder: 12
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 3.52, y: 15.36}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &5263992772045286504
@@ -98,19 +101,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _idleAnim:
-    frames:
-    - {fileID: -7871788300110944905, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: -1157248697166079331, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: 7811048746334358231, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: -6682798851520811074, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: 157931632196150130, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: -5723192853971531870, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: 5793194716063935678, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    - {fileID: -4307143682722288182, guid: 98bd44c4316e22049b86960bfa3c98f5, type: 3}
-    fps: 16
+    frames: []
+    fps: 8
   _runAnim:
     frames: []
     fps: 8
   _attackAnim:
     frames: []
     fps: 8
+  _defaultState: 0

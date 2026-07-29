@@ -24,11 +24,11 @@ MonoBehaviour:
       projectileCount: 1
       pickupRange: 1.2
       invulnDuration: 0.5
-      scale: 1
+      scale: 0.76
     attackType: 0
-    prefab: {fileID: 6146344495327477067, guid: 54c8e20e2a35d854d861147b02787f78, type: 3}
+    prefab: {fileID: 0}
   - type: 1
-    displayName: "\u5F13\u7BAD\u624B"
+    displayName: "\u5F13\u624B"
     portrait: {fileID: 21300000, guid: d6aa11f4d8b5cc740b9f65f393ab4b26, type: 3}
     stats:
       hp: 100
@@ -38,11 +38,11 @@ MonoBehaviour:
       projectileCount: 1
       pickupRange: 1.2
       invulnDuration: 0.5
-      scale: 1
+      scale: 0.76
     attackType: 1
-    prefab: {fileID: 6565009579532085477, guid: 9e6b11f93fda682499f05bbf45ebcb1f, type: 3}
+    prefab: {fileID: 0}
   - type: 2
-    displayName: "\u9A0E\u58EB"
+    displayName: "\u9EC3\u91D1\u9A0E\u58EB"
     portrait: {fileID: 21300000, guid: 5a5c85811a68ac54698d4882c83e253a, type: 3}
     stats:
       hp: 150
@@ -52,9 +52,9 @@ MonoBehaviour:
       projectileCount: 0
       pickupRange: 1.2
       invulnDuration: 0.5
-      scale: 1.5
+      scale: 1.14
     attackType: 2
-    prefab: {fileID: 9195043920424172602, guid: 79e396a4629bbd14eaa46eb8fd003fe0, type: 3}
+    prefab: {fileID: 0}
   - type: 3
     displayName: "\u5973\u6B66\u795E"
     portrait: {fileID: 21300000, guid: bc47d3ab246737048b87894d8122952d, type: 3}
@@ -66,274 +66,551 @@ MonoBehaviour:
       projectileCount: 0
       pickupRange: 1.2
       invulnDuration: 0.5
-      scale: 1.7
+      scale: 1.3
     attackType: 3
-    prefab: {fileID: 6463248100760698412, guid: a84003bca234a1140ada51b1bf3d09a6, type: 3}
+    prefab: {fileID: 0}
+  - type: 4
+    displayName: "\u8FF4\u529B\u93E2\u624B"
+    portrait: {fileID: 21300000, guid: 782edcc8f5a953e46a01560d547d00da, type: 3}
+    stats:
+      hp: 100
+      speed: 3.6
+      damage: 8
+      fireRate: 0.8
+      projectileCount: 1
+      pickupRange: 1.2
+      invulnDuration: 0.5
+      scale: 0.76
+    attackType: 4
+    prefab: {fileID: 0}
+  - type: 5
+    displayName: "\u5FCD\u8005"
+    portrait: {fileID: 21300000, guid: 1f7c5fe0ea2b87746b7c89b310da3d64, type: 3}
+    stats:
+      hp: 100
+      speed: 4
+      damage: 6
+      fireRate: 2.5
+      projectileCount: 3
+      pickupRange: 1.2
+      invulnDuration: 0.5
+      scale: 0.76
+    attackType: 5
+    prefab: {fileID: 0}
   enemies:
   - level: 1
-    idleFrames: []
-    size: 0.72
-    color: {r: 1, g: 1, b: 1, a: 1}
+    enemyName: Enemy_Lv1
+    idleFrames:
+    - {fileID: -189621718054346426, guid: f757daaf92dd1aa47b8d2fe4650e3097, type: 3}
+    - {fileID: -8880076940163096152, guid: f757daaf92dd1aa47b8d2fe4650e3097, type: 3}
+    - {fileID: 8651404331599449487, guid: f757daaf92dd1aa47b8d2fe4650e3097, type: 3}
+    - {fileID: 4343751405774176708, guid: f757daaf92dd1aa47b8d2fe4650e3097, type: 3}
+    size: 1.12
+    color: {r: 0.26666668, g: 1, b: 0.26666668, a: 1}
     hp: 12
     speed: 1.8
     damage: 5
     xpValue: 1
-    prefab: {fileID: 931172089023508255, guid: 0c5243ae5ae6e084993db754a23f17f9, type: 3}
+    prefab: {fileID: 7583253308197136195, guid: 4baf1d9d461bdd34dbc17c59db26643d, type: 3}
   - level: 2
-    idleFrames: []
-    size: 0.68
-    color: {r: 1, g: 1, b: 1, a: 1}
+    enemyName: Enemy_Lv2
+    idleFrames:
+    - {fileID: 2547552844272178492, guid: b2707094d4864ba8973d744420e1ad33, type: 3}
+    - {fileID: -1460494229613817664, guid: b2707094d4864ba8973d744420e1ad33, type: 3}
+    - {fileID: 340959864298399703, guid: b2707094d4864ba8973d744420e1ad33, type: 3}
+    - {fileID: -84646045728730883, guid: b2707094d4864ba8973d744420e1ad33, type: 3}
+    - {fileID: -4967304237796252100, guid: b2707094d4864ba8973d744420e1ad33, type: 3}
+    - {fileID: 2671909363335185906, guid: b2707094d4864ba8973d744420e1ad33, type: 3}
+    size: 0.93
+    color: {r: 0.8, g: 0.53333336, b: 0, a: 1}
+    hp: 14
+    speed: 1.92
+    damage: 6
+    xpValue: 1
+    prefab: {fileID: 1476930787621699893, guid: 54059a196f9c9154c94e0c34cab07150, type: 3}
+  - level: 3
+    enemyName: Enemy_Lv3
+    idleFrames:
+    - {fileID: -555310443602119798, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: -886386847118865685, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: -9091251914876354573, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: 3994960996363716247, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: -8182390461965866030, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: -5050775299812252648, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: 4824284030243937137, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    - {fileID: -2089049388550758016, guid: 70d32e7abf3949d29c8dde7b5148adb4, type: 3}
+    size: 0.98
+    color: {r: 0.8666667, g: 0.8, b: 0.53333336, a: 1}
+    hp: 16
+    speed: 2.04
+    damage: 7
+    xpValue: 1
+    prefab: {fileID: 2484972391169577038, guid: f7d4a1823c780334880961b2d7d3724d, type: 3}
+  - level: 4
+    enemyName: Enemy_Lv4
+    idleFrames:
+    - {fileID: 392207763247850241, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    - {fileID: 3414976693656345310, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    - {fileID: 7065120514226503740, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    - {fileID: 299206834037140345, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    size: 0.79
+    color: {r: 0.53333336, g: 0.26666668, b: 0.6666667, a: 1}
     hp: 16
     speed: 2.16
     damage: 6
-    xpValue: 1
-    prefab: {fileID: 931172089023508255, guid: b7fff33bd6e7f0746b97c5eecf5acb00, type: 3}
-  - level: 3
-    idleFrames: []
-    size: 0.83
-    color: {r: 1, g: 1, b: 1, a: 1}
+    xpValue: 2
+    prefab: {fileID: 4856731304852458559, guid: 21e1178a428131e4e9825d64ee95f5ad, type: 3}
+  - level: 5
+    enemyName: Enemy_Lv5
+    idleFrames:
+    - {fileID: -1833028912245519337, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -4043076352816274836, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: 5859905740424039440, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: 8840996052857139615, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: 1653944494283505250, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -2432972240549997218, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -4851600205526776933, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -1576816926753857554, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    size: 0.96
+    color: {r: 0.13333334, g: 0.26666668, b: 0.6666667, a: 1}
     hp: 10
     speed: 1.68
     damage: 8
     xpValue: 2
-    prefab: {fileID: 931172089023508255, guid: ba5b573cebc4fe246be01366d0b0d8ca, type: 3}
-  - level: 4
-    idleFrames: []
-    size: 0.86
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 746627847810178216, guid: 95a4ce129afb58d4dbe3f81e41d21f75, type: 3}
+  - level: 6
+    enemyName: Enemy_Lv6
+    idleFrames:
+    - {fileID: 1850180457697842098, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 3423488514337672666, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: -5611822198296089825, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 3758982796599313226, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 2884829451141324133, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: -8971952403583960730, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 2115632411211496801, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: -7966700822323609415, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    size: 1
+    color: {r: 0.2, g: 0.4, b: 0.2, a: 1}
     hp: 20
     speed: 2.04
     damage: 9
     xpValue: 2
-    prefab: {fileID: 931172089023508255, guid: 758b89c1acc59e64f84bc879b6a35b13, type: 3}
-  - level: 5
-    idleFrames: []
-    size: 0.76
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 1251884861695162641, guid: 6f59b231ebc7c424e8ed04746fc032a1, type: 3}
+  - level: 7
+    enemyName: Enemy_Lv7
+    idleFrames:
+    - {fileID: 7283181545838706650, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 5486385705734738482, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 7293648461042952166, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: -1894154185408153123, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 1399294759391883537, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: -2583488919311154379, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: -5092943092940705081, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 8871159062145441809, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    size: 0.88
+    color: {r: 0.26666668, g: 0.53333336, b: 0.26666668, a: 1}
     hp: 8
     speed: 1.56
     damage: 10
     xpValue: 2
-    prefab: {fileID: 931172089023508255, guid: ec3fe65d3d14c7c468e26e1f2b9ac4e7, type: 3}
-  - level: 6
-    idleFrames: []
-    size: 0.79
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 7820647988329420511, guid: 19657eb26ddf3d64998831fb2989c765, type: 3}
+  - level: 8
+    enemyName: Enemy_Lv8
+    idleFrames:
+    - {fileID: 1022957425585966169, guid: c23b101857e08654ea4bc2ac7c0e544b, type: 3}
+    - {fileID: -7375028871691665248, guid: c23b101857e08654ea4bc2ac7c0e544b, type: 3}
+    - {fileID: 2621512679106501741, guid: c23b101857e08654ea4bc2ac7c0e544b, type: 3}
+    size: 0.91
+    color: {r: 0.4, g: 0.4, b: 0.4, a: 1}
     hp: 14
     speed: 2.4
     damage: 9
     xpValue: 3
-    prefab: {fileID: 931172089023508255, guid: cdd3dfbbd7bbe2641a950dc90102b927, type: 3}
-  - level: 7
-    idleFrames: []
-    size: 1.19
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 5902746071659613333, guid: 39ec3b8134946a1448c5eab1b226667c, type: 3}
+  - level: 9
+    enemyName: Enemy_Lv9
+    idleFrames:
+    - {fileID: 392207763247850241, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    - {fileID: 3414976693656345310, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    - {fileID: 7065120514226503740, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    - {fileID: 299206834037140345, guid: 34589df1f6d1a444cb42e2a582301d74, type: 3}
+    size: 1.38
+    color: {r: 0.26666668, g: 0.13333334, b: 0, a: 1}
     hp: 10
     speed: 1.32
     damage: 12
     xpValue: 3
-    prefab: {fileID: 931172089023508255, guid: e0b9d488ed433c248b9869c2807a4393, type: 3}
-  - level: 8
-    idleFrames: []
-    size: 0.79
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 4154773843705762886, guid: 28310fe3ac407fc489a81db2e14e8a58, type: 3}
+  - level: 10
+    enemyName: Enemy_Lv10
+    idleFrames:
+    - {fileID: 1850180457697842098, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 3423488514337672666, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: -5611822198296089825, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 3758982796599313226, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 2884829451141324133, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: -8971952403583960730, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: 2115632411211496801, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    - {fileID: -7966700822323609415, guid: 2fa8b67ac93e008498f646d0ee46183d, type: 3}
+    size: 0.91
+    color: {r: 0.13333334, g: 0, b: 0.26666668, a: 1}
     hp: 18
     speed: 2.28
     damage: 14
     xpValue: 3
-    prefab: {fileID: 931172089023508255, guid: 8c1f270b98d55c64095c9d8365e6af91, type: 3}
-  - level: 9
-    idleFrames: []
-    size: 0.94
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 8820518073329927768, guid: 1d1bc536e089ac24da86c095d79842d2, type: 3}
+  - level: 11
+    enemyName: Enemy_Lv11
+    idleFrames:
+    - {fileID: 7283181545838706650, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 5486385705734738482, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 7293648461042952166, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: -1894154185408153123, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 1399294759391883537, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: -2583488919311154379, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: -5092943092940705081, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    - {fileID: 8871159062145441809, guid: 45fec83d913479b48b0bccc0d1dde8d6, type: 3}
+    size: 1.09
+    color: {r: 1, g: 0.26666668, b: 0, a: 1}
     hp: 30
     speed: 1.2
     damage: 16
     xpValue: 4
-    prefab: {fileID: 931172089023508255, guid: a1bbb46a99cdce341b415a4292569a6f, type: 3}
-  - level: 10
-    idleFrames: []
-    size: 1.01
-    color: {r: 1, g: 1, b: 1, a: 1}
+    prefab: {fileID: 8470705115155106811, guid: 2863985341144ea4a99164a23aa0058e, type: 3}
+  - level: 12
+    enemyName: Enemy_Lv12
+    idleFrames:
+    - {fileID: -1833028912245519337, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -4043076352816274836, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: 5859905740424039440, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: 8840996052857139615, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: 1653944494283505250, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -2432972240549997218, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -4851600205526776933, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    - {fileID: -1576816926753857554, guid: 8339e4c86caec2b42a6a8e5c0422ed6c, type: 3}
+    size: 1.17
+    color: {r: 0.26666668, g: 0, b: 0.26666668, a: 1}
     hp: 20
     speed: 1.08
     damage: 20
     xpValue: 5
-    prefab: {fileID: 931172089023508255, guid: d5f72626c1c501141b4daf300146f336, type: 3}
+    prefab: {fileID: 1014715245723323679, guid: 587e75064991e554ab5f758df62e45bc, type: 3}
   bosses:
   - level: 1
-    bossName: "\u60E1\u9B54"
-    idleFrames: []
-    size: 2.88
-    color: {r: 1, g: 1, b: 1, a: 1}
+    bossName: "\u7DA0\u9B54"
+    idleFrames:
+    - {fileID: 5674596264365422956, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: 9102749277182561565, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: 3167178274519882467, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: 4797060018093844820, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: -5826790772017532994, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: -2433625356715776633, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: 5415965304039224940, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    - {fileID: 8090937501699843109, guid: 16ff25477a7281846a9faf9e68d6bb0b, type: 3}
+    size: 1.67
+    color: {r: 0.26666668, g: 1, b: 0.26666668, a: 1}
     hp: 300
     speed: 0.6
     damage: 15
     spawnTime: 30
     xpValue: 50
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
     prefab: {fileID: 1148768653424226310, guid: a421a63389fa621428e8784196c63cf5, type: 3}
   - level: 2
-    bossName: "\u7329\u7329"
-    idleFrames: []
-    size: 4.68
-    color: {r: 1, g: 1, b: 1, a: 1}
+    bossName: "\u5927\u7329\u7329"
+    idleFrames:
+    - {fileID: -4785441268627635127, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: 6988025783663719307, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: -2872842899527082970, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: 4560223456594890298, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: 2048760392929863766, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: -532629152960114620, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: -3075902437388620698, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    - {fileID: -2411574652465742523, guid: dd501c33dabb3284f867a486be34e96e, type: 3}
+    size: 2.71
+    color: {r: 0.33333334, g: 0.2, b: 0.06666667, a: 1}
     hp: 800
     speed: 0.48
     damage: 22
     spawnTime: 60
     xpValue: 80
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
     prefab: {fileID: 3087210680094435622, guid: 52adf73dd780b454bae3e5d8f601a384, type: 3}
   - level: 3
+    bossName: "\u880D\u5B50\u738B"
+    idleFrames:
+    - {fileID: 3175790276099218105, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: 999647359879162884, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: 6903678922419696518, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: -2535795189883651558, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: -3877374386092184335, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: 1523080349466981533, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: 7429511302318163775, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    - {fileID: -4055101950885819042, guid: f8d321f833e541158b6d918de022854d, type: 3}
+    size: 2.08
+    color: {r: 0.8, g: 0.53333336, b: 0, a: 1}
+    hp: 600
+    speed: 0.66
+    damage: 20
+    spawnTime: 30
+    xpValue: 100
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 3014248815461176755, guid: fc7f1807dbd8dc74dbee190f03b497c9, type: 3}
+  - level: 4
+    bossName: "\u6C99\u87F2"
+    idleFrames:
+    - {fileID: 152184743391729086, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: 2767866034259827633, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: -3719329855954304621, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: -1150124883965164800, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: -8294626329806420049, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: 4400375649795955795, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: 4720077678271504964, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    - {fileID: 3605277938230199184, guid: 6853675940ad42f0a0c281359148d2a3, type: 3}
+    size: 2.31
+    color: {r: 0.8666667, g: 0.8, b: 0.53333336, a: 1}
+    hp: 900
+    speed: 0.54
+    damage: 24
+    spawnTime: 60
+    xpValue: 120
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 4909920078147267857, guid: 606d0c6dcef403145838e33525425bd8, type: 3}
+  - level: 5
     bossName: "\u7532\u87F2\u9A0E\u58EB"
-    idleFrames: []
-    size: 3.6
-    color: {r: 1, g: 1, b: 1, a: 1}
+    idleFrames:
+    - {fileID: -8408899753992761239, guid: e8219000667833e4f8d5f07cfe3543ac, type: 3}
+    - {fileID: 1896159097361058839, guid: e8219000667833e4f8d5f07cfe3543ac, type: 3}
+    - {fileID: 7774148109738432720, guid: e8219000667833e4f8d5f07cfe3543ac, type: 3}
+    size: 2.08
+    color: {r: 0.101960786, g: 0.2, b: 0.4, a: 1}
     hp: 1200
     speed: 0.54
     damage: 28
     spawnTime: 30
     xpValue: 100
-    prefab: {fileID: 3014248815461176755, guid: fc7f1807dbd8dc74dbee190f03b497c9, type: 3}
-  - level: 4
-    bossName: "\u5DE8\u9F8D"
-    idleFrames: []
-    size: 4.32
-    color: {r: 1, g: 1, b: 1, a: 1}
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 8594421441923741201, guid: eea3e8dad87806e4a931e48a6911ec23, type: 3}
+  - level: 6
+    bossName: "\u706B\u9F8D"
+    idleFrames:
+    - {fileID: -7380673091220067684, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: -2481292073600208118, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: 1304866459565527622, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: -4687399496195686249, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: -1633463868332840248, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: 4299045824179071529, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: 7888202232040693051, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    - {fileID: -8631634115158229136, guid: 3c565ce56228f7f4fb21d0209afc3ce3, type: 3}
+    size: 2.5
+    color: {r: 1, g: 0, b: 0.4, a: 1}
     hp: 1200
     speed: 0.54
     damage: 28
     spawnTime: 60
     xpValue: 100
-    prefab: {fileID: 4909920078147267857, guid: 606d0c6dcef403145838e33525425bd8, type: 3}
-  - level: 5
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 9162758904675853192, guid: 33acde7077e9d2c4ba368ab31964199c, type: 3}
+  - level: 7
     bossName: "\u9AB7\u9ACF\u738B"
-    idleFrames: []
-    size: 3.42
-    color: {r: 1, g: 1, b: 1, a: 1}
+    idleFrames:
+    - {fileID: -6960854041395371233, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: 173515182067864785, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: 203878590874919479, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: -5652838794968214838, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: -7277543535731151181, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: 296846865260289990, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: 1159759378074535001, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: 295856883646726583, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    - {fileID: -2560546147107748778, guid: ec4a796e363098d479f72fc616cabe70, type: 3}
+    size: 1.98
+    color: {r: 1, g: 0.26666668, b: 0, a: 1}
     hp: 1500
     speed: 0.66
     damage: 30
     spawnTime: 30
     xpValue: 120
-    prefab: {fileID: 8594421441923741201, guid: eea3e8dad87806e4a931e48a6911ec23, type: 3}
-  - level: 6
-    bossName: "\u725B\u982D\u4EBA"
-    idleFrames: []
-    size: 3.96
-    color: {r: 1, g: 1, b: 1, a: 1}
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 1957772108843895655, guid: 3a75a848d75a7c74fbd25a98c5bb9253, type: 3}
+  - level: 8
+    bossName: "\u725B\u982D\u602A"
+    idleFrames:
+    - {fileID: -3036199828436621272, guid: f53affa4979fd954789fea80072f89b0, type: 3}
+    - {fileID: -8945227675930844538, guid: f53affa4979fd954789fea80072f89b0, type: 3}
+    - {fileID: 7890475292609032079, guid: f53affa4979fd954789fea80072f89b0, type: 3}
+    - {fileID: -7168410270076249052, guid: f53affa4979fd954789fea80072f89b0, type: 3}
+    - {fileID: -637905960172149086, guid: f53affa4979fd954789fea80072f89b0, type: 3}
+    size: 2.29
+    color: {r: 0.26666668, g: 0.8, b: 1, a: 1}
     hp: 2000
     speed: 0.36
     damage: 35
     spawnTime: 60
     xpValue: 150
-    prefab: {fileID: 9162758904675853192, guid: 33acde7077e9d2c4ba368ab31964199c, type: 3}
-  - level: 7
-    bossName: "\u9ED1\u9B54\u5C0E"
-    idleFrames: []
-    size: 4.32
-    color: {r: 1, g: 1, b: 1, a: 1}
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 5691722282726652613, guid: 4c9e6fcf9bf3081439c6f780d472e667, type: 3}
+  - level: 9
+    bossName: "\u6697\u6CD5\u5E2B"
+    idleFrames:
+    - {fileID: 961167381491932767, guid: d138ef2739ee6a345aeded9ae0663342, type: 3}
+    - {fileID: -6207187735457356779, guid: d138ef2739ee6a345aeded9ae0663342, type: 3}
+    - {fileID: -1935539928191260257, guid: d138ef2739ee6a345aeded9ae0663342, type: 3}
+    - {fileID: 4452217773500077509, guid: d138ef2739ee6a345aeded9ae0663342, type: 3}
+    size: 2.5
+    color: {r: 0, g: 0.53333336, b: 0.26666668, a: 1}
     hp: 2500
     speed: 0.42
     damage: 40
     spawnTime: 30
     xpValue: 180
-    prefab: {fileID: 1957772108843895655, guid: 3a75a848d75a7c74fbd25a98c5bb9253, type: 3}
-  - level: 8
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 1576202293139753302, guid: f0d3a5bbd77638840a43805ae1997796, type: 3}
+  - level: 10
     bossName: "\u6A5F\u68B0\u9F8D"
-    idleFrames: []
-    size: 3.24
-    color: {r: 1, g: 1, b: 1, a: 1}
+    idleFrames:
+    - {fileID: 5430787818594867162, guid: 812824f69bab6d54daef485b5ee207ae, type: 3}
+    - {fileID: 6509645882627374929, guid: 812824f69bab6d54daef485b5ee207ae, type: 3}
+    - {fileID: -4122256543251027983, guid: 812824f69bab6d54daef485b5ee207ae, type: 3}
+    - {fileID: 4710333645210328016, guid: 812824f69bab6d54daef485b5ee207ae, type: 3}
+    size: 1.88
+    color: {r: 0.26666668, g: 0, b: 1, a: 1}
     hp: 2000
     speed: 0.6
     damage: 45
     spawnTime: 60
     xpValue: 200
-    prefab: {fileID: 5691722282726652613, guid: 4c9e6fcf9bf3081439c6f780d472e667, type: 3}
-  - level: 9
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 7213094589696769906, guid: 87279cdd33bc1a64687cb0f2e6b280f0, type: 3}
+  - level: 11
     bossName: "\u53F2\u840A\u59C6\u738B"
-    idleFrames: []
-    size: 3.6
-    color: {r: 1, g: 1, b: 1, a: 1}
+    idleFrames:
+    - {fileID: -943003956573422948, guid: 654949930cc8d104c80421dbf11ba219, type: 3}
+    - {fileID: 3542421553680104545, guid: 654949930cc8d104c80421dbf11ba219, type: 3}
+    - {fileID: 3801091270992525845, guid: 654949930cc8d104c80421dbf11ba219, type: 3}
+    - {fileID: 704024656459459893, guid: 654949930cc8d104c80421dbf11ba219, type: 3}
+    size: 2.08
+    color: {r: 1, g: 0.8, b: 0, a: 1}
     hp: 3000
     speed: 0.54
     damage: 50
     spawnTime: 30
     xpValue: 250
-    prefab: {fileID: 1576202293139753302, guid: f0d3a5bbd77638840a43805ae1997796, type: 3}
-  - level: 10
-    bossName: "\u6697\u9ED1\u9F8D"
-    idleFrames: []
-    size: 8.64
-    color: {r: 1, g: 1, b: 1, a: 1}
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 15136588577992823, guid: f211e004e3e4ee045a172fca7b9854c5, type: 3}
+  - level: 12
+    bossName: "\u6697\u9ED1\u5DE8\u9F8D"
+    idleFrames:
+    - {fileID: 344608655365580578, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: -4041788757754320482, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: -2158644713079122248, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: 1491020167709638176, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: -6065585592842110741, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: -4682376705353316896, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: -6320504227428968423, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    - {fileID: -6909920801301340913, guid: dc04c0a6fdcc1cf409964955ba72420b, type: 3}
+    size: 5
+    color: {r: 0, g: 0, b: 0, a: 1}
     hp: 8000
     speed: 0.48
     damage: 60
     spawnTime: 60
     xpValue: 500
-    prefab: {fileID: 7213094589696769906, guid: 87279cdd33bc1a64687cb0f2e6b280f0, type: 3}
+    hasRangedAttack: 0
+    rangedAttackInterval: 3
+    prefab: {fileID: 15136588577992823, guid: f211e004e3e4ee045a172fca7b9854c5, type: 3}
   projectile:
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: cff19f743192be247b731b4ba835a323, type: 3}
     color: {r: 1, g: 0.4, b: 0, a: 1}
     size: 0.24
     speed: 8
     lifetime: 2
   xpGem:
-    sprite: {fileID: 0}
-    color: {r: 0, g: 1, b: 0.53, a: 1}
+    sprite: {fileID: 21300000, guid: d9b22fd8e2c6dab45ae87bc4b28df0b2, type: 3}
+    color: {r: 0, g: 1, b: 0.53333336, a: 1}
     attractSpeed: 6
     pickupRadius: 0.3
   levels:
-  - levelName: "\u8349\u5730"
-    bgColor: {r: 1, g: 1, b: 1, a: 1}
+  - levelName: "\u8349\u539F"
+    bgColor: {r: 0.101960786, g: 0.18039216, b: 0.101960786, a: 1}
     bgTexture: {fileID: 2800000, guid: bc60bb9a7dc08d44199db22b4af5dd9f, type: 3}
     bgImage: {fileID: 21300000, guid: bc60bb9a7dc08d44199db22b4af5dd9f, type: 3}
     bgm: {fileID: 8300000, guid: 0b833dcf6455a864d87dd59d2dd11f34, type: 3}
     duration: 90
     enemySpeedMult: 1
+    enemyIndices: 000000000300000004000000
     bossIndices: 0000000001000000
     ambientSound: {fileID: 0}
-  - levelName: "\u6D1E\u7A9F"
-    bgColor: {r: 1, g: 1, b: 1, a: 1}
+  - levelName: "\u6C99\u6F20"
+    bgColor: {r: 0.18039216, g: 0.16470589, b: 0.101960786, a: 1}
     bgTexture: {fileID: 2800000, guid: 8ca046316b1069848a9af9a1c2ef3bcd, type: 3}
-    bgImage: {fileID: 21300000, guid: 8ca046316b1069848a9af9a1c2ef3bcd, type: 3}
+    bgImage: {fileID: 21300000, guid: da4e0443ca494d2ebd3e448de516554d, type: 3}
     bgm: {fileID: 8300000, guid: 8f989d098a99d2449bf50d736a497bf5, type: 3}
-    duration: 120
-    enemySpeedMult: 1.5
+    duration: 100
+    enemySpeedMult: 1.2
+    enemyIndices: 0100000002000000
     bossIndices: 0200000003000000
     ambientSound: {fileID: 0}
-  - levelName: "\u6CBC\u6FA4"
-    bgColor: {r: 1, g: 1, b: 1, a: 1}
+  - levelName: "\u6D1E\u7A9F"
+    bgColor: {r: 0.101960786, g: 0.101960786, b: 0.18039216, a: 1}
     bgTexture: {fileID: 2800000, guid: 43b6087c2ddb93443baf7b18e77ba375, type: 3}
-    bgImage: {fileID: 21300000, guid: 43b6087c2ddb93443baf7b18e77ba375, type: 3}
+    bgImage: {fileID: 21300000, guid: 8ca046316b1069848a9af9a1c2ef3bcd, type: 3}
     bgm: {fileID: 8300000, guid: 2ca57887533511b489e5b20d9411f116, type: 3}
-    duration: 150
-    enemySpeedMult: 2
+    duration: 120
+    enemySpeedMult: 1.5
+    enemyIndices: 03000000040000000500000006000000
     bossIndices: 0400000005000000
     ambientSound: {fileID: 0}
-  - levelName: "\u706B\u5C71"
-    bgColor: {r: 1, g: 1, b: 1, a: 1}
+  - levelName: "\u6CBC\u6FA4"
+    bgColor: {r: 0.101960786, g: 0.18039216, b: 0.16470589, a: 1}
     bgTexture: {fileID: 2800000, guid: 246cfffa28cf8c449a194401132a1ed8, type: 3}
-    bgImage: {fileID: 21300000, guid: 246cfffa28cf8c449a194401132a1ed8, type: 3}
+    bgImage: {fileID: 21300000, guid: 43b6087c2ddb93443baf7b18e77ba375, type: 3}
     bgm: {fileID: 8300000, guid: d5f7db2cce3399a409ac1a6573ea9137, type: 3}
-    duration: 180
-    enemySpeedMult: 2.5
+    duration: 150
+    enemySpeedMult: 2
+    enemyIndices: 05000000060000000700000008000000
     bossIndices: 0600000007000000
     ambientSound: {fileID: 0}
+  - levelName: "\u706B\u5C71"
+    bgColor: {r: 0.18039216, g: 0.101960786, b: 0.101960786, a: 1}
+    bgTexture: {fileID: 2800000, guid: 75565da4c58828b429434a4e9b9b96bc, type: 3}
+    bgImage: {fileID: 21300000, guid: 246cfffa28cf8c449a194401132a1ed8, type: 3}
+    bgm: {fileID: 8300000, guid: 92f43b03d544a64479a644cf7c051290, type: 3}
+    duration: 180
+    enemySpeedMult: 2.5
+    enemyIndices: 0700000008000000090000000a000000
+    bossIndices: 0800000009000000
+    ambientSound: {fileID: 0}
   - levelName: "\u5730\u7344"
-    bgColor: {r: 1, g: 1, b: 1, a: 1}
+    bgColor: {r: 0.101960786, g: 0.039215688, b: 0.039215688, a: 1}
     bgTexture: {fileID: 2800000, guid: 75565da4c58828b429434a4e9b9b96bc, type: 3}
     bgImage: {fileID: 21300000, guid: 75565da4c58828b429434a4e9b9b96bc, type: 3}
     bgm: {fileID: 8300000, guid: 92f43b03d544a64479a644cf7c051290, type: 3}
     duration: 240
     enemySpeedMult: 3
-    bossIndices: 0800000009000000
+    enemyIndices: 090000000a0000000b000000
+    bossIndices: 0a0000000b000000
     ambientSound: {fileID: 0}
   audio:
-    enabled: 1
-    volume: 0.5
+    bgmEnabled: 1
+    sfxEnabled: 1
+    bgmVolume: 0.5
+    sfxVolume: 0.7
     defaultBGM: {fileID: 8300000, guid: 0b833dcf6455a864d87dd59d2dd11f34, type: 3}
   playerPrefabs:
   - {fileID: 6146344495327477067, guid: 54c8e20e2a35d854d861147b02787f78, type: 3}
   - {fileID: 6565009579532085477, guid: 9e6b11f93fda682499f05bbf45ebcb1f, type: 3}
   - {fileID: 9195043920424172602, guid: 79e396a4629bbd14eaa46eb8fd003fe0, type: 3}
   - {fileID: 6463248100760698412, guid: a84003bca234a1140ada51b1bf3d09a6, type: 3}
+  - {fileID: 3211567610977218186, guid: ca18b65b2165b624ca09a8aa5d1e8b82, type: 3}
+  - {fileID: 6963035952977421698, guid: 0f829d035b70ae648ab357de5c53e4aa, type: 3}

@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 1700718782481954770}
   - component: {fileID: 436963318183446156}
   - component: {fileID: 7402360709100345786}
-  - component: {fileID: 8113179997044928896}
+  - component: {fileID: 3416044004318730414}
+  - component: {fileID: 6643030678476847002}
   m_Layer: 6
   m_Name: Player_Archer
   m_TagString: Player
@@ -33,7 +34,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.76, y: 0.76, z: 0.76}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -55,10 +56,13 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -92,7 +96,7 @@ SpriteRenderer:
   m_SpriteSortPoint: 0
 --- !u!50 &6935053345707214140
 Rigidbody2D:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -103,8 +107,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -115,7 +119,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 4
 --- !u!58 &6841689583997183032
 CircleCollider2D:
@@ -125,6 +129,7 @@ CircleCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6565009579532085477}
   m_Enabled: 1
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -148,9 +153,9 @@ CircleCollider2D:
     m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
   m_Radius: 0.3
 --- !u!114 &1700718782481954770
 MonoBehaviour:
@@ -185,6 +190,7 @@ MonoBehaviour:
   _attackAnim:
     frames: []
     fps: 8
+  _defaultState: 0
 --- !u!114 &436963318183446156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,9 +220,9 @@ MonoBehaviour:
   _arrowSpeed: 10
   _range: 8
   _spreadAngle: 8.6
-  _arrowPrefab: {fileID: 0}
-  _fireZonePrefab: {fileID: 5475977199133850334, guid: fb5b965ade1b1d64c97bf59fe4f130cf, type: 3}
---- !u!114 &8113179997044928896
+  _arrowPrefab: {fileID: 2000000000000000, guid: 29960f16c563171488b16ec24c2802b0, type: 3}
+  _fireZonePrefab: {fileID: 0}
+--- !u!114 &3416044004318730414
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -225,6 +231,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 6565009579532085477}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0386b93b12d522d4fab4f01e11d4b542, type: 3}
+  m_Script: {fileID: 11500000, guid: 1d729c8a74795b4499f8cf86c2c2d8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _idleAnim:
+    frames: []
+    fps: 8
+  _runAnim:
+    frames: []
+    fps: 8
+  _attackAnim:
+    frames: []
+    fps: 8
+  _defaultState: 0
+--- !u!114 &6643030678476847002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6565009579532085477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3946ddaf5e1b402e94ed91e69a46e296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

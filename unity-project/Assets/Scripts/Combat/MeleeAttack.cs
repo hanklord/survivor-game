@@ -87,6 +87,8 @@ public class MeleeAttack : MonoBehaviour, IPlayerAttack
     /// </summary>
     private void CheckHits()
     {
+        if (_player == null) return;
+
         var hits = Physics2D.OverlapCircleAll(transform.position, _currentRange, LayerMask.GetMask("Enemy"));
 
         foreach (var hit in hits)
@@ -112,7 +114,8 @@ public class MeleeAttack : MonoBehaviour, IPlayerAttack
                 enemy.ApplyKnockback(knockDir * _knockback);
 
                 // 傷害數字
-                DamageNumberManager.Instance.Spawn(enemy.transform.position, totalDamage);
+                if (DamageNumberManager.Instance != null)
+                    DamageNumberManager.Instance.Spawn(enemy.transform.position, totalDamage);
             }
         }
     }
@@ -169,5 +172,22 @@ public class MeleeAttack : MonoBehaviour, IPlayerAttack
 
         Gizmos.color = new Color(0.5f, 0, 1, 0.3f);
         Gizmos.DrawWireSphere(transform.position, _currentRange);
+    }
+
+    public void Attack(Vector2 direction)
+    {
+        if (_player == null)
+            _player = GetComponent<PlayerController>();
+
+        if (_player != null)
+        {
+            Attack(_player);
+        }
+    }
+
+    public void OnLevelUp(int level)
+    {
+        _level = level;
+        Upgrade();
     }
 }

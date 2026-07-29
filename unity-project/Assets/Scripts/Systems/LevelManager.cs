@@ -96,19 +96,37 @@ public class LevelManager : MonoBehaviour
     private void ApplyLevelSettings()
     {
         var config = GetCurrentLevelConfig();
-        if (config == null) return;
+        if (config == null)
+        {
+            Debug.LogWarning("[LevelManager] No level config available, skipping ApplyLevelSettings.");
+            return;
+        }
 
         // 背景
         var bgScroller = FindObjectOfType<BackgroundScroller>();
-        if (bgScroller != null)
+        if (bgScroller == null)
         {
-            if (config.bgTexture != null)
+            // 自動建立 BackgroundScroller
+            var bgGO = new GameObject("BackgroundScroller");
+            bgScroller = bgGO.AddComponent<BackgroundScroller>();
+            Debug.Log("[LevelManager] Auto-created BackgroundScroller");
+        }
+
+        if (config.bgTexture != null)
+        {
+            bgScroller.SetBackgroundTexture(config.bgTexture);
+        }
+        else if (config.bgImage != null)
+        {
+            bgScroller.SetBackground(config.bgImage);
+        }
+        else
+        {
+            // 嘗試從 Resources 動態載入背景
+            var bgSprite = TryLoadBackgroundFromResources(_currentLevelIndex);
+            if (bgSprite != null)
             {
-                bgScroller.SetBackgroundTexture(config.bgTexture);
-            }
-            else if (config.bgImage != null)
-            {
-                bgScroller.SetBackground(config.bgImage);
+                bgScroller.SetBackground(bgSprite);
             }
             else
             {
@@ -132,7 +150,20 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     public LevelConfig GetCurrentLevelConfig()
     {
+        if (GameManager.Instance == null) return null;
+        if (GameManager.Instance.gameConfig == null)
+        {
+            Debug.LogWarning("[LevelManager] gameConfig is not assigned on GameManager!");
+            return null;
+        }
+
         var levels = GameManager.Instance.gameConfig.levels;
+        if (levels == null || levels.Length == 0)
+        {
+            Debug.LogWarning("[LevelManager] gameConfig.levels is null or empty!");
+            return null;
+        }
+
         if (_currentLevelIndex < levels.Length)
         {
             return levels[_currentLevelIndex];
@@ -146,7 +177,17 @@ public class LevelManager : MonoBehaviour
     public AudioClip GetCurrentLevelBGM()
     {
         var config = GetCurrentLevelConfig();
-        return config?.bgm ?? GameManager.Instance.gameConfig.audio.defaultBGM;
+        if (config != null && config.bgm != null)
+            return config.bgm;
+
+        // fallback: 安全取得 defaultBGM
+        if (GameManager.Instance != null
+            && GameManager.Instance.gameConfig != null
+            && GameManager.Instance.gameConfig.audio != null)
+        {
+            return GameManager.Instance.gameConfig.audio.defaultBGM;
+        }
+        return null;
     }
 
     /// <summary>
@@ -170,5 +211,16 @@ public class LevelManager : MonoBehaviour
 
         ApplyLevelSettings();
         GameManager.Instance.WaveManager.ResetBossIndex();
+    }
+
+    /// <summary>
+    /// 嘗試從 Resources/Backgrounds 載入背景圖（當 GameConfig 未設定時的 fallback）
+    /// </summary>
+    private Sprite TryLoadBackgroundFromResources(int levelIndex)
+    {
+        string[] bgNames = { "grass", "desert", "cave", "swamp", "volcano", "hell" };
+        if (levelIndex < 0 || levelIndex >= bgNames.Length) return null;
+
+        return Resources.Load<Sprite>($"Backgrounds/{bgNames[levelIndex]}");
     }
 }
