@@ -14,7 +14,7 @@
   var BOSS_XP_SPREAD = 40;
   var BOSS_PARTICLE_COUNT = 20;
   var SPATIAL_HASH_CELL = 120;
-  var COLLISION_QUERY_MARGIN = 80;
+  var COLLISION_QUERY_MARGIN = 250;
   var REGEN_INTERVAL = 1; // 生命回復間隔秒
   var HEAL_SPAWN_INTERVAL_MIN = 15;
   var HEAL_SPAWN_INTERVAL_MAX = 20;
@@ -913,6 +913,12 @@
     for (var ci = this.enemies.length - 1; ci >= 0; ci--) {
       if (this.enemies[ci].hp <= 0) {
         this._handleKill(this.enemies[ci]);
+      }
+    }
+    // 安全清除：Boss
+    for (var cbi = this.bosses.length - 1; cbi >= 0; cbi--) {
+      if (this.bosses[cbi].hp <= 0) {
+        this._handleKill(this.bosses[cbi]);
       }
     }
 
