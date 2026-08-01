@@ -611,16 +611,16 @@
         ctx.translate(jv.x, jv.y);
         ctx.rotate(jv.angle);
         if (spearImg) {
-          var spW = 40;
+          var spW = 80;
           var spH = spW * (spearImg.height / spearImg.width);
           ctx.drawImage(spearImg, -spW * 0.3, -spH / 2, spW, spH);
         } else {
           // Fallback: 長矛形狀
           ctx.strokeStyle = '#8B5E3C';
-          ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(12, 0); ctx.stroke();
+          ctx.lineWidth = 6;
+          ctx.beginPath(); ctx.moveTo(-32, 0); ctx.lineTo(24, 0); ctx.stroke();
           ctx.fillStyle = '#cccccc';
-          ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(10, -4); ctx.lineTo(10, 4); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(36, 0); ctx.lineTo(20, -8); ctx.lineTo(20, 8); ctx.closePath(); ctx.fill();
         }
         ctx.restore();
       }
