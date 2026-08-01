@@ -134,6 +134,22 @@
     ctx.translate(-camX, -camY);
 
     this._drawXPGems(state.xpGems, camX, camY);
+    // 回血道具
+    if (state.healPickups) {
+      for (var hi = 0; hi < state.healPickups.length; hi++) {
+        var hp = state.healPickups[hi];
+        if (!this._isVisible(hp.x, hp.y, camX, camY, CULL_MARGIN)) continue;
+        var bobY = Math.sin(hp.bobTimer * 3) * 4;
+        var alpha = hp.life < 3 ? (hp.life / 3) : 1;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#ff4466';
+        ctx.font = '24px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u2764', hp.x, hp.y + bobY);
+        ctx.globalAlpha = 1;
+      }
+    }
     // 磁鐵道具 + 寶箱
     if (state.eliteVisuals) {
       var ev = state.eliteVisuals;

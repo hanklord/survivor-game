@@ -16,6 +16,12 @@
   var SPATIAL_HASH_CELL = 120;
   var COLLISION_QUERY_MARGIN = 80;
   var REGEN_INTERVAL = 1; // 生命回復間隔秒
+  var HEAL_SPAWN_INTERVAL_MIN = 15;
+  var HEAL_SPAWN_INTERVAL_MAX = 20;
+  var HEAL_PICKUP_DURATION = 10;    // 存在 10 秒
+  var HEAL_PICKUP_MAX = 3;          // 場上最多 3 個
+  var HEAL_AMOUNT = 0.25;           // 回復 25% maxHp
+  var HEAL_PICKUP_RADIUS = 20;      // 碰撞半徑
 
   function Game() {
     this.canvas = document.getElementById('game');
@@ -521,6 +527,8 @@
     this.particles = [];
     this.xpGems = [];
     this.bosses = [];
+    this._healPickups = [];
+    this._healSpawnTimer = HEAL_SPAWN_INTERVAL_MIN + Math.random() * (HEAL_SPAWN_INTERVAL_MAX - HEAL_SPAWN_INTERVAL_MIN);
     this.waveManager = new SG.WaveManager(this.imgConfig);
     this.weaponManager = new SG.WeaponManager(this.player);
     this.skillTree = new SG.SkillTree();
@@ -614,6 +622,7 @@
       projectiles: this.projectiles,
       particles: this.particles,
       xpGems: this.xpGems,
+      healPickups: this._healPickups,
       tilemapCanvas: (this._tilemap && this._tilemap.ready) ? this._tilemap.getMapCanvas() : null,
       weaponVisuals: this.weaponManager.getVisuals(),
       meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
@@ -916,6 +925,33 @@
         this._spawnOneEnemy();
       }
       this._spawnTimer = 0.3 + Math.random() * 0.2; // 0.3~0.5 秒間隔
+    }
+
+    // 回血道具生成
+    this._healSpawnTimer -= dt;
+    if (this._healSpawnTimer <= 0 && this._healPickups.length < HEAL_PICKUP_MAX) {
+      var hAngle = Math.random() * Math.PI * 2;
+      var hDist = 200 + Math.random() * 200;
+      this._healPickups.push({
+        x: this.player.x + Math.cos(hAngle) * hDist,
+        y: this.player.y + Math.sin(hAngle) * hDist,
+        life: HEAL_PICKUP_DURATION,
+        bobTimer: 0
+      });
+      this._healSpawnTimer = HEAL_SPAWN_INTERVAL_MIN + Math.random() * (HEAL_SPAWN_INTERVAL_MAX - HEAL_SPAWN_INTERVAL_MIN);
+    }
+
+    // 回血道具更新（存活時間 + 碰撞檢測）
+    for (var hi = this._healPickups.length - 1; hi >= 0; hi--) {
+      var hp = this._healPickups[hi];
+      hp.life -= dt;
+      hp.bobTimer += dt;
+      if (hp.life <= 0) { this._healPickups.splice(hi, 1); continue; }
+      if (SG.dist(this.player, hp) < this.player.hitboxRadius + HEAL_PICKUP_RADIUS) {
+        this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * HEAL_AMOUNT);
+        this._healPickups.splice(hi, 1);
+        this.audio.playPickup();
+      }
     }
 
     // Boss 排程（擊殺數觸發：20 隻出第一隻 Boss，50 隻出第二隻）

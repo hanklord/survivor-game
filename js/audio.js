@@ -219,8 +219,15 @@
     this._play(80, 'sawtooth', 0.5, 0.5, true);
   };
 
-  // 玩家受傷（噪音 burst）
+  // 玩家受傷（噪音 burst）— 1 秒內最多 3 次
   AudioManager.prototype.playHurt = function() {
+    var now = Date.now();
+    if (!this._hurtWindowStart || now - this._hurtWindowStart > 1000) {
+      this._hurtWindowStart = now;
+      this._hurtPlayCount = 0;
+    }
+    this._hurtPlayCount++;
+    if (this._hurtPlayCount > 3) return;
     this._playNoise(0.1, 0.4);
   };
 
