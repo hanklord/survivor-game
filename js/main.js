@@ -762,16 +762,25 @@
       this.player.move(dir, dt);
       if (this._autoPlay) this._autoPlay.onManualInput();
     } else if (this._autoPlay && this._autoPlay.isActive()) {
-      var autoDir = this._autoPlay.update(dt, this.enemies, this.xpGems, this._healPickups);
+      var autoDir = this._autoPlay.update(dt, this.enemies, this.xpGems, this._healPickups, this.bosses);
       this.player.move(autoDir, dt);
     }
-    // Auto-Play 自動施放大招
+    // Auto-Play 智慧大招：150px 內 5+ 隻才放，10s fallback 降至 3 隻
     if (this._autoPlay && this._autoPlay.isActive() && this._ultimateReady && this._ultimate) {
-      var killed = this._ultimate.activate(this.enemies, this.bosses);
-      for (var uk = 0; uk < killed.length; uk++) this._handleKill(killed[uk]);
-      this._ultimateCharge = 0;
-      this._ultimateReady = false;
-      this._ultimateFlash = 0.3;
+      if (!this._autoUltTimer) this._autoUltTimer = 0;
+      this._autoUltTimer += dt;
+      var ultThreshold = this._autoUltTimer > 10 ? 3 : 5;
+      var ultNearby = this.spatialHash.query(this.player.x, this.player.y, 150);
+      var ultNearCount = 0;
+      for (var ui = 0; ui < ultNearby.length; ui++) { if (ultNearby[ui].hp > 0) ultNearCount++; }
+      if (ultNearCount >= ultThreshold) {
+        var killed = this._ultimate.activate(this.enemies, this.bosses);
+        for (var uk = 0; uk < killed.length; uk++) this._handleKill(killed[uk]);
+        this._ultimateCharge = 0;
+        this._ultimateReady = false;
+        this._ultimateFlash = 0.3;
+        this._autoUltTimer = 0;
+      }
     }
     this.player.updateAnimation(dt);
 
@@ -1138,7 +1147,7 @@
     // 絕招集氣
     if (this._ultimateCharge < 1) {
       this._ultimateCharge = Math.min(1, this._ultimateCharge + 1 / this._ultimateKillsNeeded);
-      if (this._ultimateCharge >= 1) this._ultimateReady = true;
+      if (this._ultimateCharge >= 1) { this._ultimateReady = true; this._autoUltTimer = 0; }
     }
   };
 

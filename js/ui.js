@@ -302,51 +302,68 @@
       var btns = self.els.choices.querySelectorAll('.upgrade-btn');
       if (btns.length > 0) {
         var step = 0;
-        // 隨機選最終停止格
         var finalIdx = Math.floor(Math.random() * btns.length);
-        // 調整 totalSteps 讓最後一步停在 finalIdx
         var totalSteps = 9;
         while ((totalSteps - 1) % btns.length !== finalIdx) totalSteps++;
         var baseDelay = 100;
         var autoTimer = null;
         var cancelled = false;
 
+        // 音效合成
+        function playTick() {
+          if (!window.SG._gameInstance || !window.SG._gameInstance.audio || !window.SG._gameInstance.audio.enabled) return;
+          try {
+            var ctx = window.SG._audioCtx || (window.SG._audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+            var osc = ctx.createOscillator(); var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = 800; gain.gain.value = 0.1;
+            osc.start(); osc.stop(ctx.currentTime + 0.03);
+          } catch(e) {}
+        }
+        function playDing() {
+          if (!window.SG._gameInstance || !window.SG._gameInstance.audio || !window.SG._gameInstance.audio.enabled) return;
+          try {
+            var ctx = window.SG._audioCtx || (window.SG._audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+            var osc = ctx.createOscillator(); var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = 1200; osc.type = 'sine'; gain.gain.value = 0.2;
+            osc.start(); osc.stop(ctx.currentTime + 0.12);
+          } catch(e) {}
+        }
+
         function doStep() {
           if (cancelled) return;
-          // 清除所有高亮
           for (var i = 0; i < btns.length; i++) {
             btns[i].style.borderColor = '';
             btns[i].style.transform = '';
           }
-          // 高亮當前格
           var currentIdx = step % btns.length;
           btns[currentIdx].style.borderColor = '#ffffff';
           btns[currentIdx].style.transform = 'scale(1.03)';
+          playTick();
           step++;
 
           if (step >= totalSteps) {
-            // 最終停在 finalIdx
             for (var i = 0; i < btns.length; i++) {
               btns[i].style.borderColor = '';
               btns[i].style.transform = '';
             }
             btns[finalIdx].style.borderColor = '#ffd700';
             btns[finalIdx].style.transform = 'scale(1.05)';
+            playDing();
             autoTimer = setTimeout(function() {
               if (!cancelled && self.els.levelUp.style.display !== 'none') {
                 btns[finalIdx].click();
               }
             }, 300);
           } else {
-            // 逐漸減速
             var delay = baseDelay + step * 25;
             autoTimer = setTimeout(doStep, delay);
           }
         }
 
-        autoTimer = setTimeout(doStep, 500); // 0.5s 後開始
+        autoTimer = setTimeout(doStep, 500);
 
-        // 玩家手動點任何按鈕取消輪播
         self.els.choices.addEventListener('click', function() {
           cancelled = true;
           if (autoTimer) clearTimeout(autoTimer);

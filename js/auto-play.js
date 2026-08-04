@@ -1,15 +1,15 @@
-// auto-play.js — 自動遊玩 AI（三層優先級 + 方向平滑化）
+// auto-play.js — 自動遊玩 AI v3（三層優先級 + 平滑 + Boss 優先 + 碰撞警戒）
 (function() {
   window.SG = window.SG || {};
 
-  var QUERY_RADIUS = 250;         // 偵測範圍 px
-  var QUERY_INTERVAL = 4;         // 每 N 幀查詢一次
-  var MANUAL_OVERRIDE_TIME = 2;   // 手動操作後幾秒恢復自動
+  var QUERY_RADIUS = 250;
+  var QUERY_INTERVAL = 4;
+  var MANUAL_OVERRIDE_TIME = 2;
   var STORAGE_KEY = 'sg_autoplay';
-  var DEAD_ZONE = 0.15;           // 合成向量低於此值視為無效
-  var MIN_ANGLE_DOT = 0.966;      // cos(15°) — 夾角小於 15° 不更新
-  var LERP_NORMAL = 0.2;          // 正常平滑因子
-  var LERP_EMERGENCY = 0.5;       // 緊急模式平滑因子
+  var DEAD_ZONE = 0.15;
+  var MIN_ANGLE_DOT = 0.966;
+  var LERP_NORMAL = 0.2;
+  var LERP_EMERGENCY = 0.5;
 
   function AutoPlay(spatialHash, player) {
     this._spatialHash = spatialHash;
@@ -17,16 +17,13 @@
     this._enabled = this._loadState();
     this._frameCount = 0;
     this._cachedDir = { x: 0, y: 0 };
-    this._smoothDir = { x: 0, y: 1 }; // 當前平滑方向
+    this._smoothDir = { x: 0, y: 1 };
     this._manualTimer = 0;
     this._emergency = false;
   }
 
-  // localStorage 持久化
   AutoPlay.prototype._loadState = function() {
-    try {
-      return localStorage.getItem(STORAGE_KEY) === 'true';
-    } catch(e) { return false; }
+    try { return localStorage.getItem(STORAGE_KEY) === 'true'; } catch(e) { return false; }
   };
 
   AutoPlay.prototype._saveState = function() {
@@ -36,57 +33,38 @@
   AutoPlay.prototype.setEnabled = function(val) {
     this._enabled = !!val;
     this._saveState();
-    // 重新啟用時清除手動覆蓋狀態
-    if (val) {
-      this._manualTimer = 0;
-    }
+    if (val) this._manualTimer = 0;
   };
 
-  AutoPlay.prototype.isEnabled = function() {
-    return this._enabled;
-  };
+  AutoPlay.prototype.isEnabled = function() { return this._enabled; };
 
   AutoPlay.prototype.toggle = function() {
     this.setEnabled(!this._enabled);
     return this._enabled;
   };
 
-  AutoPlay.prototype.onManualInput = function() {
-    this._manualTimer = MANUAL_OVERRIDE_TIME;
-  };
+  AutoPlay.prototype.onManualInput = function() { this._manualTimer = MANUAL_OVERRIDE_TIME; };
 
-  AutoPlay.prototype.isActive = function() {
-    return this._enabled && this._manualTimer <= 0;
-  };
+  AutoPlay.prototype.isActive = function() { return this._enabled && this._manualTimer <= 0; };
 
   // 主更新：每 N 幀重新計算方向（含平滑）
-  AutoPlay.prototype.update = function(dt, enemies, xpGems, healPickups) {
+  AutoPlay.prototype.update = function(dt, enemies, xpGems, healPickups, bosses) {
     if (this._manualTimer > 0) this._manualTimer -= dt;
 
     this._frameCount++;
     if (this._frameCount % QUERY_INTERVAL !== 0) return this._cachedDir;
 
-    var rawDir = this._computeDirection(dt, enemies, xpGems, healPickups);
+    var rawDir = this._computeDirection(dt, enemies, xpGems, healPickups, bosses);
 
-    // 死區：合成向量太小，維持舊方向
     var rawMag = Math.sqrt(rawDir.x * rawDir.x + rawDir.y * rawDir.y);
-    if (rawMag < DEAD_ZONE) {
-      this._cachedDir = this._smoothDir;
-      return this._cachedDir;
-    }
+    if (rawMag < DEAD_ZONE) { this._cachedDir = this._smoothDir; return this._cachedDir; }
 
-    // 最小轉角：新舊方向夾角 < 15° 不更新
     var dot = this._smoothDir.x * rawDir.x + this._smoothDir.y * rawDir.y;
-    if (dot > MIN_ANGLE_DOT) {
-      this._cachedDir = this._smoothDir;
-      return this._cachedDir;
-    }
+    if (dot > MIN_ANGLE_DOT) { this._cachedDir = this._smoothDir; return this._cachedDir; }
 
-    // Lerp 平滑
     var lerpFactor = this._emergency ? LERP_EMERGENCY : LERP_NORMAL;
     this._smoothDir.x += (rawDir.x - this._smoothDir.x) * lerpFactor;
     this._smoothDir.y += (rawDir.y - this._smoothDir.y) * lerpFactor;
-    // 正規化
     var sMag = Math.sqrt(this._smoothDir.x * this._smoothDir.x + this._smoothDir.y * this._smoothDir.y) || 1;
     this._smoothDir.x /= sMag;
     this._smoothDir.y /= sMag;
@@ -95,8 +73,7 @@
     return this._cachedDir;
   };
 
-  // 三層加權向量合成
-  AutoPlay.prototype._computeDirection = function(dt, enemies, xpGems, healPickups) {
+  AutoPlay.prototype._computeDirection = function(dt, enemies, xpGems, healPickups, bosses) {
     var px = this.player.x, py = this.player.y;
 
     // === 層 1：生存避敵 ===
@@ -113,15 +90,33 @@
       survX += (dx / dist) * w;
       survY += (dy / dist) * w;
     }
-    // 緊急狀態
     this._emergency = (closeCount >= 3);
     if (this._emergency) survWeight = 6.0;
-    // 主動攻擊模式：低怪數時降低避敵、提升射程追蹤
     var aggressiveMode = (closeCount < 3);
     if (aggressiveMode) survWeight = 0.5;
     var survMag = Math.sqrt(survX * survX + survY * survY) || 1;
-    survX /= survMag;
-    survY /= survMag;
+    survX /= survMag; survY /= survMag;
+
+    // === 碰撞警戒斥力（最近 1-2 隻太近時強力排斥）===
+    var safeMargin = (this.player.hitboxRadius || 20) + 20;
+    var repelCloseX = 0, repelCloseY = 0, repelCount = 0;
+    for (var i = 0; i < nearby.length && repelCount < 2; i++) {
+      var e = nearby[i];
+      if (e.hp <= 0) continue;
+      var dx = px - e.x, dy = py - e.y;
+      var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      var minSafe = safeMargin + (e.hitboxRadius || 30);
+      if (dist < minSafe) {
+        repelCloseX += dx / dist;
+        repelCloseY += dy / dist;
+        repelCount++;
+      }
+    }
+    if (repelCount > 0) {
+      var rcMag = Math.sqrt(repelCloseX * repelCloseX + repelCloseY * repelCloseY) || 1;
+      repelCloseX /= rcMag; repelCloseY /= rcMag;
+    }
+    var repelCloseWeight = repelCount > 0 ? 4.0 : 0;
 
     // === 層 2：撿道具 ===
     var pickX = 0, pickY = 0, pickWeight = 0;
@@ -154,14 +149,11 @@
         var dot = (ex / eMag) * toDx + (ey / eMag) * toDy;
         if (dot > 0.5) dangerCount++;
       }
-      if (dangerCount < 3) {
-        pickX = toDx; pickY = toDy;
-      } else {
-        pickWeight = 0;
-      }
+      if (dangerCount < 3) { pickX = toDx; pickY = toDy; }
+      else { pickWeight = 0; }
     }
 
-    // === 層 3：保持攻擊射程 ===
+    // === 層 3：保持攻擊射程（Boss 優先）===
     var rangeX = 0, rangeY = 0, rangeWeight = 0;
     var nearestEnemy = null, nearestDist = Infinity;
     for (var i = 0; i < nearby.length; i++) {
@@ -170,20 +162,31 @@
       var d = Math.sqrt((e.x - px) * (e.x - px) + (e.y - py) * (e.y - py));
       if (d < nearestDist) { nearestDist = d; nearestEnemy = e; }
     }
-    if (nearestEnemy && closeCount < 3) {
+    // Boss 優先
+    var rangeTarget = nearestEnemy;
+    if (bosses && bosses.length > 0) {
+      var nearestBoss = null, nearestBossDist = Infinity;
+      for (var i = 0; i < bosses.length; i++) {
+        if (bosses[i].hp <= 0) continue;
+        var bd = Math.sqrt((bosses[i].x - px) * (bosses[i].x - px) + (bosses[i].y - py) * (bosses[i].y - py));
+        if (bd < nearestBossDist) { nearestBossDist = bd; nearestBoss = bosses[i]; }
+      }
+      if (nearestBoss) { rangeTarget = nearestBoss; nearestDist = nearestBossDist; }
+    }
+
+    if (rangeTarget && closeCount < 3) {
       var attackType = this.player.attackType;
       var idealDist = 200;
-      if (attackType === 'ranged') idealDist = 250;
-      else if (attackType === 'archer') idealDist = 280;
-      else if (attackType === 'amazon') idealDist = 245;
+      if (attackType === 'ranged') idealDist = 306;
+      else if (attackType === 'archer') idealDist = 340;
+      else if (attackType === 'amazon') idealDist = 298;
       else if (attackType === 'boomerang') idealDist = 170;
-      else if (attackType === 'melee') idealDist = 100;
-      else if (attackType === 'valkyrie') idealDist = 100;
+      else if (attackType === 'melee') idealDist = 136;
+      else if (attackType === 'valkyrie') idealDist = 102;
 
-      // 主動攻擊模式：更積極靠近（門檻 0.5 vs 正常 1.2）
       var distThreshold = aggressiveMode ? idealDist * 0.5 : idealDist * 1.2;
       if (nearestDist > distThreshold) {
-        var dx = nearestEnemy.x - px, dy = nearestEnemy.y - py;
+        var dx = rangeTarget.x - px, dy = rangeTarget.y - py;
         var d = Math.sqrt(dx * dx + dy * dy) || 1;
         rangeX = dx / d; rangeY = dy / d;
         rangeWeight = aggressiveMode ? 2.5 : ((attackType === 'melee' || attackType === 'valkyrie') ? 1.2 : 0.5);
@@ -191,8 +194,8 @@
     }
 
     // === 合成 ===
-    var fx = survX * survWeight + pickX * pickWeight + rangeX * rangeWeight;
-    var fy = survY * survWeight + pickY * pickWeight + rangeY * rangeWeight;
+    var fx = survX * survWeight + pickX * pickWeight + rangeX * rangeWeight + repelCloseX * repelCloseWeight;
+    var fy = survY * survWeight + pickY * pickWeight + rangeY * rangeWeight + repelCloseY * repelCloseWeight;
     var fMag = Math.sqrt(fx * fx + fy * fy);
     if (fMag < 0.1) {
       var cx = 1280, cy = 1920;
