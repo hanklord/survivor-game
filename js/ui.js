@@ -90,12 +90,37 @@
   // 顯示通關畫面
   UI.prototype.showLevelClear = function(levelName, callback) {
     if (!this.els.levelClear) { callback(); return; }
-    this.els.levelClear.innerHTML = '<h2>🎉 ' + levelName + ' 通關！</h2><button class="upgrade-btn" id="next-level-btn">下一關</button>';
+    var self = this;
+    this.els.levelClear.innerHTML = '<h2>🎉 ' + levelName + ' 通關！</h2><span id="auto-countdown" style="display:none;font-size:48px;color:#ffcc00;font-weight:bold;"></span><button class="upgrade-btn" id="next-level-btn">下一關</button>';
     this.els.levelClear.style.display = 'block';
-    document.getElementById('next-level-btn').onclick = function() {
+    this._autoClearTimer = null;
+
+    var nextBtn = document.getElementById('next-level-btn');
+    nextBtn.onclick = function() {
+      if (self._autoClearTimer) clearInterval(self._autoClearTimer);
       document.getElementById('level-clear').style.display = 'none';
       callback();
     };
+
+    // Auto-Play：3-2-1 倒數後自動接關
+    if (window.SG && window.SG._gameInstance && window.SG._gameInstance._autoPlay && window.SG._gameInstance._autoPlay.isEnabled()) {
+      var countEl = document.getElementById('auto-countdown');
+      countEl.style.display = 'block';
+      var count = 3;
+      countEl.textContent = count;
+      self._autoClearTimer = setInterval(function() {
+        count--;
+        if (count > 0) {
+          countEl.textContent = count;
+        } else {
+          clearInterval(self._autoClearTimer);
+          self._autoClearTimer = null;
+          if (self.els.levelClear.style.display !== 'none') {
+            nextBtn.click();
+          }
+        }
+      }, 1000);
+    }
   };
 
   // 顯示全通關
@@ -270,6 +295,21 @@
       }
     }, 15000);
     this.els.levelUp.style.display = 'block';
+
+    // Auto-Play：1 秒後自動選第一格
+    this._autoSkillTimer = null;
+    if (window.SG && window.SG._gameInstance && window.SG._gameInstance._autoPlay && window.SG._gameInstance._autoPlay.isEnabled()) {
+      var firstBtn = self.els.choices.children[0];
+      if (firstBtn) {
+        firstBtn.style.borderColor = '#ffcc00';
+        firstBtn.style.animation = 'pulse-gold 0.3s ease-in-out infinite alternate';
+        self._autoSkillTimer = setTimeout(function() {
+          if (self.els.levelUp.style.display !== 'none' && firstBtn) {
+            firstBtn.click();
+          }
+        }, 1000);
+      }
+    }
   };
 
   // Game Over（含排行榜）

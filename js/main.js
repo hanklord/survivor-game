@@ -327,6 +327,30 @@
         localStorage.setItem('survivor_hitbox', hitboxCheck.checked ? 'on' : 'off');
       };
     }
+
+    // Auto-Play 開關（設定頁 checkbox + 快捷按鈕）
+    var autoCheck = document.getElementById('set-autoplay');
+    var autoBtn = document.getElementById('autoplay-btn');
+    var savedAuto = localStorage.getItem('sg_autoplay') === 'true';
+    if (autoCheck) autoCheck.checked = savedAuto;
+    if (autoCheck) {
+      autoCheck.onchange = function() {
+        if (self._autoPlay) self._autoPlay.setEnabled(autoCheck.checked);
+        if (autoBtn) autoBtn.style.borderColor = autoCheck.checked ? '#ffcc00' : '#666';
+      };
+    }
+    if (autoBtn) {
+      autoBtn.style.borderColor = savedAuto ? '#ffcc00' : '#666';
+      autoBtn.onclick = function() {
+        if (self._autoPlay) {
+          var val = self._autoPlay.toggle();
+          autoBtn.style.borderColor = val ? '#ffcc00' : '#666';
+          if (autoCheck) autoCheck.checked = val;
+        }
+      };
+    }
+    // 存 game instance 引用供 UI 層查詢
+    SG._gameInstance = this;
   };
 
   Game.prototype._loadImages = function() {
@@ -454,6 +478,7 @@
     this._combo = new SG.ComboSystem();
     this._bomb = new SG.BombSystem();
     this._bossProjectiles = new SG.BossProjectileSystem();
+    this._autoPlay = new SG.AutoPlay(this.spatialHash);
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -705,6 +730,7 @@
       bossProjectiles: this._bossProjectiles ? this._bossProjectiles.getVisual() : null,
       debugHitbox: window.DEBUG_SHOW_HITBOX,
       playerHitboxRadius: this.player.hitboxRadius,
+      autoPlayActive: this._autoPlay && this._autoPlay.isActive(),
       dt: dt
     });
 
@@ -730,9 +756,15 @@
       }
     }
 
-    // 玩家移動
+    // 玩家移動（手動 vs 自動）
     var dir = this.input.getDirection();
-    this.player.move(dir, dt);
+    if (dir.x || dir.y) {
+      this.player.move(dir, dt);
+      if (this._autoPlay) this._autoPlay.onManualInput();
+    } else if (this._autoPlay && this._autoPlay.isActive()) {
+      var autoDir = this._autoPlay.update(dt, this.player.x, this.player.y);
+      this.player.move(autoDir, dt);
+    }
     this.player.updateAnimation(dt);
 
     // 空間雜湊
