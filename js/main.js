@@ -756,15 +756,15 @@
       }
     }
 
-    // 玩家移動（手動 vs 自動）
-    var dir = this.input.getDirection();
-    if (dir.x || dir.y) {
-      this.player.move(dir, dt);
-      if (this._autoPlay) this._autoPlay.onManualInput();
-    } else if (this._autoPlay && this._autoPlay.isActive()) {
-      var autoDir = this._autoPlay.update(dt, this.enemies, this.xpGems, this._healPickups, this.bosses);
-      this.player.move(autoDir, dt);
+    // 玩家移動（即時切換：有輸入=手動，無輸入=自動）
+    var inputDir = this.input.getDirection();
+    var hasInput = (inputDir.x !== 0 || inputDir.y !== 0);
+    var moveDir = inputDir;
+    if (this._autoPlay && this._autoPlay.isEnabled()) {
+      var autoDir = this._autoPlay.update(dt, this.enemies, this.xpGems, this._healPickups, this.bosses, hasInput);
+      if (!hasInput && autoDir) moveDir = autoDir;
     }
+    this.player.move(moveDir, dt);
     // Auto-Play 智慧大招：150px 內 5+ 隻才放，10s fallback 降至 3 隻
     if (this._autoPlay && this._autoPlay.isActive() && this._ultimateReady && this._ultimate) {
       if (!this._autoUltTimer) this._autoUltTimer = 0;

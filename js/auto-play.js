@@ -1,10 +1,9 @@
-// auto-play.js — 自動遊玩 AI v3（三層優先級 + 平滑 + Boss 優先 + 碰撞警戒）
+// auto-play.js — 自動遊玩 AI v3（即時手動/自動切換）
 (function() {
   window.SG = window.SG || {};
 
   var QUERY_RADIUS = 250;
   var QUERY_INTERVAL = 4;
-  var MANUAL_OVERRIDE_TIME = 2;
   var STORAGE_KEY = 'sg_autoplay';
   var DEAD_ZONE = 0.15;
   var MIN_ANGLE_DOT = 0.966;
@@ -18,8 +17,8 @@
     this._frameCount = 0;
     this._cachedDir = { x: 0, y: 0 };
     this._smoothDir = { x: 0, y: 1 };
-    this._manualTimer = 0;
     this._emergency = false;
+    this._manualActive = false;
   }
 
   AutoPlay.prototype._loadState = function() {
@@ -33,7 +32,6 @@
   AutoPlay.prototype.setEnabled = function(val) {
     this._enabled = !!val;
     this._saveState();
-    if (val) this._manualTimer = 0;
   };
 
   AutoPlay.prototype.isEnabled = function() { return this._enabled; };
@@ -43,13 +41,20 @@
     return this._enabled;
   };
 
-  AutoPlay.prototype.onManualInput = function() { this._manualTimer = MANUAL_OVERRIDE_TIME; };
+  AutoPlay.prototype.isActive = function() { return this._enabled && !this._manualActive; };
 
-  AutoPlay.prototype.isActive = function() { return this._enabled && this._manualTimer <= 0; };
+  // 主更新：即時切換，有輸入=手動，無輸入=自動
+  AutoPlay.prototype.update = function(dt, enemies, xpGems, healPickups, bosses, hasInput) {
+    if (!this._enabled) return null;
 
-  // 主更新：每 N 幀重新計算方向（含平滑）
-  AutoPlay.prototype.update = function(dt, enemies, xpGems, healPickups, bosses) {
-    if (this._manualTimer > 0) this._manualTimer -= dt;
+    // 即時切換：有輸入 = 手動，無輸入 = 自動
+    if (hasInput) {
+      this._manualActive = true;
+      return null;
+    }
+
+    // 從手動切回自動：smoothDir 保持，lerp 自然銜接
+    this._manualActive = false;
 
     this._frameCount++;
     if (this._frameCount % QUERY_INTERVAL !== 0) return this._cachedDir;
@@ -97,7 +102,7 @@
     var survMag = Math.sqrt(survX * survX + survY * survY) || 1;
     survX /= survMag; survY /= survMag;
 
-    // === 碰撞警戒斥力（最近 1-2 隻太近時強力排斥）===
+    // === 碰撞警戒斥力 ===
     var safeMargin = (this.player.hitboxRadius || 20) + 20;
     var repelCloseX = 0, repelCloseY = 0, repelCount = 0;
     for (var i = 0; i < nearby.length && repelCount < 2; i++) {
@@ -162,7 +167,6 @@
       var d = Math.sqrt((e.x - px) * (e.x - px) + (e.y - py) * (e.y - py));
       if (d < nearestDist) { nearestDist = d; nearestEnemy = e; }
     }
-    // Boss 優先
     var rangeTarget = nearestEnemy;
     if (bosses && bosses.length > 0) {
       var nearestBoss = null, nearestBossDist = Infinity;
