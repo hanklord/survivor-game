@@ -478,7 +478,7 @@
     this._combo = new SG.ComboSystem();
     this._bomb = new SG.BombSystem();
     this._bossProjectiles = new SG.BossProjectileSystem();
-    this._autoPlay = new SG.AutoPlay(this.spatialHash);
+    this._autoPlay = new SG.AutoPlay(this.spatialHash, this.player);
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -762,8 +762,16 @@
       this.player.move(dir, dt);
       if (this._autoPlay) this._autoPlay.onManualInput();
     } else if (this._autoPlay && this._autoPlay.isActive()) {
-      var autoDir = this._autoPlay.update(dt, this.player.x, this.player.y);
+      var autoDir = this._autoPlay.update(dt, this.enemies, this.xpGems, this._healPickups);
       this.player.move(autoDir, dt);
+    }
+    // Auto-Play 自動施放大招
+    if (this._autoPlay && this._autoPlay.isActive() && this._ultimateReady && this._ultimate) {
+      var killed = this._ultimate.activate(this.enemies, this.bosses);
+      for (var uk = 0; uk < killed.length; uk++) this._handleKill(killed[uk]);
+      this._ultimateCharge = 0;
+      this._ultimateReady = false;
+      this._ultimateFlash = 0.3;
     }
     this.player.updateAnimation(dt);
 
