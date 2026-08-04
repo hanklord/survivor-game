@@ -48,7 +48,7 @@
         continue;
       }
       // Hit detection vs player
-      if (SG.dist(p, player) < (player.hitboxRadius + PROJECTILE_SIZE / 2)) {
+      if (SG.aabbHit(p, PROJECTILE_SIZE / 2, player, player.hitboxRadius)) {
         this.impacts.push({ x: p.x, y: p.y, progress: 0 });
         this.projectiles.splice(i, 1);
         // Return damage info (caller handles actual damage)

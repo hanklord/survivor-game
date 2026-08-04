@@ -780,7 +780,7 @@
       for (var j = 0; j < nearby.length; j++) {
         var e = nearby[j];
         if (e.hp <= 0) continue;
-        if (SG.dist(p, e) < (e.hitboxRadius + pSize / 2)) {
+        if (SG.aabbHit(p, pSize / 2, e, e.hitboxRadius)) {
           // 暴擊判定
           var dmg = p.damage * (this.player.damageMultiplier || 1);
           var isCrit = this.player.critChance && Math.random() < this.player.critChance;
@@ -802,7 +802,7 @@
             for (var ae = 0; ae < allTargets.length; ae++) {
               var at = allTargets[ae];
               if (at === e || at.hp <= 0) continue;
-              if (SG.dist(e, at) <= expRadius + at.hitboxRadius) {
+              if (SG.aabbHit(e, expRadius, at, at.hitboxRadius)) {
                 at.hp -= expDmg;
                 if (!this._lowQuality) this._damageNumbers.add(at.x, at.y, expDmg, false);
                 if (at.hp <= 0) this._handleKill(at);
@@ -829,7 +829,7 @@
       e.moveToward(this.player, dt);
       e.speed = origSpeed;
       e.updateAnimation(dt);
-      if (SG.dist(this.player, e) < (this.player.hitboxRadius + e.hitboxRadius)) {
+      if (SG.aabbHit(this.player, this.player.hitboxRadius, e, e.hitboxRadius)) {
         if (this._playerTakeDamage(e.damage, e)) return;
       }
     }
@@ -839,7 +839,7 @@
       var b = this.bosses[i];
       b.moveToward(this.player, dt);
       b.updateAnimation(dt);
-      if (SG.dist(this.player, b) < (this.player.hitboxRadius + b.hitboxRadius)) {
+      if (SG.aabbHit(this.player, this.player.hitboxRadius, b, b.hitboxRadius)) {
         if (this._playerTakeDamage(b.damage, b)) return;
       }
     }
@@ -953,7 +953,7 @@
       hp.life -= dt;
       hp.bobTimer += dt;
       if (hp.life <= 0) { this._healPickups.splice(hi, 1); continue; }
-      if (SG.dist(this.player, hp) < this.player.hitboxRadius + HEAL_PICKUP_RADIUS) {
+      if (SG.aabbHit(this.player, this.player.hitboxRadius, hp, HEAL_PICKUP_RADIUS)) {
         this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * HEAL_AMOUNT);
         this._healPickups.splice(hi, 1);
         this.audio.playPickup();

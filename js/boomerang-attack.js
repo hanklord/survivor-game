@@ -69,7 +69,7 @@
         var t = targets[j];
         if (t.hp <= 0) continue;
         if (b.hitIds[t.id]) continue;
-        if (SG.dist(b, t) < (t.hitboxRadius + this.hitboxSize)) {
+        if (SG.aabbHit(b, this.hitboxSize, t, t.hitboxRadius)) {
           t.hp -= this.damage;
           b.hitIds[t.id] = true;
           this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });

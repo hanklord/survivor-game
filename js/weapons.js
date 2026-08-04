@@ -33,7 +33,7 @@
         var e = targets[j];
         var key = e.id + '_' + i;
         if (this.hitTimers[key] && this.hitTimers[key] > 0) continue;
-        if (SG.dist({x:sx,y:sy}, e) < (SHIELD_BALL_SIZE / 2 + e.hitboxRadius)) {
+        if (SG.aabbHit({x:sx,y:sy}, SHIELD_BALL_SIZE / 2, e, e.hitboxRadius)) {
           e.hp -= this.damage;
           // 擊退
           var ka = Math.atan2(e.y - this.player.y, e.x - this.player.x);
@@ -106,7 +106,7 @@
       var targets = enemies.concat(bosses);
       for (var i = 0; i < targets.length; i++) {
         var e = targets[i];
-        if (SG.dist(this.player, e) < this.radius) {
+        if (SG.aabbHit(this.player, this.radius, e, e.hitboxRadius)) {
           e.hp -= this.damage;
           if (e.hp <= 0) hits.push(e);
         }
@@ -183,14 +183,14 @@
     var targets = enemies.concat(bosses);
     for (var i = 0; i < targets.length; i++) {
       var e = targets[i];
-      if (SG.dist(this, e) < (e.hitboxRadius + 8)) {
+      if (SG.aabbHit(this, 8, e, e.hitboxRadius)) {
         e.hp -= this.damage;
         this.active = false;
         // AoE 爆炸
         var aoeHits = [];
         for (var j = 0; j < targets.length; j++) {
           if (j === i) continue;
-          if (SG.dist(this, targets[j]) < MISSILE_AOE_RADIUS) {
+          if (SG.aabbHit(this, MISSILE_AOE_RADIUS, targets[j], targets[j].hitboxRadius)) {
             targets[j].hp -= MISSILE_AOE_DAMAGE;
             if (targets[j].hp <= 0) aoeHits.push(targets[j]);
           }

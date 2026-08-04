@@ -50,7 +50,7 @@
       for (var ti = 0; ti < targets.length; ti++) {
         var t = targets[ti];
         if (t.hp <= 0 || j.hitIds[t.id]) continue;
-        if (SG.dist(j, t) < (t.hitboxRadius + JAVELIN_SIZE)) {
+        if (SG.aabbHit(j, JAVELIN_SIZE, t, t.hitboxRadius)) {
           t.hp -= this.damage;
           j.hitIds[t.id] = true;
           j.hitCount++;

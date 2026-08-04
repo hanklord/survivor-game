@@ -44,7 +44,7 @@
       for (var j = 0; j < targets.length; j++) {
         var t = targets[j];
         if (t.hp <= 0 || s.hitIds[t.id]) continue;
-        if (SG.dist(s, t) < (t.hitboxRadius + SHURIKEN_SIZE)) {
+        if (SG.aabbHit(s, SHURIKEN_SIZE, t, t.hitboxRadius)) {
           t.hp -= this.damage;
           s.hitIds[t.id] = true;
           this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });

@@ -930,18 +930,21 @@
       ctx.globalAlpha = 0.6;
       // 玩家 hitbox（綠）
       ctx.strokeStyle = '#00ff00';
-      ctx.beginPath(); ctx.arc(state.player.x, state.player.y, state.playerHitboxRadius, 0, Math.PI * 2); ctx.stroke();
+      var pr = state.playerHitboxRadius;
+      ctx.strokeRect(state.player.x - pr, state.player.y - pr, pr * 2, pr * 2);
       // 敵人 hitbox（紅）
       ctx.strokeStyle = '#ff0000';
       for (var di = 0; di < state.enemies.length; di++) {
         var de = state.enemies[di];
-        ctx.beginPath(); ctx.arc(de.x, de.y, de.hitboxRadius, 0, Math.PI * 2); ctx.stroke();
+        var er = de.hitboxRadius;
+        ctx.strokeRect(de.x - er, de.y - er, er * 2, er * 2);
       }
       // Boss hitbox（紅粗）
       ctx.lineWidth = 2.5;
       for (var dbi = 0; dbi < state.bosses.length; dbi++) {
         var db = state.bosses[dbi];
-        ctx.beginPath(); ctx.arc(db.x, db.y, db.hitboxRadius, 0, Math.PI * 2); ctx.stroke();
+        var br = db.hitboxRadius;
+        ctx.strokeRect(db.x - br, db.y - br, br * 2, br * 2);
       }
       ctx.lineWidth = 1.5;
       // 投射物 hitbox（黃）
@@ -949,7 +952,8 @@
       var dpSize = (this.imgConfig.projectile && this.imgConfig.projectile.size) || 12;
       for (var dpi = 0; dpi < state.projectiles.length; dpi++) {
         var dp = state.projectiles[dpi];
-        ctx.beginPath(); ctx.arc(dp.x, dp.y, dpSize / 2, 0, Math.PI * 2); ctx.stroke();
+        var phr = dpSize / 2;
+        ctx.strokeRect(dp.x - phr, dp.y - phr, dpSize, dpSize);
       }
       // 近戰判定（藍扇形）
       if (state.meleeVisual) {

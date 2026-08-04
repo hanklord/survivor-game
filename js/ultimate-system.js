@@ -104,7 +104,7 @@
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (t.hp <= 0) continue;
-      if (SG.dist(this.player, t) <= ULTIMATE_RADIUS) {
+      if (SG.aabbHit(this.player, ULTIMATE_RADIUS, t, t.hitboxRadius)) {
         t.hp -= dmg;
         if (t.hp <= 0) hits.push(t);
       }
@@ -139,7 +139,7 @@
       for (var j = 0; j < targets.length; j++) {
         var t = targets[j];
         if (t.hp <= 0 || a.hitIds[t.id]) continue;
-        if (SG.dist(a, t) < t.hitboxRadius + 10) {
+        if (SG.aabbHit(a, 10, t, t.hitboxRadius)) {
           t.hp -= dmg;
           a.hitIds[t.id] = true;
           if (t.hp <= 0) hits.push(t);
@@ -167,7 +167,7 @@
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (t.hp <= 0 || this._dashHitIds[t.id]) continue;
-      if (SG.dist(this.player, t) < this.player.hitboxRadius + t.hitboxRadius + 30) {
+      if (SG.aabbHit(this.player, this.player.hitboxRadius + 30, t, t.hitboxRadius)) {
         t.hp -= dmg;
         this._dashHitIds[t.id] = true;
         if (t.hp <= 0) hits.push(t);
@@ -224,7 +224,7 @@
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (t.hp <= 0 || s.hitIds[t.id]) continue;
-      if (SG.dist(s, t) < t.hitboxRadius + 40) {
+      if (SG.aabbHit(s, 40, t, t.hitboxRadius)) {
         t.hp -= dmg;
         s.hitIds[t.id] = true;
         if (t.hp <= 0) hits.push(t);
@@ -241,7 +241,7 @@
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (t.hp <= 0) continue;
-      if (SG.dist(this.player, t) <= ULTIMATE_RADIUS + 50) {
+      if (SG.aabbHit(this.player, ULTIMATE_RADIUS + 50, t, t.hitboxRadius)) {
         t.hp -= dmg;
         if (t.hp <= 0) hits.push(t);
       }

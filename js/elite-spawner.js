@@ -53,7 +53,7 @@
 
     // 磁鐵拾取檢測
     for (var i = this.magnets.length - 1; i >= 0; i--) {
-      if (SG.dist(this.player, this.magnets[i]) < MAGNET_PICKUP_RADIUS + 20) {
+      if (SG.aabbHit(this.player, this.player.hitboxRadius, this.magnets[i], MAGNET_PICKUP_RADIUS + 20)) {
         this.magnets.splice(i, 1);
         this.magnetActive = true;
         this.magnetActiveTimer = MAGNET_DURATION;
@@ -62,7 +62,7 @@
 
     // 寶箱拾取檢測
     for (var i = this.chests.length - 1; i >= 0; i--) {
-      if (SG.dist(this.player, this.chests[i]) < 30) {
+      if (SG.aabbHit(this.player, this.player.hitboxRadius, this.chests[i], 30)) {
         this.chests.splice(i, 1);
         result.triggerLevelUp = true;
       }
