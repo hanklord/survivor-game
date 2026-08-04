@@ -236,6 +236,7 @@
     var boss = SG.Boss.spawn(bossIdx, this.imgConfig, this.player, this.W, this.H);
     if (!boss) return;
     boss.animator = this._buildAnimator('boss_' + boss.cfgIdx, (this.imgConfig.bosses || [])[boss.cfgIdx]);
+    this._applyAABB(boss, 'boss_' + boss.cfgIdx);
     var hcMult = this.getHardcoreHPMult();
     if (hcMult > 1) { boss.hp = Math.round(boss.hp * hcMult); boss.maxHp = boss.hp; }
     this.bosses.push(boss);
@@ -557,6 +558,9 @@
     var startBgm = this.levelManager.getCurrent().bgm || 'assets/audio/bgm.mp3';
     this.audio.switchBGM(startBgm);
 
+    // 預計算所有敵人/Boss sprite 的 AABB
+    this._precomputeAABB();
+
     // 初始填充怪物到目標數量
     this._fillEnemies();
 
@@ -583,6 +587,52 @@
     }
     if (!Object.keys(animConfig).length) return null;
     return new SG.SpriteAnimator(animConfig);
+  };
+
+  // 預計算所有敵人/Boss sprite 的 AABB（基於輝度掃描）
+  Game.prototype._precomputeAABB = function() {
+    var enemies = this.imgConfig.enemies || [];
+    for (var i = 0; i < enemies.length; i++) {
+      var eCfg = enemies[i];
+      var key = 'enemy_' + i;
+      if (eCfg.sprites) {
+        // 用第一個有圖片的動作做 strip AABB
+        for (var action in eCfg.sprites) {
+          var img = this.images[key + '_sprite_' + action];
+          if (img && img.complete) {
+            var info = SG.parseSpriteInfo(eCfg.sprites[action].file);
+            SG.computeStripAABB(key, img, info.frames, info.cols, info.rows);
+            break;
+          }
+        }
+      } else if (this.images[key]) {
+        SG.computeSpriteAABB(key, this.images[key]);
+      }
+    }
+    var bosses = this.imgConfig.bosses || [];
+    for (var i = 0; i < bosses.length; i++) {
+      var bCfg = bosses[i];
+      var key = 'boss_' + i;
+      if (bCfg.sprites) {
+        for (var action in bCfg.sprites) {
+          var img = this.images[key + '_sprite_' + action];
+          if (img && img.complete) {
+            var info = SG.parseSpriteInfo(bCfg.sprites[action].file);
+            SG.computeStripAABB(key, img, info.frames, info.cols, info.rows);
+            break;
+          }
+        }
+      } else if (this.images[key]) {
+        SG.computeSpriteAABB(key, this.images[key]);
+      }
+    }
+  };
+
+  // 套用已預計算的 AABB 到實體
+  Game.prototype._applyAABB = function(entity, key) {
+    var extent = SG.getAABBHalfExtent(key, entity.size);
+    entity._aabbHalfW = extent.halfW;
+    entity._aabbHalfH = extent.halfH;
   };
 
   Game.prototype._loop = function(ts) {
@@ -899,6 +949,7 @@
     var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this.levelManager.getCurrent().enemyIndices);
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
+      this._applyAABB(spawned[i], 'enemy_' + spawned[i].cfgIdx);
       // Hardcore HP 倍率
       var hcMult = this.getHardcoreHPMult();
       if (hcMult > 1) {
@@ -970,6 +1021,7 @@
       var rushSpawned = this.waveManager.spawnRushWave(this._rushWave.getSpawnCount(), this.player, this.W, this.H, this.imgConfig);
       if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
         rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
+        this._applyAABB(rushSpawned[ri], 'enemy_' + rushSpawned[ri].cfgIdx);
         var hcR = this.getHardcoreHPMult(); if (hcR > 1) { rushSpawned[ri].hp = Math.round(rushSpawned[ri].hp * hcR); rushSpawned[ri].maxHp = rushSpawned[ri].hp; }
         if (this.enemies.length < MAX_ENEMIES) this.enemies.push(rushSpawned[ri]);
       }
@@ -988,6 +1040,7 @@
     var eliteResult = this._eliteSpawner.update(dt, this.W, this.H, this.imgConfig);
     if (eliteResult.elite && this.enemies.length < MAX_ENEMIES) {
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
+      this._applyAABB(eliteResult.elite, 'enemy_' + eliteResult.elite.cfgIdx);
       var hcE = this.getHardcoreHPMult(); if (hcE > 1) { eliteResult.elite.hp = Math.round(eliteResult.elite.hp * hcE); eliteResult.elite.maxHp = eliteResult.elite.hp; }
       this.enemies.push(eliteResult.elite);
     }
@@ -1194,6 +1247,7 @@
     var y = this.player.y + Math.sin(angle) * dist;
     var enemy = new SG.Enemy(x, y, pick.cfg, pick.idx);
     enemy.animator = this._buildAnimator('enemy_' + pick.idx, (this.imgConfig.enemies || [])[pick.idx]);
+    this._applyAABB(enemy, 'enemy_' + pick.idx);
     var hcMult = this.getHardcoreHPMult();
     if (hcMult > 1) { enemy.hp = Math.round(enemy.hp * hcMult); enemy.maxHp = enemy.hp; }
     this.enemies.push(enemy);

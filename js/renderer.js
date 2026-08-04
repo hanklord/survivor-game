@@ -936,15 +936,17 @@
       ctx.strokeStyle = '#ff0000';
       for (var di = 0; di < state.enemies.length; di++) {
         var de = state.enemies[di];
-        var er = de.hitboxRadius;
-        ctx.strokeRect(de.x - er, de.y - er, er * 2, er * 2);
+        var eHalfW = de._aabbHalfW || de.hitboxRadius;
+        var eHalfH = de._aabbHalfH || de.hitboxRadius;
+        ctx.strokeRect(de.x - eHalfW, de.y - eHalfH, eHalfW * 2, eHalfH * 2);
       }
       // Boss hitbox（紅粗）
       ctx.lineWidth = 2.5;
       for (var dbi = 0; dbi < state.bosses.length; dbi++) {
         var db = state.bosses[dbi];
-        var br = db.hitboxRadius;
-        ctx.strokeRect(db.x - br, db.y - br, br * 2, br * 2);
+        var bHalfW = db._aabbHalfW || db.hitboxRadius;
+        var bHalfH = db._aabbHalfH || db.hitboxRadius;
+        ctx.strokeRect(db.x - bHalfW, db.y - bHalfH, bHalfW * 2, bHalfH * 2);
       }
       ctx.lineWidth = 1.5;
       // 投射物 hitbox（黃）

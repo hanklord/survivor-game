@@ -15,14 +15,15 @@
   // 實體唯一 ID 計數器
   SG.nextEntityId = 0;
 
-  // AABB 碰撞：兩個以中心點 + 半徑為基礎的物件
-  // 物件需有 x, y, hitboxRadius（用 radius×2 作為寬高）
+  // AABB 碰撞：優先使用精確 AABB 半寬/半高，fallback 到 hitboxRadius
   SG.aabbHit = function(a, aRadius, b, bRadius) {
-    var ar = aRadius || a.hitboxRadius || 10;
-    var br = bRadius || b.hitboxRadius || 10;
-    return a.x - ar < b.x + br &&
-           a.x + ar > b.x - br &&
-           a.y - ar < b.y + br &&
-           a.y + ar > b.y - br;
+    var aHalfW = a._aabbHalfW || aRadius || a.hitboxRadius || 10;
+    var aHalfH = a._aabbHalfH || aRadius || a.hitboxRadius || 10;
+    var bHalfW = b._aabbHalfW || bRadius || b.hitboxRadius || 10;
+    var bHalfH = b._aabbHalfH || bRadius || b.hitboxRadius || 10;
+    return a.x - aHalfW < b.x + bHalfW &&
+           a.x + aHalfW > b.x - bHalfW &&
+           a.y - aHalfH < b.y + bHalfH &&
+           a.y + aHalfH > b.y - bHalfH;
   };
 })();
