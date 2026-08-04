@@ -302,7 +302,11 @@
       var btns = self.els.choices.querySelectorAll('.upgrade-btn');
       if (btns.length > 0) {
         var step = 0;
-        var totalSteps = 9; // 轉 3 圈（9 步 % 3 格 = 停在 index 0）
+        // 隨機選最終停止格
+        var finalIdx = Math.floor(Math.random() * btns.length);
+        // 調整 totalSteps 讓最後一步停在 finalIdx
+        var totalSteps = 9;
+        while ((totalSteps - 1) % btns.length !== finalIdx) totalSteps++;
         var baseDelay = 100;
         var autoTimer = null;
         var cancelled = false;
@@ -321,16 +325,16 @@
           step++;
 
           if (step >= totalSteps) {
-            // 最終停在第一格
+            // 最終停在 finalIdx
             for (var i = 0; i < btns.length; i++) {
               btns[i].style.borderColor = '';
               btns[i].style.transform = '';
             }
-            btns[0].style.borderColor = '#ffd700';
-            btns[0].style.transform = 'scale(1.05)';
+            btns[finalIdx].style.borderColor = '#ffd700';
+            btns[finalIdx].style.transform = 'scale(1.05)';
             autoTimer = setTimeout(function() {
               if (!cancelled && self.els.levelUp.style.display !== 'none') {
-                btns[0].click();
+                btns[finalIdx].click();
               }
             }, 300);
           } else {

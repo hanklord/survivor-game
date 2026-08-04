@@ -36,6 +36,10 @@
   AutoPlay.prototype.setEnabled = function(val) {
     this._enabled = !!val;
     this._saveState();
+    // 重新啟用時清除手動覆蓋狀態
+    if (val) {
+      this._manualTimer = 0;
+    }
   };
 
   AutoPlay.prototype.isEnabled = function() {
@@ -112,6 +116,9 @@
     // 緊急狀態
     this._emergency = (closeCount >= 3);
     if (this._emergency) survWeight = 6.0;
+    // 主動攻擊模式：低怪數時降低避敵、提升射程追蹤
+    var aggressiveMode = (closeCount < 3);
+    if (aggressiveMode) survWeight = 0.5;
     var survMag = Math.sqrt(survX * survX + survY * survY) || 1;
     survX /= survMag;
     survY /= survMag;
@@ -173,11 +180,13 @@
       else if (attackType === 'melee') idealDist = 100;
       else if (attackType === 'valkyrie') idealDist = 100;
 
-      if (nearestDist > idealDist * 1.2) {
+      // 主動攻擊模式：更積極靠近（門檻 0.5 vs 正常 1.2）
+      var distThreshold = aggressiveMode ? idealDist * 0.5 : idealDist * 1.2;
+      if (nearestDist > distThreshold) {
         var dx = nearestEnemy.x - px, dy = nearestEnemy.y - py;
         var d = Math.sqrt(dx * dx + dy * dy) || 1;
         rangeX = dx / d; rangeY = dy / d;
-        rangeWeight = (attackType === 'melee' || attackType === 'valkyrie') ? 1.2 : 0.5;
+        rangeWeight = aggressiveMode ? 2.5 : ((attackType === 'melee' || attackType === 'valkyrie') ? 1.2 : 0.5);
       }
     }
 
