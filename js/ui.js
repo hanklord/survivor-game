@@ -296,18 +296,57 @@
     }, 15000);
     this.els.levelUp.style.display = 'block';
 
-    // Auto-Play：1 秒後自動選第一格
+    // Auto-Play：輪播選擇動畫
     this._autoSkillTimer = null;
     if (window.SG && window.SG._gameInstance && window.SG._gameInstance._autoPlay && window.SG._gameInstance._autoPlay.isEnabled()) {
-      var firstBtn = self.els.choices.children[0];
-      if (firstBtn) {
-        firstBtn.style.borderColor = '#ffcc00';
-        firstBtn.style.animation = 'pulse-gold 0.3s ease-in-out infinite alternate';
-        self._autoSkillTimer = setTimeout(function() {
-          if (self.els.levelUp.style.display !== 'none' && firstBtn) {
-            firstBtn.click();
+      var btns = self.els.choices.querySelectorAll('.upgrade-btn');
+      if (btns.length > 0) {
+        var step = 0;
+        var totalSteps = 9; // 轉 3 圈（9 步 % 3 格 = 停在 index 0）
+        var baseDelay = 100;
+        var autoTimer = null;
+        var cancelled = false;
+
+        function doStep() {
+          if (cancelled) return;
+          // 清除所有高亮
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].style.borderColor = '';
+            btns[i].style.transform = '';
           }
-        }, 1000);
+          // 高亮當前格
+          var currentIdx = step % btns.length;
+          btns[currentIdx].style.borderColor = '#ffffff';
+          btns[currentIdx].style.transform = 'scale(1.03)';
+          step++;
+
+          if (step >= totalSteps) {
+            // 最終停在第一格
+            for (var i = 0; i < btns.length; i++) {
+              btns[i].style.borderColor = '';
+              btns[i].style.transform = '';
+            }
+            btns[0].style.borderColor = '#ffd700';
+            btns[0].style.transform = 'scale(1.05)';
+            autoTimer = setTimeout(function() {
+              if (!cancelled && self.els.levelUp.style.display !== 'none') {
+                btns[0].click();
+              }
+            }, 300);
+          } else {
+            // 逐漸減速
+            var delay = baseDelay + step * 25;
+            autoTimer = setTimeout(doStep, delay);
+          }
+        }
+
+        autoTimer = setTimeout(doStep, 500); // 0.5s 後開始
+
+        // 玩家手動點任何按鈕取消輪播
+        self.els.choices.addEventListener('click', function() {
+          cancelled = true;
+          if (autoTimer) clearTimeout(autoTimer);
+        }, { once: true });
       }
     }
   };
