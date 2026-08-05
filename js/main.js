@@ -334,6 +334,10 @@
     var autoIcon = document.getElementById('autoplay-icon');
     var savedAuto = localStorage.getItem('sg_autoplay') === 'true';
     if (autoCheck) autoCheck.checked = savedAuto;
+    // The shortcut is intentionally hidden in the markup until the game has
+    // initialized its settings handlers. Make it visible once the icon and
+    // click handler are ready so a valid image cannot be hidden by display:none.
+    if (autoBtn) autoBtn.style.display = 'block';
 
     function updateAutoIcon(enabled) {
       if (autoIcon) {
