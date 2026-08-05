@@ -72,7 +72,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 <div id="skill-icons"></div>
 <button id="settings-btn" style="position:absolute; top:55px; right:10px; z-index:100; background:rgba(0,0,0,0.5); border:1px solid #666; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; color:#ccc;">⚙</button>
 <button id="autoplay-btn" style="position:absolute; top:55px; right:50px; z-index:100; background:rgba(0,0,0,0.5); border:1px solid #666; border-radius:50%; width:36px; height:36px; cursor:pointer; display:none; padding:4px;">
-  <img id="autoplay-icon" src="assets/ui/auto-play-icon.png" style="width:100%; height:100%; filter:brightness(2) invert(0);">
+  <img id="autoplay-icon" src="assets/ui/auto-play-icon.png" style="width:100%; height:100%;">
 </button>
 <div id="settings-menu" style="display:none; position:absolute; inset:0; z-index:200; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center;">
   <div style="background:#1a1a2e; border:2px solid #4488ff; border-radius:12px; padding:30px 40px; text-align:center; color:#eee;">
@@ -80,7 +80,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
     <div style="margin:14px 0;"><label><input type="checkbox" id="set-bgm" checked> 🎵 背景音樂</label></div>
     <div style="margin:14px 0;"><label><input type="checkbox" id="set-sfx" checked> 🔊 音效</label></div>
     <div style="margin:14px 0;"><label><input type="checkbox" id="set-hitbox"> 🎯 Hitbox 顯示</label></div>
-    <div style="margin:14px 0;"><label><img src="assets/ui/auto-play-icon.png" style="width:20px;height:20px;vertical-align:middle;filter:brightness(2);margin-right:6px;"><input type="checkbox" id="set-autoplay"> 自動遊玩</label></div>
+    <div style="margin:14px 0;"><label><img src="assets/ui/auto-play-icon.png" style="width:20px;height:20px;vertical-align:middle;filter:invert(1);margin-right:6px;"><input type="checkbox" id="set-autoplay"> 自動遊玩</label></div>
     <button id="set-resume" style="margin-top:16px; padding:10px 30px; background:#4488ff; border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer;">▶ 繼續遊戲</button>
     <button id="set-back-menu" style="margin-top:10px; padding:10px 30px; background:#aa4444; border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer;">🏠 返回選單</button>
   </div>

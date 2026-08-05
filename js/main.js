@@ -342,10 +342,10 @@
     function updateAutoIcon(enabled) {
       if (autoIcon) {
         if (enabled) {
-          autoIcon.style.filter = 'brightness(2) sepia(1) saturate(5) hue-rotate(15deg)';
+          autoIcon.style.filter = 'invert(1) sepia(1) saturate(5) hue-rotate(15deg)';
           autoIcon.style.animation = 'autoSpin 2.5s linear infinite';
         } else {
-          autoIcon.style.filter = 'brightness(2)';
+          autoIcon.style.filter = 'invert(1)';
           autoIcon.style.animation = 'none';
         }
       }
