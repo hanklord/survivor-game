@@ -94,17 +94,14 @@
     this._el.style.top = Math.floor((sh - th) / 2) + 'px';
     this._el.style.display = 'block';
 
-    // AFK mode: restore the last character (or choose one randomly) after a
-    // short highlight, while allowing a manual click to cancel the timer.
+    // AFK mode: rotate through every character in round-robin order, while
+    // allowing a manual click to cancel the timer.
     if (localStorage.getItem('survivor_autoplay') === 'on') {
       var cards = this._el.querySelectorAll('[data-char-id]');
-      var lastChar = localStorage.getItem('survivor_lastCharacter');
-      var targetIdx = lastChar ? 0 : Math.floor(Math.random() * CHARACTERS.length);
-      if (lastChar) {
-        for (var ci = 0; ci < CHARACTERS.length; ci++) {
-          if (CHARACTERS[ci].id === lastChar) { targetIdx = ci; break; }
-        }
-      }
+      var charIndex = parseInt(localStorage.getItem('autoPlayCharIndex') || '-1', 10);
+      charIndex = (charIndex + 1) % CHARACTERS.length;
+      localStorage.setItem('autoPlayCharIndex', String(charIndex));
+      var targetIdx = charIndex;
       var autoSelf = this;
       this._autoTimer = setTimeout(function() {
         var targetCard = cards[targetIdx];
