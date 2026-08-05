@@ -398,6 +398,34 @@
     }
 
     this.els.gameOverEl.style.display = 'block';
+
+    // AFK mode: automatically retry after a visible three-second countdown.
+    if (localStorage.getItem('survivor_autoplay') === 'on') {
+      var countdown = 3;
+      var countEl = document.createElement('div');
+      countEl.style.cssText = 'font-size:48px; color:#ffd700; text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000; margin-top:15px; font-family:' + (window.GAME_FONT || 'Cinzel, serif') + ';';
+      countEl.textContent = countdown;
+      this.els.gameOverEl.appendChild(countEl);
+      var cdInterval = setInterval(function() {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(cdInterval);
+          // The leaderboard may add a "clear" button before Retry; target
+          // the original inline Retry action explicitly.
+          var retryBtn = document.querySelector('#game-over button[onclick]');
+          if (retryBtn) retryBtn.click();
+        } else {
+          countEl.textContent = countdown;
+        }
+      }, 1000);
+      var allBtns = this.els.gameOverEl.querySelectorAll('button');
+      for (var bi = 0; bi < allBtns.length; bi++) {
+        allBtns[bi].addEventListener('click', function() {
+          clearInterval(cdInterval);
+          if (countEl.parentNode) countEl.parentNode.removeChild(countEl);
+        }, { once: true });
+      }
+    }
   };
 
   // 暫停切換

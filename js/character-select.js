@@ -45,6 +45,7 @@
     for (var i = 0; i < CHARACTERS.length; i++) {
       (function(ch) {
         var card = document.createElement('div');
+        card.setAttribute('data-char-id', ch.id);
         card.style.cssText = 'background:rgba(20,20,50,0.95); border:2px solid ' + ch.color + '; border-radius:12px; padding:12px 10px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:100px; overflow:hidden; transition:transform 0.2s, border-color 0.2s;';
         
         // 靜態角色圖（第一幀）
@@ -67,7 +68,11 @@
 
         card.onmouseover = function() { card.style.transform = 'scale(1.08)'; card.style.borderColor = '#fff'; };
         card.onmouseout = function() { card.style.transform = ''; card.style.borderColor = ch.color; };
-        card.onclick = function() { self._el.style.display = 'none'; self._onSelect(ch); };
+        card.onclick = function() {
+          localStorage.setItem('survivor_lastCharacter', ch.id);
+          self._el.style.display = 'none';
+          self._onSelect(ch);
+        };
         container.appendChild(card);
       })(CHARACTERS[i]);
     }
@@ -88,6 +93,35 @@
     this._el.style.left = Math.floor((sw - tw) / 2) + 'px';
     this._el.style.top = Math.floor((sh - th) / 2) + 'px';
     this._el.style.display = 'block';
+
+    // AFK mode: restore the last character (or choose one randomly) after a
+    // short highlight, while allowing a manual click to cancel the timer.
+    if (localStorage.getItem('survivor_autoplay') === 'on') {
+      var cards = this._el.querySelectorAll('[data-char-id]');
+      var lastChar = localStorage.getItem('survivor_lastCharacter');
+      var targetIdx = lastChar ? 0 : Math.floor(Math.random() * CHARACTERS.length);
+      if (lastChar) {
+        for (var ci = 0; ci < CHARACTERS.length; ci++) {
+          if (CHARACTERS[ci].id === lastChar) { targetIdx = ci; break; }
+        }
+      }
+      var autoSelf = this;
+      this._autoTimer = setTimeout(function() {
+        var targetCard = cards[targetIdx];
+        if (!targetCard) return;
+        targetCard.style.borderColor = '#ffd700';
+        targetCard.style.transform = 'scale(1.08)';
+        setTimeout(function() { targetCard.click(); }, 500);
+      }, 1500);
+      for (var cardIdx = 0; cardIdx < cards.length; cardIdx++) {
+        cards[cardIdx].addEventListener('click', function() {
+          if (autoSelf._autoTimer) {
+            clearTimeout(autoSelf._autoTimer);
+            autoSelf._autoTimer = null;
+          }
+        }, { once: true });
+      }
+    }
   };
 
   SG.CharacterSelect = CharacterSelect;

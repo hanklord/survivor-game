@@ -22,11 +22,16 @@
   }
 
   AutoPlay.prototype._loadState = function() {
-    try { return localStorage.getItem(STORAGE_KEY) === 'true'; } catch(e) { return false; }
+    try {
+      return localStorage.getItem(STORAGE_KEY) === 'true' || localStorage.getItem('survivor_autoplay') === 'on';
+    } catch(e) { return false; }
   };
 
   AutoPlay.prototype._saveState = function() {
-    try { localStorage.setItem(STORAGE_KEY, this._enabled ? 'true' : 'false'); } catch(e) {}
+    try {
+      localStorage.setItem(STORAGE_KEY, this._enabled ? 'true' : 'false');
+      localStorage.setItem('survivor_autoplay', this._enabled ? 'on' : 'off');
+    } catch(e) {}
   };
 
   AutoPlay.prototype.setEnabled = function(val) {

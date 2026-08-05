@@ -334,6 +334,7 @@
     var autoIcon = document.getElementById('autoplay-icon');
     var savedAuto = localStorage.getItem('sg_autoplay') === 'true';
     if (autoCheck) autoCheck.checked = savedAuto;
+    if (savedAuto) localStorage.setItem('survivor_autoplay', 'on');
     // The shortcut is intentionally hidden in the markup until the game has
     // initialized its settings handlers. Make it visible once the icon and
     // click handler are ready so a valid image cannot be hidden by display:none.
@@ -484,6 +485,12 @@
     }
     document.getElementById('meta-start').onclick = function() { el.style.display = 'none'; callback(); };
     el.style.display = 'block';
+    if (localStorage.getItem('survivor_autoplay') === 'on') {
+      setTimeout(function() {
+        var startBtn = document.getElementById('meta-start');
+        if (startBtn) startBtn.click();
+      }, 1000);
+    }
   };
 
   Game.prototype._initGame = function() {
