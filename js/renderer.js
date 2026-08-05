@@ -922,17 +922,6 @@
       ctx.fillText('FPS: ' + state.fps, camX + 10, camY + 20);
     }
 
-    // AUTO 標籤
-    if (state.autoPlayActive) {
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = '#ffcc00';
-      ctx.font = 'bold 18px ' + (window.GAME_FONT || 'Cinzel, serif');
-      ctx.textAlign = 'right';
-      ctx.fillText('AUTO', camX + W - 60, camY + 80);
-      ctx.textAlign = 'left';
-      ctx.globalAlpha = 1;
-    }
-
     // （絕招集氣已移至 _drawPlayer 內以橫條呈現）
 
     // Debug Hitbox 顯示

@@ -331,20 +331,36 @@
     // Auto-Play 開關（設定頁 checkbox + 快捷按鈕）
     var autoCheck = document.getElementById('set-autoplay');
     var autoBtn = document.getElementById('autoplay-btn');
+    var autoIcon = document.getElementById('autoplay-icon');
     var savedAuto = localStorage.getItem('sg_autoplay') === 'true';
     if (autoCheck) autoCheck.checked = savedAuto;
+
+    function updateAutoIcon(enabled) {
+      if (autoIcon) {
+        if (enabled) {
+          autoIcon.style.filter = 'brightness(2) sepia(1) saturate(5) hue-rotate(15deg)';
+          autoIcon.style.animation = 'autoSpin 2.5s linear infinite';
+        } else {
+          autoIcon.style.filter = 'brightness(2)';
+          autoIcon.style.animation = 'none';
+        }
+      }
+      if (autoBtn) autoBtn.style.borderColor = enabled ? '#ffcc00' : '#666';
+    }
+
+    updateAutoIcon(savedAuto);
+
     if (autoCheck) {
       autoCheck.onchange = function() {
         if (self._autoPlay) self._autoPlay.setEnabled(autoCheck.checked);
-        if (autoBtn) autoBtn.style.borderColor = autoCheck.checked ? '#ffcc00' : '#666';
+        updateAutoIcon(autoCheck.checked);
       };
     }
     if (autoBtn) {
-      autoBtn.style.borderColor = savedAuto ? '#ffcc00' : '#666';
       autoBtn.onclick = function() {
         if (self._autoPlay) {
           var val = self._autoPlay.toggle();
-          autoBtn.style.borderColor = val ? '#ffcc00' : '#666';
+          updateAutoIcon(val);
           if (autoCheck) autoCheck.checked = val;
         }
       };
