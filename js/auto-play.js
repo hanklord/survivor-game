@@ -80,6 +80,7 @@
 
   AutoPlay.prototype._computeDirection = function(dt, enemies, xpGems, healPickups, bosses) {
     var px = this.player.x, py = this.player.y;
+    var PREDICT_TIME = 0.4;
 
     // === 層 1：生存避敵 ===
     var survX = 0, survY = 0, survWeight = 3.0;
@@ -88,22 +89,58 @@
     for (var i = 0; i < nearby.length; i++) {
       var e = nearby[i];
       if (e.hp <= 0) continue;
-      var dx = px - e.x, dy = py - e.y;
-      var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      var dist = Math.sqrt((px - e.x) * (px - e.x) + (py - e.y) * (py - e.y)) || 1;
       if (dist < 150) closeCount++;
-      var w = 1 / (dist * dist);
-      survX += (dx / dist) * w;
-      survY += (dy / dist) * w;
     }
-    this._emergency = (closeCount >= 3);
-    if (this._emergency) survWeight = 6.0;
-    var aggressiveMode = (closeCount < 3);
-    if (aggressiveMode) survWeight = 0.5;
-    var survMag = Math.sqrt(survX * survX + survY * survY) || 1;
-    survX /= survMag; survY /= survMag;
+
+    // 突圍模式：5+ 隻近距 → 分 8 扇區選最少敵人方向
+    var aggressiveMode = false;
+    if (closeCount >= 5) {
+      var sectors = [0,0,0,0,0,0,0,0];
+      for (var i = 0; i < nearby.length; i++) {
+        var e = nearby[i];
+        if (e.hp <= 0) continue;
+        var dx = e.x - px, dy = e.y - py;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 150) continue;
+        var angle = Math.atan2(dy, dx);
+        var sector = Math.floor(((angle + Math.PI) / (Math.PI * 2)) * 8) % 8;
+        sectors[sector]++;
+      }
+      var minSector = 0, minCount = sectors[0];
+      for (var s = 1; s < 8; s++) {
+        if (sectors[s] < minCount) { minCount = sectors[s]; minSector = s; }
+      }
+      var breakAngle = (minSector / 8) * Math.PI * 2 - Math.PI;
+      survX = Math.cos(breakAngle);
+      survY = Math.sin(breakAngle);
+      survWeight = 5.0;
+      this._emergency = true;
+    } else {
+      // 正常生存層（含預判）
+      for (var i = 0; i < nearby.length; i++) {
+        var e = nearby[i];
+        if (e.hp <= 0) continue;
+        // 預判敵人位置（0.4 秒後，敵人朝玩家移動）
+        var toPlayerAngle = Math.atan2(py - e.y, px - e.x);
+        var predX = e.x + (e.speed || 0) * Math.cos(toPlayerAngle) * PREDICT_TIME;
+        var predY = e.y + (e.speed || 0) * Math.sin(toPlayerAngle) * PREDICT_TIME;
+        var dx = px - predX, dy = py - predY;
+        var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        var w = 1 / (dist * dist);
+        survX += (dx / dist) * w;
+        survY += (dy / dist) * w;
+      }
+      this._emergency = (closeCount >= 3);
+      if (this._emergency) survWeight = 6.0;
+      aggressiveMode = (closeCount < 3);
+      if (aggressiveMode) survWeight = 0.5;
+      var survMag = Math.sqrt(survX * survX + survY * survY) || 1;
+      survX /= survMag; survY /= survMag;
+    }
 
     // === 碰撞警戒斥力 ===
-    var safeMargin = (this.player.hitboxRadius || 20) + 20;
+    var safeMargin = (this.player.hitboxRadius || 20) + 40;
     var repelCloseX = 0, repelCloseY = 0, repelCount = 0;
     for (var i = 0; i < nearby.length && repelCount < 2; i++) {
       var e = nearby[i];
@@ -131,7 +168,12 @@
       for (var i = 0; i < healPickups.length; i++) {
         var hp = healPickups[i];
         var d = Math.sqrt((hp.x - px) * (hp.x - px) + (hp.y - py) * (hp.y - py));
-        if (d < bestDist) { bestDist = d; bestPickup = hp; pickWeight = hpRatio < 0.5 ? 2.5 : 1.5; }
+        if (d < bestDist) {
+          bestDist = d; bestPickup = hp;
+          if (hpRatio < 0.3) pickWeight = 4.0;
+          else if (hpRatio < 0.5) pickWeight = 2.5;
+          else pickWeight = 1.5;
+        }
       }
     }
     if (!bestPickup && xpGems) {
@@ -154,7 +196,8 @@
         var dot = (ex / eMag) * toDx + (ey / eMag) * toDy;
         if (dot > 0.5) dangerCount++;
       }
-      if (dangerCount < 3) { pickX = toDx; pickY = toDy; }
+      var safeThreshold = (hpRatio < 0.3) ? 5 : 3;
+      if (dangerCount < safeThreshold) { pickX = toDx; pickY = toDy; }
       else { pickWeight = 0; }
     }
 
