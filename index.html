@@ -81,6 +81,14 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
     <div style="margin:14px 0;"><label><input type="checkbox" id="set-sfx" checked> 🔊 音效</label></div>
     <div style="margin:14px 0;"><label><input type="checkbox" id="set-hitbox"> 🎯 Hitbox 顯示</label></div>
     <div style="margin:14px 0;"><label><img src="assets/ui/auto-play-icon.png" style="width:20px;height:20px;vertical-align:middle;filter:invert(1);margin-right:6px;"><input type="checkbox" id="set-autoplay"> 自動遊玩</label></div>
+    <div id="legacy-info" style="margin:14px 0; font-size:12px; color:#aaa; text-align:left;">
+      📈 永久成長<br>
+      <span id="legacy-hp">HP 加成: +0%</span><br>
+      <span id="legacy-atk">ATK 加成: +0%</span><br>
+      <span id="legacy-deaths">死亡次數: 0</span><br>
+      <span id="legacy-stage">最高關卡: 第 0 關</span><br>
+      <button id="legacy-reset" style="margin-top:6px; padding:4px 12px; background:#662222; border:1px solid #aa4444; border-radius:4px; color:#fff; font-size:11px; cursor:pointer;">重置成長</button>
+    </div>
     <button id="set-resume" style="margin-top:16px; padding:10px 30px; background:#4488ff; border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer;">▶ 繼續遊戲</button>
     <button id="set-back-menu" style="margin-top:10px; padding:10px 30px; background:#aa4444; border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer;">🏠 返回選單</button>
   </div>
@@ -125,6 +133,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 <script src="js/bomb-system.js"></script>
 <script src="js/ultimate-system.js"></script>
 <script src="js/meta-progression.js"></script>
+<script src="js/legacy-system.js"></script>
 <script src="js/melee-attack.js"></script>
 <script src="js/valkyrie-attack.js"></script>
 <script src="js/archer-attack.js"></script>

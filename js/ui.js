@@ -399,6 +399,16 @@
 
     this.els.gameOverEl.style.display = 'block';
 
+    var legacy = window.SG._gameInstance && window.SG._gameInstance._legacy;
+    var gain = window.SG._gameInstance && window.SG._gameInstance._lastLegacyGain;
+    if (legacy && gain) {
+      var legacyDiv = document.createElement('div');
+      legacyDiv.style.cssText = 'margin-top:12px; font-size:14px; color:#ffcc00;';
+      legacyDiv.innerHTML = '📈 永久成長: +' + gain.hpGain.toFixed(1) + '% HP, +' + gain.atkGain.toFixed(1) + '% ATK<br>' +
+        '<span style="color:#aaa;font-size:12px;">累計: HP +' + legacy.data.hpPercent.toFixed(1) + '%, ATK +' + legacy.data.atkPercent.toFixed(1) + '%</span>';
+      this.els.gameOverEl.appendChild(legacyDiv);
+    }
+
     // AFK mode: automatically retry after a visible three-second countdown.
     if (localStorage.getItem('survivor_autoplay') === 'on') {
       var countdown = 3;

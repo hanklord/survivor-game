@@ -60,6 +60,18 @@
         nameDiv.textContent = ch.name;
         card.appendChild(nameDiv);
 
+        try {
+          var legacy = JSON.parse(localStorage.getItem('legacyBonus') || '{}');
+          var legacyHp = Number(legacy.hpPercent) || 0;
+          var legacyAtk = Number(legacy.atkPercent) || 0;
+          if (legacyHp > 0 || legacyAtk > 0) {
+            var bonusDiv = document.createElement('div');
+            bonusDiv.style.cssText = 'font-size:9px; color:#ffcc00; margin-top:2px;';
+            bonusDiv.textContent = '+' + legacyHp.toFixed(0) + '%HP +' + legacyAtk.toFixed(0) + '%ATK';
+            card.appendChild(bonusDiv);
+          }
+        } catch(e) {}
+
         // 技能描述
         var descDiv = document.createElement('div');
         descDiv.style.cssText = 'font-size:11px; color:#aaa; margin-top:4px; white-space:nowrap;';

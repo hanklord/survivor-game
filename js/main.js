@@ -45,6 +45,7 @@
     this.ui = new SG.UI();
     this.audio = new SG.AudioManager(cfg);
     this.leaderboard = new SG.Leaderboard();
+    this._legacy = new SG.LegacySystem();
 
     // 空間雜湊 + 物件池
     this.spatialHash = new SG.SpatialHash(SPATIAL_HASH_CELL);
@@ -335,6 +336,20 @@
     var savedAuto = localStorage.getItem('sg_autoplay') === 'true';
     if (autoCheck) autoCheck.checked = savedAuto;
     if (savedAuto) localStorage.setItem('survivor_autoplay', 'on');
+    function updateLegacyUI() {
+      var d = self._legacy.data;
+      document.getElementById('legacy-hp').textContent = 'HP 加成: +' + d.hpPercent.toFixed(1) + '%';
+      document.getElementById('legacy-atk').textContent = 'ATK 加成: +' + d.atkPercent.toFixed(1) + '%';
+      document.getElementById('legacy-deaths').textContent = '死亡次數: ' + d.totalDeaths;
+      document.getElementById('legacy-stage').textContent = '最高關卡: 第 ' + d.highestStage + ' 關';
+    }
+    updateLegacyUI();
+    document.getElementById('legacy-reset').onclick = function() {
+      if (confirm('確定要重置所有永久成長嗎？此操作不可恢復。')) {
+        self._legacy.reset();
+        updateLegacyUI();
+      }
+    };
     // The shortcut is intentionally hidden in the markup until the game has
     // initialized its settings handlers. Make it visible once the icon and
     // click handler are ready so a valid image cannot be hidden by display:none.
@@ -569,6 +584,11 @@
     this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
     }
+
+    var legacyMult = this._legacy.getMultipliers();
+    this.player.maxHp = Math.round(this.player.maxHp * legacyMult.hp);
+    this.player.hp = this.player.maxHp;
+    this.player.damage = Math.round(this.player.damage * legacyMult.atk);
 
     // 角色專屬大招
     this._ultimate = new SG.UltimateSystem(this.player);
@@ -1363,6 +1383,7 @@
   Game.prototype._endGame = function() {
     this.gameOver = true;
     this.audio.stopBGM();
+    this._lastLegacyGain = this._legacy.onDeath(this.player.level, this.levelManager.currentLevel);
     var earned = this.meta.earnCoins(this.kills, this.gameTime);
     this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins());
   };
