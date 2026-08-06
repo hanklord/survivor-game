@@ -94,28 +94,62 @@
     this._el.style.top = Math.floor((sh - th) / 2) + 'px';
     this._el.style.display = 'block';
 
-    // AFK mode: rotate through every character in round-robin order, while
-    // allowing a manual click to cancel the timer.
+    // AFK mode: randomly select a character with a roulette highlight.
     if (localStorage.getItem('survivor_autoplay') === 'on') {
+      var self = this;
       var cards = this._el.querySelectorAll('[data-char-id]');
-      var charIndex = parseInt(localStorage.getItem('autoPlayCharIndex') || '-1', 10);
-      charIndex = (charIndex + 1) % CHARACTERS.length;
-      localStorage.setItem('autoPlayCharIndex', String(charIndex));
-      var targetIdx = charIndex;
-      var autoSelf = this;
-      this._autoTimer = setTimeout(function() {
-        var targetCard = cards[targetIdx];
-        if (!targetCard) return;
-        targetCard.style.borderColor = '#ffd700';
-        targetCard.style.transform = 'scale(1.08)';
-        setTimeout(function() { targetCard.click(); }, 500);
-      }, 1500);
+      if (cards.length === 0) return;
+
+      var targetIdx = Math.floor(Math.random() * cards.length);
+      var totalSteps = cards.length * 3 + targetIdx;
+      var step = 0;
+      var baseDelay = 80;
+
+      function playTick() {
+        try {
+          var ctx = window.SG._audioCtx || (window.SG._audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+          var osc = ctx.createOscillator(); var gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 800; gain.gain.value = 0.1;
+          osc.start(); osc.stop(ctx.currentTime + 0.03);
+        } catch(e) {}
+      }
+      function playDing() {
+        try {
+          var ctx = window.SG._audioCtx || (window.SG._audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+          var osc = ctx.createOscillator(); var gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 1200; osc.type = 'sine'; gain.gain.value = 0.2;
+          osc.start(); osc.stop(ctx.currentTime + 0.12);
+        } catch(e) {}
+      }
+
+      function doStep() {
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].style.borderColor = '';
+          cards[i].style.transform = '';
+        }
+        var currentIdx = step % cards.length;
+        cards[currentIdx].style.borderColor = '#ffffff';
+        cards[currentIdx].style.transform = 'scale(1.08)';
+        playTick();
+        step++;
+
+        if (step > totalSteps) {
+          cards[targetIdx].style.borderColor = '#ffd700';
+          cards[targetIdx].style.transform = 'scale(1.08)';
+          playDing();
+          setTimeout(function() { cards[targetIdx].click(); }, 500);
+        } else {
+          var delay = baseDelay + step * 12;
+          self._autoTimer = setTimeout(doStep, delay);
+        }
+      }
+
+      this._autoTimer = setTimeout(doStep, 500);
       for (var cardIdx = 0; cardIdx < cards.length; cardIdx++) {
         cards[cardIdx].addEventListener('click', function() {
-          if (autoSelf._autoTimer) {
-            clearTimeout(autoSelf._autoTimer);
-            autoSelf._autoTimer = null;
-          }
+          if (self._autoTimer) { clearTimeout(self._autoTimer); self._autoTimer = null; }
         }, { once: true });
       }
     }
