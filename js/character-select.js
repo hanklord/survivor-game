@@ -37,6 +37,16 @@
     subtitle.style.cssText = 'margin:0 0 15px 0; color:#aaa; font-size:16px;';
     subtitle.textContent = '選擇角色';
     wrapper.appendChild(subtitle);
+
+    var daily = SG._dailyChallenge;
+    if (daily) {
+      var dailyBtn = document.createElement('button');
+      dailyBtn.className = 'upgrade-btn';
+      dailyBtn.style.cssText = 'margin-bottom:12px;padding:8px 14px;background:#6b3fa0;color:#fff;border:1px solid #d9a7ff;border-radius:6px;cursor:pointer;';
+      dailyBtn.textContent = '📅 每日挑戰：' + daily.getSummary();
+      dailyBtn.onclick = function() { daily.activate(); dailyBtn.textContent = '📅 每日挑戰已啟用'; };
+      wrapper.appendChild(dailyBtn);
+    }
     
     // 3. 角色卡片容器（上 3 下 3 置中排列）
     var container = document.createElement('div');
@@ -81,6 +91,13 @@
         card.onmouseover = function() { card.style.transform = 'scale(1.08)'; card.style.borderColor = '#fff'; };
         card.onmouseout = function() { card.style.transform = ''; card.style.borderColor = ch.color; };
         card.onclick = function() {
+          if (daily && daily.active) {
+            var allowed = false;
+            for (var di = 0; di < daily.conditions.length; di++) {
+              if (!daily.conditions[di].chars || daily.conditions[di].chars.indexOf(ch.id) >= 0) { allowed = true; break; }
+            }
+            if (!allowed) { card.style.borderColor = '#ff4444'; return; }
+          }
           localStorage.setItem('survivor_lastCharacter', ch.id);
           self._el.style.display = 'none';
           self._onSelect(ch);

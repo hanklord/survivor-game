@@ -694,6 +694,23 @@
       ctx.fillRect(camX, camY, W, H);
     }
 
+    // 隨機事件公告、活動濾鏡與倒數
+    if (state.randomEventVisual) {
+      var rev = state.randomEventVisual;
+      if (rev.activeEvent) {
+        var ec = rev.activeEvent.color || '#ffffff';
+        var er = parseInt(ec.slice(1, 3), 16) || 255, eg = parseInt(ec.slice(3, 5), 16) || 255, eb = parseInt(ec.slice(5, 7), 16) || 255;
+        ctx.fillStyle = 'rgba(' + er + ',' + eg + ',' + eb + ',0.05)';
+        ctx.fillRect(camX, camY, W, H);
+        ctx.font = '14px ' + (window.GAME_FONT || 'Cinzel, serif'); ctx.fillStyle = ec; ctx.textAlign = 'right'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+        ctx.strokeText(rev.activeEvent.name + ' ' + Math.ceil(rev.countdown) + 's', camX + W - 14, camY + 28); ctx.fillText(rev.activeEvent.name + ' ' + Math.ceil(rev.countdown) + 's', camX + W - 14, camY + 28); ctx.textAlign = 'left';
+      }
+      if (rev.announcement) {
+        ctx.globalAlpha = Math.min(1, rev.announcement.timer / 0.5); ctx.font = 'bold 36px ' + (window.GAME_FONT || 'Cinzel, serif'); ctx.textAlign = 'center'; ctx.fillStyle = rev.announcement.color; ctx.strokeStyle = '#000'; ctx.lineWidth = 5;
+        ctx.strokeText(rev.announcement.text, camX + W / 2, camY + H / 2); ctx.fillText(rev.announcement.text, camX + W / 2, camY + H / 2); ctx.globalAlpha = 1; ctx.textAlign = 'left';
+      }
+    }
+
     // 角色專屬大招視覺
     if (state.ultimateVisual) {
       var uv = state.ultimateVisual;

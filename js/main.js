@@ -46,6 +46,8 @@
     this.audio = new SG.AudioManager(cfg);
     this.leaderboard = new SG.Leaderboard();
     this._legacy = new SG.LegacySystem();
+    this._dailyChallenge = new SG.DailyChallenge();
+    SG._dailyChallenge = this._dailyChallenge;
 
     // 空間雜湊 + 物件池
     this.spatialHash = new SG.SpatialHash(SPATIAL_HASH_CELL);
@@ -511,10 +513,19 @@
   Game.prototype._initGame = function() {
     var self = this;
     this.player = new SG.Player();
+    this._randomEvents = new SG.RandomEvents(this);
     this.player.attackType = this._selectedCharacter.attackType;
     this.player.scale = this._selectedCharacter.scale || 1.0;
     this.player.hitboxRadius = this._selectedCharacter.hitboxRadius || PLAYER_HITBOX;
     this.player.critChance = this._selectedCharacter.baseCritRate || 0;
+    if (this._dailyChallenge.active) {
+      for (var dci = 0; dci < this._dailyChallenge.conditions.length; dci++) {
+        var dc = this._dailyChallenge.conditions[dci];
+        if (dc.id === 'glass_cannon') this.player.maxHp = this.player.hp = Math.round(this.player.maxHp * 0.5);
+        if (dc.id === 'no_levelup') this._eventBlockLevelUp = true;
+        if (dc.id === 'swarm') TARGET_ENEMY_COUNT = Math.min(240, TARGET_ENEMY_COUNT * 2);
+      }
+    }
     this.meta.applyToPlayer(this.player);
     this._eliteSpawner = new SG.EliteSpawner(this.player);
     this._combo = new SG.ComboSystem();
@@ -778,6 +789,7 @@
       debugHitbox: window.DEBUG_SHOW_HITBOX,
       playerHitboxRadius: this.player.hitboxRadius,
       autoPlayActive: this._autoPlay && this._autoPlay.isActive(),
+      randomEventVisual: this._randomEvents ? this._randomEvents.getVisual() : null,
       dt: dt
     });
 
@@ -788,6 +800,7 @@
   Game.prototype._update = function(dt) {
     var self = this;
     this.gameTime += dt;
+    if (this._randomEvents) this._randomEvents.update(dt);
 
     // 生命回復（被動技能）
     if (this.player.regen) {
@@ -811,7 +824,8 @@
       var autoDir = this._autoPlay.update(dt, this.enemies, this.xpGems, this._healPickups, this.bosses, hasInput);
       if (!hasInput && autoDir) moveDir = autoDir;
     }
-    this.player.move(moveDir, dt);
+      if (this._eventSpeedMult) { moveDir = { x: moveDir.x * this._eventSpeedMult, y: moveDir.y * this._eventSpeedMult }; }
+      this.player.move(moveDir, dt);
     // Auto-Play 智慧大招：150px 內 5+ 隻才放，10s fallback 降至 3 隻
     if (this._autoPlay && this._autoPlay.isActive() && this._ultimateReady && this._ultimate) {
       if (!this._autoUltTimer) this._autoUltTimer = 0;
@@ -928,7 +942,7 @@
         if (e.hp <= 0) continue;
         if (SG.aabbHit(p, pSize / 2, e, e.hitboxRadius)) {
           // 暴擊判定
-          var dmg = p.damage * (this.player.damageMultiplier || 1);
+          var dmg = p.damage * (this.player.damageMultiplier || 1) * (this._eventDamageMult || 1);
           var isCrit = this.player.critChance && Math.random() < this.player.critChance;
           if (isCrit) { dmg *= 2; this.renderer.shake(0.12, 4); }
           dmg = Math.round(dmg);
@@ -1082,7 +1096,7 @@
 
     // 回血道具生成
     this._healSpawnTimer -= dt;
-    if (this._healSpawnTimer <= 0 && this._healPickups.length < HEAL_PICKUP_MAX) {
+    if (this._healSpawnTimer <= 0 && this._healPickups.length < HEAL_PICKUP_MAX && !(this._dailyChallenge.active && this._dailyChallenge.conditions.some(function(c) { return c.id === 'no_heals'; }))) {
       var hAngle = Math.random() * Math.PI * 2;
       var hDist = 200 + Math.random() * 200;
       this._healPickups.push({
@@ -1201,7 +1215,7 @@
   // 玩家受傷（含護甲、閃避、反射）
   Game.prototype._playerTakeDamage = function(damage, attacker) {
     if (this.player.dodgeChance && Math.random() < this.player.dodgeChance) return false;
-    var finalDmg = Math.max(1, damage - (this.player.armor || 0));
+    var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1));
     var dead = this.player.takeDamage(finalDmg);
     if (dead) { this._endGame(); return true; }
     this.audio.playHurt();
@@ -1342,6 +1356,11 @@
     var x = this.player.x + Math.cos(angle) * dist;
     var y = this.player.y + Math.sin(angle) * dist;
     var enemy = new SG.Enemy(x, y, pick.cfg, pick.idx);
+    if (this._dailyChallenge && this._dailyChallenge.active) {
+      for (var fdi = 0; fdi < this._dailyChallenge.conditions.length; fdi++) {
+        if (this._dailyChallenge.conditions[fdi].id === 'fast_enemies') enemy.speed *= 1.5;
+      }
+    }
     enemy.animator = this._buildAnimator('enemy_' + pick.idx, (this.imgConfig.enemies || [])[pick.idx]);
     this._applyAABB(enemy, 'enemy_' + pick.idx);
     var hcMult = this.getHardcoreHPMult();
@@ -1358,6 +1377,7 @@
 
   Game.prototype._showLevelUp = function() {
     if (this._levelUpPending) return;
+    if (this._eventBlockLevelUp) return;
     this._levelUpPending = true;
     // 每升一級攻擊力 ×1.01
     this.player.damage *= 1.01;
@@ -1384,6 +1404,11 @@
     this.gameOver = true;
     this.audio.stopBGM();
     this._lastLegacyGain = this._legacy.onDeath(this.player.level, this.levelManager.currentLevel);
+    if (this._dailyChallenge.active) {
+      var dailyScore = this._dailyChallenge.getScore(this.gameTime, this.kills);
+      this._dailyChallenge.saveScore(dailyScore, this._selectedCharacter.id, this.gameTime);
+      this._dailyReward = Math.max(10, Math.round(dailyScore / 100));
+    }
     var earned = this.meta.earnCoins(this.kills, this.gameTime);
     this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins());
   };
