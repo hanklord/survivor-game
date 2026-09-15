@@ -40,12 +40,14 @@
     this._attackTimer = 0;
     this._wingBonusMult = 1;
     this._wingsApplied = false;
+    this._relicSpeedMult = 1;
+    this._relicAtkSpeedMult = 1;
   }
 
   // 移動玩家
   Player.prototype.move = function(dir, dt) {
     if (dir.x || dir.y) {
-      var speed = this.speed * (this._traitSpeedMult || 1) * (this._wingBonusMult || 1);
+      var speed = this.speed * (this._traitSpeedMult || 1) * (this._wingBonusMult || 1) * (this._relicSpeedMult || 1);
       this.x += dir.x * speed * dt;
       this.y += dir.y * speed * dt;
       if (dir.x !== 0) this.facingLeft = this.spriteDefaultRight ? dir.x < 0 : dir.x > 0;

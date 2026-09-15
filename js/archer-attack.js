@@ -39,13 +39,13 @@
     }
   };
 
-  ArcherAttack.prototype.update = function(dt, enemies, bosses) {
+  ArcherAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
     this._firedThisFrame = false;
 
     // 發射箭矢
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {
@@ -189,7 +189,7 @@
     if (!this.active) this.active = true;
   };
 
-  ExplosiveArrow.prototype.update = function(dt, enemies, bosses) {
+  ExplosiveArrow.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     if (!this.level) return hits;
 
@@ -230,7 +230,7 @@
 
     // 發射新爆炸箭
     if (!this.arrow) {
-      this.timer -= dt;
+      this.timer -= dt * (attackSpeedMult || 1);
       if (this.timer <= 0) {
         var targets = enemies.concat(bosses);
         if (targets.length > 0) {
@@ -284,12 +284,12 @@
     if (!this.active) this.active = true;
   };
 
-  PiercingArrow.prototype.update = function(dt, enemies, bosses) {
+  PiercingArrow.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     if (!this.level) return hits;
 
     // 發射
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {

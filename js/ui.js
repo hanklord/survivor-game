@@ -74,12 +74,20 @@
   };
 
   // 更新技能圖標顯示
-  UI.prototype.updateSkillIcons = function(skillTree) {
+  UI.prototype.updateSkillIcons = function(skillTree, relicIds) {
     if (!this.els.skillIcons) return;
     var acquired = skillTree.getAcquired();
     var html = '';
     for (var i = 0; i < acquired.length; i++) {
       html += '<span class="skill-icon" title="Lv.' + acquired[i].level + '">' + acquired[i].icon + '<sub>' + acquired[i].level + '</sub></span>';
+    }
+    for (var r = 0; relicIds && r < relicIds.length; r++) {
+      for (var ri = 0; window.SG.RELICS && ri < window.SG.RELICS.length; ri++) {
+        if (window.SG.RELICS[ri].id === relicIds[r]) {
+          html += '<span class="skill-icon" title="遺物：' + window.SG.RELICS[ri].name + '">' + window.SG.RELICS[ri].icon + '</span>';
+          break;
+        }
+      }
     }
     this.els.skillIcons.innerHTML = html;
   };
@@ -145,6 +153,8 @@
   // 顯示升級選單（含武器 + 被動技能選項）
   UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack, amazonAttack) {
     var self = this;
+    var heading = this.els.levelUp.querySelector('h2');
+    if (heading) heading.textContent = 'LEVEL UP!';
     this.els.choices.innerHTML = '';
 
     // 建立所有可選技能池（未滿級的）
@@ -371,6 +381,40 @@
           if (autoTimer) clearTimeout(autoTimer);
         }, { once: true });
       }
+    }
+  };
+
+  // 顯示 Boss 掉落的風險／報酬遺物三選一。
+  UI.prototype.showRelicChoice = function(relics, onPick) {
+    var self = this;
+    if (!relics || !relics.length) { onPick(null); return; }
+    var heading = this.els.levelUp.querySelector('h2');
+    if (heading) heading.textContent = '✨ 選擇遺物';
+    this.els.choices.innerHTML = '';
+    var handled = false;
+    function pick(relic) {
+      if (handled) return;
+      handled = true;
+      self.els.levelUp.style.display = 'none';
+      onPick(relic);
+    }
+    for (var i = 0; i < relics.length; i++) {
+      (function(relic) {
+        var button = document.createElement('button');
+        button.className = 'upgrade-btn';
+        button.innerHTML = '<div style="font-size:20px;margin-bottom:4px;">' + relic.icon + ' ' + relic.name + '</div>' +
+          '<div style="font-size:12px;color:#66dd88;">＋ ' + relic.positive + '</div>' +
+          '<div style="font-size:12px;color:#ff8888;margin-top:3px;">－ ' + relic.negative + '</div>';
+        button.onclick = function() { pick(relic); };
+        button.addEventListener('touchend', function(e) { e.preventDefault(); pick(relic); });
+        self.els.choices.appendChild(button);
+      })(relics[i]);
+    }
+    this.els.levelUp.style.display = 'block';
+    if (window.SG && window.SG._gameInstance && window.SG._gameInstance._autoPlay && window.SG._gameInstance._autoPlay.isEnabled()) {
+      setTimeout(function() {
+        if (!handled && self.els.levelUp.style.display !== 'none') pick(relics[Math.floor(Math.random() * relics.length)]);
+      }, 600);
     }
   };
 

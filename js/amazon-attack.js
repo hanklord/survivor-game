@@ -23,7 +23,7 @@
     this._chainVisuals = []; // { segments: [{x1,y1,x2,y2}], timer }
   }
 
-  AmazonAttack.prototype.update = function(dt, enemies, bosses) {
+  AmazonAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
 
@@ -72,7 +72,7 @@
     }
 
     // Fire (always 1 javelin)
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {

@@ -514,6 +514,9 @@
   Game.prototype._initGame = function() {
     var self = this;
     this.player = new SG.Player();
+    this._relics = [];
+    this._relicChoosing = false;
+    this._relicOfferQueued = false;
     this.endlessMode = localStorage.getItem('survivor_gameMode') === 'endless';
     this._endlessRamp = 0;
     this._endlessTimer = 0;
@@ -742,7 +745,7 @@
       this._lowQuality = this._currentFps < LOW_FPS_THRESHOLD;
     }
 
-    if (!this.paused && !this.levelingUp && !this.levelClearing) {
+    if (!this.paused && !this.levelingUp && !this.levelClearing && !this._relicChoosing) {
       try { this._update(dt); } catch(err) { console.error('[Game] _update error:', err); }
     }
     // 聖光效果不受遊戲暫停影響，獨立更新
@@ -811,6 +814,10 @@
     this.gameTime += dt;
     if (this._randomEvents) this._randomEvents.update(dt);
     if (this._trait && this._trait.onUpdate) this._trait.onUpdate(dt, this, this.player);
+    if (this._relicOfferQueued && !this.levelingUp && !this._levelUpPending && !this.levelClearing) {
+      this._relicOfferQueued = false;
+      this._offerRelicChoice();
+    }
 
     // 生命回復（被動技能）
     if (this.player.regen) {
@@ -862,7 +869,7 @@
 
     // 自動射擊（遠程角色）/ 近戰斬擊（近戰角色）/ 女武神貫通
     if (this.player.attackType === 'valkyrie' && this._valkyrieAttack) {
-      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses, SG.getTraitAttackSpeedMult(this.player));
+      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < valkHits.length; i++) this._handleKill(valkHits[i]);
       var vhits = this._valkyrieAttack.getLastHits();
       for (var i = 0; i < vhits.length; i++) {
@@ -873,7 +880,7 @@
         }
       }
     } else if (this.player.attackType === 'melee' && this._meleeAttack) {
-      var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
+      var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
       var mhits = this._meleeAttack.getLastHits();
       for (var i = 0; i < mhits.length; i++) {
@@ -884,16 +891,16 @@
         }
       }
     } else if (this.player.attackType === 'archer' && this._archerAttack) {
-      var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
+      var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       if (this._archerAttack.didFire()) { this.audio.playArrowShoot(); this.player.triggerAttack(); }
       for (var i = 0; i < archerHits.length; i++) this._handleKill(archerHits[i]);
       var ahits = this._archerAttack.getLastHits();
       // 爆炸箭
       var ea = this._archerAttack.getExplosiveArrow();
-      var eaHits = ea.update(dt, this.enemies, this.bosses);
+      var eaHits = ea.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       // 貫通箭
       var pa = this._archerAttack.getPiercingArrow();
-      var paHits = pa.update(dt, this.enemies, this.bosses);
+      var paHits = pa.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < paHits.length; i++) this._handleKill(paHits[i]);
       for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
       for (var i = 0; i < ahits.length; i++) {
@@ -904,7 +911,7 @@
         }
       }
     } else if (this.player.attackType === 'boomerang' && this._boomerangAttack) {
-      var boomHits = this._boomerangAttack.update(dt, this.enemies, this.bosses);
+      var boomHits = this._boomerangAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < boomHits.length; i++) this._handleKill(boomHits[i]);
       var bhits = this._boomerangAttack.getLastHits();
       for (var i = 0; i < bhits.length; i++) {
@@ -915,7 +922,7 @@
         }
       }
     } else if (this.player.attackType === 'amazon' && this._amazonAttack) {
-      var amazonHits = this._amazonAttack.update(dt, this.enemies, this.bosses);
+      var amazonHits = this._amazonAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < amazonHits.length; i++) this._handleKill(amazonHits[i]);
       var amhits = this._amazonAttack.getLastHits();
       for (var i = 0; i < amhits.length; i++) {
@@ -926,7 +933,7 @@
         }
       }
     } else {
-      this.player.fireTimer -= dt;
+      this.player.fireTimer -= dt * SG.getAttackSpeedMult(this.player);
       if (this.player.fireTimer <= 0) {
         var allTargets = this.enemies.concat(this.bosses).sort(function(a, b) {
           return SG.dist(self.player, a) - SG.dist(self.player, b);
@@ -1197,7 +1204,27 @@
     }
     this._damageNumbers.update(dt);
     this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null);
-    this.ui.updateSkillIcons(this.skillTree);
+    this.ui.updateSkillIcons(this.skillTree, this._relics);
+  };
+
+  // Boss 擊敗後提供一次遺物三選一；升級流程中則排隊至選單關閉。
+  Game.prototype._offerRelicChoice = function() {
+    if (this._relicChoosing || !this._relics || this._relics.length >= 3) return;
+    if (this.levelingUp || this._levelUpPending || this.levelClearing) {
+      this._relicOfferQueued = true;
+      return;
+    }
+    var choices = SG.getRelicChoices(this._relics, 3);
+    if (!choices.length) return;
+    var self = this;
+    this._relicChoosing = true;
+    this.ui.showRelicChoice(choices, function(relic) {
+      if (relic) {
+        relic.apply(self.player, self);
+        self._relics.push(relic.id);
+      }
+      self._relicChoosing = false;
+    });
   };
 
   // 處理敵人/Boss 被殺死
@@ -1218,6 +1245,7 @@
       // Boss 擊敗特效：畫面震動 + 吸取所有經驗
       this.renderer.shake(0.5, 12);
       this._magnetDelay = 0.5;
+      this._offerRelicChoice();
     } else {
       var gem = this.xpGemPool.get();
       gem.init(e.x, e.y, 1);
@@ -1228,6 +1256,7 @@
     }
     this.kills++;
     if (this._trait && this._trait.onKill) this._trait.onKill(this.player);
+    if (this.player._relicLifesteal) this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * this.player._relicLifesteal);
     if (!isBoss) this._levelKills++;
     this._combo.addKill();
     this.audio.playEnemyDeath();
@@ -1241,7 +1270,7 @@
   // 玩家受傷（含護甲、閃避、反射）
   Game.prototype._playerTakeDamage = function(damage, attacker) {
     if (this.player.dodgeChance && Math.random() < this.player.dodgeChance) return false;
-    var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1));
+    var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1) * (this.player._relicDamageTakenMult || 1));
     var hpBefore = this.player.hp;
     var dead = this.player.takeDamage(finalDmg);
     if (dead) { this._endGame(); return true; }

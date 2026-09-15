@@ -20,7 +20,7 @@
     this.level = 0;
   }
 
-  MeleeAttack.prototype.update = function(dt, enemies, bosses) {
+  MeleeAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
 
@@ -75,7 +75,7 @@
     }
 
     // 攻擊冷卻
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0 && !this._activeHitbox) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {

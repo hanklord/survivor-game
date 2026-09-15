@@ -24,7 +24,7 @@
     this._chainVisuals = [];  // { segments: [{x1,y1,x2,y2}], timer }
   }
 
-  BoomerangAttack.prototype.update = function(dt, enemies, bosses) {
+  BoomerangAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
 
@@ -90,7 +90,7 @@
     }
 
     // Fire new boomerangs
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0 && this.boomerangs.length < this.count) {
