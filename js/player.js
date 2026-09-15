@@ -38,13 +38,18 @@
     this.spriteWidthRatio = 1.0;
     this.scale = 1.0; // 角色顯示縮放（影響渲染和碰撞框）
     this._attackTimer = 0;
+    this._wingBonusMult = 1;
+    this._wingsApplied = false;
+    this._relicSpeedMult = 1;
+    this._relicAtkSpeedMult = 1;
   }
 
   // 移動玩家
   Player.prototype.move = function(dir, dt) {
     if (dir.x || dir.y) {
-      this.x += dir.x * this.speed * dt;
-      this.y += dir.y * this.speed * dt;
+      var speed = this.speed * (this._traitSpeedMult || 1) * (this._wingBonusMult || 1) * (this._relicSpeedMult || 1);
+      this.x += dir.x * speed * dt;
+      this.y += dir.y * speed * dt;
       if (dir.x !== 0) this.facingLeft = this.spriteDefaultRight ? dir.x < 0 : dir.x > 0;
       this._moving = true;
     } else {

@@ -58,7 +58,7 @@
   }
 
   // 更新 HUD
-  UI.prototype.updateHUD = function(player, gameTime, kills) {
+  UI.prototype.updateHUD = function(player, gameTime, kills, endlessInfo) {
     var statsEl = document.getElementById('hud-stats');
     if (statsEl) {
       statsEl.innerHTML = 'Lv.' + player.level + '<br>💀 ' + kills + '<br>⚔️ ' + Math.round(player.damage) + '<br>🛡️ ' + (player.armor || 0) + '<br>👟 ' + Math.round(player.speed);
@@ -68,16 +68,26 @@
     if (xpFill) xpFill.style.width = (player.xp / player.xpNeeded * 100) + '%';
     // Timer
     var timerEl = document.getElementById('game-timer');
-    if (timerEl) timerEl.textContent = SG.formatTime(gameTime);
+    if (timerEl) {
+      timerEl.textContent = endlessInfo ? '♾️ ' + SG.formatTime(gameTime) + ' | 難度 ×' + endlessInfo.multiplier.toFixed(1) : SG.formatTime(gameTime);
+    }
   };
 
   // 更新技能圖標顯示
-  UI.prototype.updateSkillIcons = function(skillTree) {
+  UI.prototype.updateSkillIcons = function(skillTree, relicIds) {
     if (!this.els.skillIcons) return;
     var acquired = skillTree.getAcquired();
     var html = '';
     for (var i = 0; i < acquired.length; i++) {
       html += '<span class="skill-icon" title="Lv.' + acquired[i].level + '">' + acquired[i].icon + '<sub>' + acquired[i].level + '</sub></span>';
+    }
+    for (var r = 0; relicIds && r < relicIds.length; r++) {
+      for (var ri = 0; window.SG.RELICS && ri < window.SG.RELICS.length; ri++) {
+        if (window.SG.RELICS[ri].id === relicIds[r]) {
+          html += '<span class="skill-icon" title="遺物：' + window.SG.RELICS[ri].name + '">' + window.SG.RELICS[ri].icon + '</span>';
+          break;
+        }
+      }
     }
     this.els.skillIcons.innerHTML = html;
   };
@@ -143,6 +153,8 @@
   // 顯示升級選單（含武器 + 被動技能選項）
   UI.prototype.showLevelUp = function(player, weaponManager, skillTree, callback, meleeAttack, archerAttack, passiveItems, valkyrieAttack, boomerangAttack, amazonAttack) {
     var self = this;
+    var heading = this.els.levelUp.querySelector('h2');
+    if (heading) heading.textContent = 'LEVEL UP!';
     this.els.choices.innerHTML = '';
 
     // 建立所有可選技能池（未滿級的）
@@ -372,27 +384,96 @@
     }
   };
 
-  // Game Over（含排行榜）
-  UI.prototype.showGameOver = function(gameTime, level, kills, leaderboard) {
-    var rank = leaderboard.addEntry(kills, level, gameTime);
-    var top5 = leaderboard.getTop(5);
+  // 顯示 Boss 掉落的風險／報酬遺物三選一。
+  UI.prototype.showRelicChoice = function(relics, onPick) {
+    var self = this;
+    if (!relics || !relics.length) { onPick(null); return; }
+    var heading = this.els.levelUp.querySelector('h2');
+    if (heading) heading.textContent = '✨ 選擇遺物';
+    this.els.choices.innerHTML = '';
+    var handled = false;
+    function pick(relic) {
+      if (handled) return;
+      handled = true;
+      self.els.levelUp.style.display = 'none';
+      onPick(relic);
+    }
+    for (var i = 0; i < relics.length; i++) {
+      (function(relic) {
+        var button = document.createElement('button');
+        button.className = 'upgrade-btn';
+        button.innerHTML = '<div style="font-size:20px;margin-bottom:4px;">' + relic.icon + ' ' + relic.name + '</div>' +
+          '<div style="font-size:12px;color:#66dd88;">＋ ' + relic.positive + '</div>' +
+          '<div style="font-size:12px;color:#ff8888;margin-top:3px;">－ ' + relic.negative + '</div>';
+        button.onclick = function() { pick(relic); };
+        button.addEventListener('touchend', function(e) { e.preventDefault(); pick(relic); });
+        self.els.choices.appendChild(button);
+      })(relics[i]);
+    }
+    this.els.levelUp.style.display = 'block';
+    if (window.SG && window.SG._gameInstance && window.SG._gameInstance._autoPlay && window.SG._gameInstance._autoPlay.isEnabled()) {
+      setTimeout(function() {
+        if (!handled && self.els.levelUp.style.display !== 'none') pick(relics[Math.floor(Math.random() * relics.length)]);
+      }, 600);
+    }
+  };
 
-    var html = 'Time: ' + SG.formatTime(gameTime) + ' | Level: ' + level + ' | Kills: ' + kills;
-    if (rank > 0) html += '<br>🏅 排名 #' + rank;
+  UI.prototype.showAchievementToast = function(achievement, delay) {
+    setTimeout(function() {
+      var old = document.getElementById('achievement-toast');
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+      var toast = document.createElement('div');
+      toast.id = 'achievement-toast';
+      toast.style.cssText = 'position:absolute;top:18%;left:50%;transform:translateX(-50%);z-index:30;padding:12px 18px;background:rgba(32,25,8,0.94);border:2px solid #ffcc33;border-radius:10px;color:#fff;font-size:16px;text-align:center;text-shadow:0 1px 2px #000;pointer-events:none;';
+      toast.textContent = '🏆 成就解鎖：' + achievement.name + ' (+' + achievement.reward + ' 金幣)';
+      document.getElementById('game-container').appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3500);
+    }, delay || 0);
+  };
+
+  UI.prototype.renderAchievements = function(system) {
+    var el = document.getElementById('achievement-list');
+    if (!el || !system) return;
+    var all = system.getAchievements();
+    var html = '<div style="color:#ffdd55;margin-bottom:8px;">🏆 成就：' + system.getUnlockedCount() + ' / ' + all.length + '</div>';
+    for (var i = 0; i < all.length; i++) {
+      var a = all[i], unlockedAt = system.unlocked[a.id];
+      var color = unlockedAt ? '#fff' : '#777';
+      var date = unlockedAt ? ' — ' + new Date(unlockedAt).toLocaleDateString() : ' (' + (a.progress ? a.progress(system.stats) : '') + ')';
+      html += '<div style="padding:6px 2px;border-bottom:1px solid #333;color:' + color + ';">' + a.icon + ' <b>' + a.name + '</b> +' + a.reward + ' 💰<br><span style="font-size:11px;color:' + (unlockedAt ? '#aadd88' : '#888') + ';">' + a.desc + date + '</span></div>';
+    }
+    el.innerHTML = html;
+    el.style.display = 'block';
+  };
+
+  // Game Over（含排行榜）
+  UI.prototype.showGameOver = function(gameTime, level, kills, leaderboard, earned, totalCoins, endlessResult) {
+    var rank, top5, html;
+    if (endlessResult) {
+      rank = endlessResult.rank;
+      top5 = leaderboard.getEndlessTop(5);
+      html = '♾️ 無盡模式<br>存活: ' + SG.formatTime(gameTime) + ' | 擊殺: ' + kills + ' | 難度 ×' + endlessResult.multiplier.toFixed(1) + '<br>角色: ' + endlessResult.character;
+      if (rank > 0) html += '<br>🏅 無盡排名 #' + rank;
+    } else {
+      rank = leaderboard.addEntry(kills, level, gameTime);
+      top5 = leaderboard.getTop(5);
+      html = 'Time: ' + SG.formatTime(gameTime) + ' | Level: ' + level + ' | Kills: ' + kills;
+      if (rank > 0) html += '<br>🏅 排名 #' + rank;
+    }
     this.els.finalStats.innerHTML = html;
 
     // 排行榜
     if (this.els.leaderboardEl) {
-      var lbHtml = '<h3>🏆 排行榜</h3><ol>';
+      var lbHtml = '<h3>🏆 ' + (endlessResult ? '無盡排行榜' : '排行榜') + '</h3><ol>';
       for (var i = 0; i < top5.length; i++) {
         var e = top5[i];
-        lbHtml += '<li>' + e.score + '分 (Lv.' + e.level + ' K:' + e.kills + ' ' + e.date + ')</li>';
+        lbHtml += endlessResult ? '<li>' + SG.formatTime(e.time) + ' (K:' + e.kills + ' 難度 ×' + (1 + e.rampLevel * 0.1).toFixed(1) + ' ' + e.character + ')</li>' : '<li>' + e.score + '分 (Lv.' + e.level + ' K:' + e.kills + ' ' + e.date + ')</li>';
       }
       lbHtml += '</ol><button id="clear-lb-btn" class="upgrade-btn" style="width:auto;padding:8px 16px;font-size:12px;">清除記錄</button>';
       this.els.leaderboardEl.innerHTML = lbHtml;
       this.els.leaderboardEl.style.display = 'block';
       document.getElementById('clear-lb-btn').onclick = function() {
-        leaderboard.clear();
+        if (endlessResult) leaderboard.clearEndless(); else leaderboard.clear();
         document.getElementById('leaderboard').innerHTML = '<p>記錄已清除</p>';
       };
     }

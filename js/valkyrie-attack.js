@@ -47,7 +47,7 @@
   var KNOCKBACK_DAMAGE_MULT = 0.25;
   var KNOCKBACK_FORCE = 15; // px 推開距離
 
-  ValkyrieAttack.prototype.update = function(dt, enemies, bosses) {
+  ValkyrieAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
 
@@ -65,7 +65,7 @@
     }
 
     // 攻擊冷卻
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {
@@ -137,8 +137,8 @@
       var perp = Math.abs(-dx * Math.sin(angle) + dy * Math.cos(angle));
 
       if (along > 0 && along <= this.range + t.hitboxRadius && perp <= THRUST_WIDTH + t.hitboxRadius) {
-        t.hp -= this.damage;
-        this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
+        var thrustHit = SG.applyTraitDamage(this.player, t, this.damage, { canCrit: true });
+        this._lastHits.push({ x: t.x, y: t.y, dmg: thrustHit.damage, isCrit: thrustHit.isCrit });
         if (t.hp <= 0) hits.push(t);
         hitAny = true;
         if (along > SG.dist(this.player, farthestHit)) {
@@ -160,8 +160,8 @@
         if (t.hp <= 0) continue;
         var dist = Math.sqrt((t.x - shockX) * (t.x - shockX) + (t.y - shockY) * (t.y - shockY));
         if (dist <= KNOCKBACK_RADIUS + t.hitboxRadius) {
-          t.hp -= knockDmg;
-          this._lastHits.push({ x: t.x, y: t.y, dmg: knockDmg });
+          var knockHit = SG.applyTraitDamage(this.player, t, knockDmg, { canCrit: true });
+          this._lastHits.push({ x: t.x, y: t.y, dmg: knockHit.damage, isCrit: knockHit.isCrit });
           if (t.hp <= 0) { hits.push(t); continue; }
           // Knockback 推開（方向：從玩家指向敵人，向外推）
           var ka = Math.atan2(t.y - shockY, t.x - shockX);

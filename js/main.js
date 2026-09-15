@@ -46,6 +46,7 @@
     this.audio = new SG.AudioManager(cfg);
     this.leaderboard = new SG.Leaderboard();
     this._legacy = new SG.LegacySystem();
+    this.achievements = new SG.AchievementSystem();
     this._dailyChallenge = new SG.DailyChallenge();
     SG._dailyChallenge = this._dailyChallenge;
 
@@ -156,6 +157,7 @@
     this._setupSettings();
 
     this._selectedCharacter = null;
+    this.endlessMode = false;
     this._archerAttack = null;
     this._valkyrieAttack = null;
     this._boomerangAttack = null;
@@ -219,6 +221,7 @@
   // 除錯：按 N 跳關
   // Boss 生成：基於擊殺數（20 隻出 Boss1，50 隻出 Boss2）
   Game.prototype._checkBossSpawn = function() {
+    if (this.endlessMode) return;
     var indices = this.levelManager.getBossIndices();
     if (this._bossesSpawnedThisLevel >= 2 || indices.length < 2) return;
 
@@ -240,8 +243,7 @@
     if (!boss) return;
     boss.animator = this._buildAnimator('boss_' + boss.cfgIdx, (this.imgConfig.bosses || [])[boss.cfgIdx]);
     this._applyAABB(boss, 'boss_' + boss.cfgIdx);
-    var hcMult = this.getHardcoreHPMult();
-    if (hcMult > 1) { boss.hp = Math.round(boss.hp * hcMult); boss.maxHp = boss.hp; }
+    this._applySpawnDifficulty(boss);
     this.bosses.push(boss);
     this.ui.showBossWarning();
     this.audio.playBossWarning();
@@ -352,6 +354,8 @@
         updateLegacyUI();
       }
     };
+    var achievementsBtn = document.getElementById('achievements-btn');
+    if (achievementsBtn) achievementsBtn.onclick = function() { self.ui.renderAchievements(self.achievements); };
     // The shortcut is intentionally hidden in the markup until the game has
     // initialized its settings handlers. Make it visible once the icon and
     // click handler are ready so a valid image cannot be hidden by display:none.
@@ -513,6 +517,13 @@
   Game.prototype._initGame = function() {
     var self = this;
     this.player = new SG.Player();
+    this._relics = [];
+    this._relicChoosing = false;
+    this._relicOfferQueued = false;
+    this.endlessMode = localStorage.getItem('survivor_gameMode') === 'endless';
+    this._endlessRamp = 0;
+    this._endlessTimer = 0;
+    this._endlessBossTimer = 90 + Math.random() * 30;
     this._randomEvents = new SG.RandomEvents(this);
     this.player.attackType = this._selectedCharacter.attackType;
     this.player.scale = this._selectedCharacter.scale || 1.0;
@@ -595,6 +606,10 @@
     this._bomb = new SG.BombSystem();
     this.meta = new SG.MetaProgression();
     }
+
+    this._trait = SG.getTrait(this._selectedCharacter.id);
+    this.player._trait = this._trait;
+    if (this._trait && this._trait.init) this._trait.init(this.player);
 
     var legacyMult = this._legacy.getMultipliers();
     this.player.maxHp = Math.round(this.player.maxHp * legacyMult.hp);
@@ -733,7 +748,7 @@
       this._lowQuality = this._currentFps < LOW_FPS_THRESHOLD;
     }
 
-    if (!this.paused && !this.levelingUp && !this.levelClearing) {
+    if (!this.paused && !this.levelingUp && !this.levelClearing && !this._relicChoosing) {
       try { this._update(dt); } catch(err) { console.error('[Game] _update error:', err); }
     }
     // 聖光效果不受遊戲暫停影響，獨立更新
@@ -801,6 +816,11 @@
     var self = this;
     this.gameTime += dt;
     if (this._randomEvents) this._randomEvents.update(dt);
+    if (this._trait && this._trait.onUpdate) this._trait.onUpdate(dt, this, this.player);
+    if (this._relicOfferQueued && !this.levelingUp && !this._levelUpPending && !this.levelClearing) {
+      this._relicOfferQueued = false;
+      this._offerRelicChoice();
+    }
 
     // 生命回復（被動技能）
     if (this.player.regen) {
@@ -852,71 +872,71 @@
 
     // 自動射擊（遠程角色）/ 近戰斬擊（近戰角色）/ 女武神貫通
     if (this.player.attackType === 'valkyrie' && this._valkyrieAttack) {
-      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses);
+      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < valkHits.length; i++) this._handleKill(valkHits[i]);
       var vhits = this._valkyrieAttack.getLastHits();
       for (var i = 0; i < vhits.length; i++) {
         if (!this._lowQuality) {
-          var vc = this.player.critChance && Math.random() < this.player.critChance;
-          if (vc) { vhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var vc = !!vhits[i].isCrit;
+          if (vc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(vhits[i].x, vhits[i].y, vhits[i].dmg, vc);
         }
       }
     } else if (this.player.attackType === 'melee' && this._meleeAttack) {
-      var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses);
+      var meleeHits = this._meleeAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < meleeHits.length; i++) this._handleKill(meleeHits[i]);
       var mhits = this._meleeAttack.getLastHits();
       for (var i = 0; i < mhits.length; i++) {
         if (!this._lowQuality) {
-          var mc = this.player.critChance && Math.random() < this.player.critChance;
-          if (mc) { mhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var mc = !!mhits[i].isCrit;
+          if (mc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, mc);
         }
       }
     } else if (this.player.attackType === 'archer' && this._archerAttack) {
-      var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses);
+      var archerHits = this._archerAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       if (this._archerAttack.didFire()) { this.audio.playArrowShoot(); this.player.triggerAttack(); }
       for (var i = 0; i < archerHits.length; i++) this._handleKill(archerHits[i]);
       var ahits = this._archerAttack.getLastHits();
       // 爆炸箭
       var ea = this._archerAttack.getExplosiveArrow();
-      var eaHits = ea.update(dt, this.enemies, this.bosses);
+      var eaHits = ea.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       // 貫通箭
       var pa = this._archerAttack.getPiercingArrow();
-      var paHits = pa.update(dt, this.enemies, this.bosses);
+      var paHits = pa.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < paHits.length; i++) this._handleKill(paHits[i]);
       for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
       for (var i = 0; i < ahits.length; i++) {
         if (!this._lowQuality) {
-          var ac = this.player.critChance && Math.random() < this.player.critChance;
-          if (ac) { ahits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var ac = !!ahits[i].isCrit;
+          if (ac) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, ac);
         }
       }
     } else if (this.player.attackType === 'boomerang' && this._boomerangAttack) {
-      var boomHits = this._boomerangAttack.update(dt, this.enemies, this.bosses);
+      var boomHits = this._boomerangAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < boomHits.length; i++) this._handleKill(boomHits[i]);
       var bhits = this._boomerangAttack.getLastHits();
       for (var i = 0; i < bhits.length; i++) {
         if (!this._lowQuality) {
-          var bc = this.player.critChance && Math.random() < this.player.critChance;
-          if (bc) { bhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var bc = !!bhits[i].isCrit;
+          if (bc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(bhits[i].x, bhits[i].y, bhits[i].dmg, bc);
         }
       }
     } else if (this.player.attackType === 'amazon' && this._amazonAttack) {
-      var amazonHits = this._amazonAttack.update(dt, this.enemies, this.bosses);
+      var amazonHits = this._amazonAttack.update(dt, this.enemies, this.bosses, SG.getAttackSpeedMult(this.player));
       for (var i = 0; i < amazonHits.length; i++) this._handleKill(amazonHits[i]);
       var amhits = this._amazonAttack.getLastHits();
       for (var i = 0; i < amhits.length; i++) {
         if (!this._lowQuality) {
-          var amc = this.player.critChance && Math.random() < this.player.critChance;
-          if (amc) { amhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var amc = !!amhits[i].isCrit;
+          if (amc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(amhits[i].x, amhits[i].y, amhits[i].dmg, amc);
         }
       }
     } else {
-      this.player.fireTimer -= dt;
+      this.player.fireTimer -= dt * SG.getAttackSpeedMult(this.player);
       if (this.player.fireTimer <= 0) {
         var allTargets = this.enemies.concat(this.bosses).sort(function(a, b) {
           return SG.dist(self.player, a) - SG.dist(self.player, b);
@@ -943,6 +963,7 @@
         if (SG.aabbHit(p, pSize / 2, e, e.hitboxRadius)) {
           // 暴擊判定
           var dmg = p.damage * (this.player.damageMultiplier || 1) * (this._eventDamageMult || 1);
+          dmg *= SG.getTraitDamageMult(this.player, e);
           var isCrit = this.player.critChance && Math.random() < this.player.critChance;
           if (isCrit) { dmg *= 2; this.renderer.shake(0.12, 4); }
           dmg = Math.round(dmg);
@@ -981,6 +1002,7 @@
 
     // 敵人移動 + 碰撞
     var speedMult = this.levelManager.getEnemySpeedMult();
+    if (this.endlessMode) speedMult *= this._getEndlessMultiplier();
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
       // 套用關卡速度倍率
@@ -997,7 +1019,10 @@
     // Boss 移動 + 碰撞
     for (var i = 0; i < this.bosses.length; i++) {
       var b = this.bosses[i];
+      var originalBossSpeed = b.speed;
+      if (this.endlessMode) b.speed *= this._getEndlessMultiplier();
       b.moveToward(this.player, dt);
+      b.speed = originalBossSpeed;
       b.updateAnimation(dt);
       if (SG.aabbHit(this.player, this.player.hitboxRadius, b, b.hitboxRadius)) {
         if (this._playerTakeDamage(b.damage, b)) return;
@@ -1056,17 +1081,25 @@
     }
 
     // 波次（作為加強波，補充超過 TARGET 的額外怪物）
-    var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this.levelManager.getCurrent().enemyIndices);
+    if (this.endlessMode) {
+      this._endlessTimer += dt;
+      while (this._endlessTimer >= 60) {
+        this._endlessTimer -= 60;
+        this._endlessRamp += 0.1;
+      }
+      this._endlessBossTimer -= dt;
+      if (this._endlessBossTimer <= 0 && this.bosses.length === 0) {
+        var endlessBosses = this.imgConfig.bosses || [];
+        if (endlessBosses.length) this._spawnBoss(Math.floor(Math.random() * endlessBosses.length));
+        this._endlessBossTimer = 90 + Math.random() * 30;
+      }
+    }
+
+    var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this._getSpawnEnemyIndices());
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
       this._applyAABB(spawned[i], 'enemy_' + spawned[i].cfgIdx);
-      // Hardcore HP 倍率
-      var hcMult = this.getHardcoreHPMult();
-      if (hcMult > 1) {
-        spawned[i].hp = Math.round(spawned[i].hp * hcMult);
-        spawned[i].maxHp = spawned[i].hp;
-        console.log('[Hardcore] Enemy HP:', spawned[i].hp, 'mult:', hcMult.toFixed(2));
-      }
+      this._applySpawnDifficulty(spawned[i]);
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
@@ -1132,7 +1165,7 @@
       if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
         rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
         this._applyAABB(rushSpawned[ri], 'enemy_' + rushSpawned[ri].cfgIdx);
-        var hcR = this.getHardcoreHPMult(); if (hcR > 1) { rushSpawned[ri].hp = Math.round(rushSpawned[ri].hp * hcR); rushSpawned[ri].maxHp = rushSpawned[ri].hp; }
+        this._applySpawnDifficulty(rushSpawned[ri]);
         if (this.enemies.length < MAX_ENEMIES) this.enemies.push(rushSpawned[ri]);
       }
     } else if (rushEvent === "rush_end") {
@@ -1151,15 +1184,17 @@
     if (eliteResult.elite && this.enemies.length < MAX_ENEMIES) {
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
       this._applyAABB(eliteResult.elite, 'enemy_' + eliteResult.elite.cfgIdx);
-      var hcE = this.getHardcoreHPMult(); if (hcE > 1) { eliteResult.elite.hp = Math.round(eliteResult.elite.hp * hcE); eliteResult.elite.maxHp = eliteResult.elite.hp; }
+      this._applySpawnDifficulty(eliteResult.elite);
       this.enemies.push(eliteResult.elite);
     }
     if (eliteResult.triggerLevelUp && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
     if (this._eliteSpawner.isMagnetActive()) this._magnetAllXP = true;
 
     // 關卡系統
-    var levelEvent = this.levelManager.update(dt, this.bosses.length);
-    if (levelEvent === 'level_clear') this._onLevelClear();
+    if (!this.endlessMode) {
+      var levelEvent = this.levelManager.update(dt, this.bosses.length);
+      if (levelEvent === 'level_clear') this._onLevelClear();
+    }
 
     // 無敵 + HUD
     this.player.updateInvuln(dt);
@@ -1171,8 +1206,50 @@
       for (var ui = 0; ui < ultHits.length; ui++) this._handleKill(ultHits[ui]);
     }
     this._damageNumbers.update(dt);
-    this.ui.updateHUD(this.player, this.gameTime, this.kills);
-    this.ui.updateSkillIcons(this.skillTree);
+    this.achievements.flushIfDue();
+    this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null);
+    this.ui.updateSkillIcons(this.skillTree, this._relics);
+  };
+
+  // 更新永久統計並一次性發放新解鎖的成就獎勵。
+  Game.prototype._recordAchievementStats = function(mutator, options) {
+    try {
+      this.achievements.record(mutator);
+      var checkNow = !options || !options.kill;
+      if (options && options.kill) {
+        this._achievementKillChecks = (this._achievementKillChecks || 0) + 1;
+        checkNow = !!options.immediate || this._achievementKillChecks >= 25;
+        if (checkNow) this._achievementKillChecks = 0;
+      }
+      var gained = checkNow ? this.achievements.checkUnlocks() : [];
+      for (var i = 0; i < gained.length; i++) {
+        this.meta.coins += gained[i].reward;
+        this.meta._save();
+        this.ui.showAchievementToast(gained[i], i * 3600);
+      }
+      if (checkNow) this.achievements.flush();
+    } catch(e) {}
+  };
+
+  // Boss 擊敗後提供一次遺物三選一；升級流程中則排隊至選單關閉。
+  Game.prototype._offerRelicChoice = function() {
+    if (this._relicChoosing || !this._relics || this._relics.length >= 3) return;
+    if (this.levelingUp || this._levelUpPending || this.levelClearing) {
+      this._relicOfferQueued = true;
+      return;
+    }
+    var choices = SG.getRelicChoices(this._relics, 3);
+    if (!choices.length) return;
+    var self = this;
+    this._relicChoosing = true;
+    this.ui.showRelicChoice(choices, function(relic) {
+      if (relic) {
+        relic.apply(self.player, self);
+        self._relics.push(relic.id);
+        self._recordAchievementStats(function(stats) { stats.relicsCollected = (stats.relicsCollected || 0) + 1; });
+      }
+      self._relicChoosing = false;
+    });
   };
 
   // 處理敵人/Boss 被殺死
@@ -1193,6 +1270,7 @@
       // Boss 擊敗特效：畫面震動 + 吸取所有經驗
       this.renderer.shake(0.5, 12);
       this._magnetDelay = 0.5;
+      this._offerRelicChoice();
     } else {
       var gem = this.xpGemPool.get();
       gem.init(e.x, e.y, 1);
@@ -1202,6 +1280,14 @@
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
     }
     this.kills++;
+    if (this._trait && this._trait.onKill) this._trait.onKill(this.player);
+    var characterId = this._selectedCharacter && this._selectedCharacter.id;
+    this._recordAchievementStats(function(stats) {
+      stats.totalKills = (stats.totalKills || 0) + 1;
+      if (isBoss) stats.totalBossKills = (stats.totalBossKills || 0) + 1;
+      if (characterId) { stats.charKills = stats.charKills || {}; stats.charKills[characterId] = (stats.charKills[characterId] || 0) + 1; }
+    }, { kill: true, immediate: isBoss });
+    if (this.player._relicLifesteal) this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * this.player._relicLifesteal);
     if (!isBoss) this._levelKills++;
     this._combo.addKill();
     this.audio.playEnemyDeath();
@@ -1215,9 +1301,11 @@
   // 玩家受傷（含護甲、閃避、反射）
   Game.prototype._playerTakeDamage = function(damage, attacker) {
     if (this.player.dodgeChance && Math.random() < this.player.dodgeChance) return false;
-    var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1));
+    var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1) * (this.player._relicDamageTakenMult || 1));
+    var hpBefore = this.player.hp;
     var dead = this.player.takeDamage(finalDmg);
     if (dead) { this._endGame(); return true; }
+    if (this.player.hp < hpBefore && this._trait && this._trait.onHit) this._trait.onHit(this.player);
     this.audio.playHurt();
     // 傷害反射
     if (this.player.reflect && attacker && attacker.hp > 0) {
@@ -1261,11 +1349,22 @@
     var healAmount = this.player.maxHp * (window.LEVEL_CLEAR_HEAL_PERCENT || 0.5);
     this.player.hp = Math.min(this.player.hp + healAmount, this.player.maxHp);
     var levelName = this.levelManager.getCurrent().name;
+    this._recordAchievementStats(function(stats) { stats.levelsCleared = (stats.levelsCleared || 0) + 1; });
 
     if (!this.levelManager.nextLevel()) {
       // 全通關 — 提供 Hardcore 選項
       var self = this;
       this.gameOver = true;
+      var clearCharId = this._selectedCharacter && this._selectedCharacter.id;
+      var clearTime = this.gameTime;
+      var clearLevel = this.player.level;
+      this._recordAchievementStats(function(stats) {
+        stats.gamesCleared = (stats.gamesCleared || 0) + 1;
+        stats.totalGames = (stats.totalGames || 0) + 1;
+        stats.totalPlayTime = (stats.totalPlayTime || 0) + clearTime;
+        stats.maxLevel = Math.max(stats.maxLevel || 0, clearLevel);
+        if (clearCharId) { stats.charClears = stats.charClears || {}; stats.charClears[clearCharId] = (stats.charClears[clearCharId] || 0) + 1; }
+      });
       this.leaderboard.addEntry(this.kills, this.player.level, this.gameTime);
       this.ui.showAllClear(this.gameTime, this.player.level, this.kills, this.hardcoreLevel, function() {
         self._startHardcore();
@@ -1296,6 +1395,8 @@
   // Hardcore 模式：保留角色進度，敵人 HP 累乘，從第一關重新開始
   Game.prototype._startHardcore = function() {
     this.hardcoreLevel++;
+    var reachedHardcore = this.hardcoreLevel;
+    this._recordAchievementStats(function(stats) { stats.hardcoreReached = Math.max(stats.hardcoreReached || 0, reachedHardcore); });
     this._hardcoreVFX.setActive(this.hardcoreLevel);
     this.gameOver = false;
     this.gameTime = 0;
@@ -1335,6 +1436,7 @@
   };
 
   Game.prototype._getLevelDisplayName = function() {
+    if (this.endlessMode) return '♾️ 無盡模式 — ' + this.levelManager.getCurrent().name;
     var name = this.levelManager.getCurrent().name;
     if (this.hardcoreLevel > 0) name += ' (Hardcore Lv.' + this.hardcoreLevel + ')';
     return name;
@@ -1348,7 +1450,7 @@
   // 在螢幕外生成一隻敵人（擊殺即補充用）
   Game.prototype._spawnOneEnemy = function() {
     if (this.enemies.length >= MAX_ENEMIES) return;
-    var enemyIndices = this.levelManager.getCurrent().enemyIndices;
+    var enemyIndices = this._getSpawnEnemyIndices();
     var pick = SG.Enemy.pickConfig(this.imgConfig, this.gameTime, enemyIndices);
     // 隨機在螢幕外 60~120px 處生成
     var angle = Math.random() * Math.PI * 2;
@@ -1363,9 +1465,29 @@
     }
     enemy.animator = this._buildAnimator('enemy_' + pick.idx, (this.imgConfig.enemies || [])[pick.idx]);
     this._applyAABB(enemy, 'enemy_' + pick.idx);
-    var hcMult = this.getHardcoreHPMult();
-    if (hcMult > 1) { enemy.hp = Math.round(enemy.hp * hcMult); enemy.maxHp = enemy.hp; }
+    this._applySpawnDifficulty(enemy);
     this.enemies.push(enemy);
+  };
+
+  Game.prototype._getEndlessMultiplier = function() {
+    return 1 + (this._endlessRamp || 0);
+  };
+
+  Game.prototype._getSpawnEnemyIndices = function() {
+    if (!this.endlessMode) return this.levelManager.getCurrent().enemyIndices;
+    var count = Math.min((this.imgConfig.enemies || []).length, 3 + Math.floor(this.gameTime / 60));
+    var indices = [];
+    for (var i = 0; i < count; i++) indices.push(i);
+    return indices;
+  };
+
+  Game.prototype._applySpawnDifficulty = function(entity) {
+    var hpMult = this.getHardcoreHPMult();
+    if (this.endlessMode) hpMult *= this._getEndlessMultiplier();
+    if (hpMult > 1) {
+      entity.hp = Math.round(entity.hp * hpMult);
+      entity.maxHp = entity.hp;
+    }
   };
 
   // 填充到目標數量（開場/關卡切換用）
@@ -1378,6 +1500,13 @@
   Game.prototype._showLevelUp = function() {
     if (this._levelUpPending) return;
     if (this._eventBlockLevelUp) return;
+    var reachedLevel = this.player.level;
+    this._recordAchievementStats(function(stats) { stats.maxLevel = Math.max(stats.maxLevel || 0, reachedLevel); });
+    // Lv10 翅膀：以獨立倍率套用，與忍者疾風及局內移速升級可安全疊加。
+    if (this.player.level >= 10 && !this.player._wingsApplied) {
+      this.player._wingsApplied = true;
+      this.player._wingBonusMult = 1.08;
+    }
     this._levelUpPending = true;
     // 每升一級攻擊力 ×1.01
     this.player.damage *= 1.01;
@@ -1409,8 +1538,30 @@
       this._dailyChallenge.saveScore(dailyScore, this._selectedCharacter.id, this.gameTime);
       this._dailyReward = Math.max(10, Math.round(dailyScore / 100));
     }
+    var finalLevel = this.player.level;
+    var finalTime = this.gameTime;
+    var wasEndless = this.endlessMode;
+    var finalRamp = this._endlessRamp || 0;
+    var dailyActive = this._dailyChallenge.active;
+    this._recordAchievementStats(function(stats) {
+      stats.totalDeaths = (stats.totalDeaths || 0) + 1;
+      stats.totalGames = (stats.totalGames || 0) + 1;
+      stats.totalPlayTime = (stats.totalPlayTime || 0) + finalTime;
+      stats.maxLevel = Math.max(stats.maxLevel || 0, finalLevel);
+      if (wasEndless) { stats.maxSurvivalTime = Math.max(stats.maxSurvivalTime || 0, finalTime); stats.endlessMaxRamp = Math.max(stats.endlessMaxRamp || 0, finalRamp); }
+      if (dailyActive) stats.dailyCompleted = (stats.dailyCompleted || 0) + 1;
+    });
     var earned = this.meta.earnCoins(this.kills, this.gameTime);
-    this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins());
+    var endlessResult = null;
+    if (this.endlessMode) {
+      var rampLevel = Math.round((this._endlessRamp || 0) * 10);
+      endlessResult = {
+        rank: this.leaderboard.addEndlessEntry(this.gameTime, this.kills, rampLevel, this._selectedCharacter.id),
+        multiplier: this._getEndlessMultiplier(),
+        character: this._selectedCharacter.name
+      };
+    }
+    this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins(), endlessResult);
   };
 
   SG.Game = Game;

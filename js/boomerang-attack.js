@@ -24,7 +24,7 @@
     this._chainVisuals = [];  // { segments: [{x1,y1,x2,y2}], timer }
   }
 
-  BoomerangAttack.prototype.update = function(dt, enemies, bosses) {
+  BoomerangAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
 
@@ -70,9 +70,9 @@
         if (t.hp <= 0) continue;
         if (b.hitIds[t.id]) continue;
         if (SG.aabbHit(b, this.hitboxSize, t, t.hitboxRadius)) {
-          t.hp -= this.damage;
+          var hitResult = SG.applyTraitDamage(this.player, t, this.damage, { canCrit: true });
           b.hitIds[t.id] = true;
-          this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
+          this._lastHits.push({ x: t.x, y: t.y, dmg: hitResult.damage, isCrit: hitResult.isCrit });
           if (t.hp <= 0) hits.push(t);
 
           // Lv15+: Chain lightning on hit
@@ -90,7 +90,7 @@
     }
 
     // Fire new boomerangs
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0 && this.boomerangs.length < this.count) {
@@ -155,8 +155,8 @@
       if (!next) break;
       chained[next.id] = true;
       segments.push({ x1: current.x, y1: current.y, x2: next.x, y2: next.y });
-      next.hp -= chainDmg;
-      this._lastHits.push({ x: next.x, y: next.y, dmg: chainDmg });
+      var chainHit = SG.applyTraitDamage(this.player, next, chainDmg, { canCrit: true });
+      this._lastHits.push({ x: next.x, y: next.y, dmg: chainHit.damage, isCrit: chainHit.isCrit });
       if (next.hp <= 0) hits.push(next);
       current = next;
     }

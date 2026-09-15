@@ -39,13 +39,13 @@
     }
   };
 
-  ArcherAttack.prototype.update = function(dt, enemies, bosses) {
+  ArcherAttack.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     this._lastHits = [];
     this._firedThisFrame = false;
 
     // 發射箭矢
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {
@@ -96,13 +96,13 @@
         var t = targets[j];
         if (t.hp <= 0) continue;
         if (SG.aabbHit(ar, 20, t, t.hitboxRadius)) {
-          t.hp -= ar.damage;
-          this._lastHits.push({ x: t.x, y: t.y, dmg: ar.damage });
+          var hitResult = SG.applyTraitDamage(this.player, t, ar.damage, { canCrit: true });
+          this._lastHits.push({ x: t.x, y: t.y, dmg: hitResult.damage, isCrit: hitResult.isCrit });
           if (t.hp <= 0) hits.push(t);
           hit = true;
           // Lv13+：火焰附加（30% 機率）
           if (this.level >= 13 && Math.random() < ARCHER_FIRE_CHANCE) {
-            this._fireZones.push({ x: t.x, y: t.y, life: ARCHER_FIRE_DURATION, tickTimer: 0, dmg: Math.round(ar.damage * ARCHER_FIRE_DAMAGE_RATIO) });
+            this._fireZones.push({ x: t.x, y: t.y, life: ARCHER_FIRE_DURATION, tickTimer: 0, dmg: Math.round(hitResult.damage * ARCHER_FIRE_DAMAGE_RATIO) });
           }
           break;
         }
@@ -123,8 +123,8 @@
           var ft = allT[fi2];
           if (ft.hp <= 0) continue;
           if (SG.aabbHit(fz, ARCHER_FIRE_RADIUS, ft, ft.hitboxRadius)) {
-            ft.hp -= fz.dmg;
-            this._lastHits.push({ x: ft.x, y: ft.y, dmg: fz.dmg });
+            var fireHit = SG.applyTraitDamage(this.player, ft, fz.dmg);
+            this._lastHits.push({ x: ft.x, y: ft.y, dmg: fireHit.damage });
             if (ft.hp <= 0) hits.push(ft);
           }
         }
@@ -189,7 +189,7 @@
     if (!this.active) this.active = true;
   };
 
-  ExplosiveArrow.prototype.update = function(dt, enemies, bosses) {
+  ExplosiveArrow.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     if (!this.level) return hits;
 
@@ -218,7 +218,7 @@
           for (var j = 0; j < targets.length; j++) {
             if (targets[j].hp <= 0) continue;
             if (SG.aabbHit(this.arrow, this.radius, targets[j], targets[j].hitboxRadius)) {
-              targets[j].hp -= this.damage;
+              SG.applyTraitDamage(this.player, targets[j], this.damage, { canCrit: true });
               if (targets[j].hp <= 0) hits.push(targets[j]);
             }
           }
@@ -230,7 +230,7 @@
 
     // 發射新爆炸箭
     if (!this.arrow) {
-      this.timer -= dt;
+      this.timer -= dt * (attackSpeedMult || 1);
       if (this.timer <= 0) {
         var targets = enemies.concat(bosses);
         if (targets.length > 0) {
@@ -284,12 +284,12 @@
     if (!this.active) this.active = true;
   };
 
-  PiercingArrow.prototype.update = function(dt, enemies, bosses) {
+  PiercingArrow.prototype.update = function(dt, enemies, bosses, attackSpeedMult) {
     var hits = [];
     if (!this.level) return hits;
 
     // 發射
-    this.timer -= dt;
+    this.timer -= dt * (attackSpeedMult || 1);
     if (this.timer <= 0) {
       var targets = enemies.concat(bosses);
       if (targets.length > 0) {
@@ -323,7 +323,7 @@
         var t = targets[j];
         if (t.hp <= 0) continue;
         if (SG.aabbHit(ar, 15, t, t.hitboxRadius)) {
-          t.hp -= this.damage;
+          SG.applyTraitDamage(this.player, t, this.damage, { canCrit: true });
           if (t.hp <= 0) hits.push(t);
         }
       }
