@@ -41,9 +41,9 @@
         while (diff > Math.PI) diff -= Math.PI * 2;
         while (diff < -Math.PI) diff += Math.PI * 2;
         if (Math.abs(diff) <= ARC_ANGLE) {
-          t.hp -= this.damage;
+          var hit = SG.applyTraitDamage(this.player, t, this.damage, { canCrit: true });
           this._activeHitbox.hitIds[t.id] = true;
-          this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
+          this._lastHits.push({ x: t.x, y: t.y, dmg: hit.damage, isCrit: hit.isCrit });
           if (t.hp <= 0) hits.push(t);
         }
       }
@@ -65,9 +65,9 @@
         while (diff2 > Math.PI) diff2 -= Math.PI * 2;
         while (diff2 < -Math.PI) diff2 += Math.PI * 2;
         if (Math.abs(diff2) <= ARC_ANGLE) {
-          t2.hp -= this.damage;
+          var backHit = SG.applyTraitDamage(this.player, t2, this.damage, { canCrit: true });
           this._activeHitbox2.hitIds[t2.id] = true;
-          this._lastHits.push({ x: t2.x, y: t2.y, dmg: this.damage });
+          this._lastHits.push({ x: t2.x, y: t2.y, dmg: backHit.damage, isCrit: backHit.isCrit });
           if (t2.hp <= 0) hits.push(t2);
         }
       }

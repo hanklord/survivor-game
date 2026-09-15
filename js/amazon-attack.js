@@ -51,10 +51,10 @@
         var t = targets[ti];
         if (t.hp <= 0 || j.hitIds[t.id]) continue;
         if (SG.aabbHit(j, JAVELIN_SIZE, t, t.hitboxRadius)) {
-          t.hp -= this.damage;
+          var hitResult = SG.applyTraitDamage(this.player, t, this.damage, { canCrit: true });
           j.hitIds[t.id] = true;
           j.hitCount++;
-          this._lastHits.push({ x: t.x, y: t.y, dmg: this.damage });
+          this._lastHits.push({ x: t.x, y: t.y, dmg: hitResult.damage, isCrit: hitResult.isCrit });
           if (t.hp <= 0) hits.push(t);
 
           // Lv10+ 連鎖閃電
@@ -126,8 +126,8 @@
       if (!next) break;
       chained[next.id] = true;
       segments.push({ x1: current.x, y1: current.y, x2: next.x, y2: next.y });
-      next.hp -= chainDmg;
-      this._lastHits.push({ x: next.x, y: next.y, dmg: chainDmg });
+      var chainHit = SG.applyTraitDamage(this.player, next, chainDmg, { canCrit: true });
+      this._lastHits.push({ x: next.x, y: next.y, dmg: chainHit.damage, isCrit: chainHit.isCrit });
       if (next.hp <= 0) hits.push(next);
       current = next;
     }

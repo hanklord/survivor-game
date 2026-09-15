@@ -596,6 +596,10 @@
     this.meta = new SG.MetaProgression();
     }
 
+    this._trait = SG.getTrait(this._selectedCharacter.id);
+    this.player._trait = this._trait;
+    if (this._trait && this._trait.init) this._trait.init(this.player);
+
     var legacyMult = this._legacy.getMultipliers();
     this.player.maxHp = Math.round(this.player.maxHp * legacyMult.hp);
     this.player.hp = this.player.maxHp;
@@ -801,6 +805,7 @@
     var self = this;
     this.gameTime += dt;
     if (this._randomEvents) this._randomEvents.update(dt);
+    if (this._trait && this._trait.onUpdate) this._trait.onUpdate(dt, this, this.player);
 
     // 生命回復（被動技能）
     if (this.player.regen) {
@@ -852,13 +857,13 @@
 
     // 自動射擊（遠程角色）/ 近戰斬擊（近戰角色）/ 女武神貫通
     if (this.player.attackType === 'valkyrie' && this._valkyrieAttack) {
-      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses);
+      var valkHits = this._valkyrieAttack.update(dt, this.enemies, this.bosses, SG.getTraitAttackSpeedMult(this.player));
       for (var i = 0; i < valkHits.length; i++) this._handleKill(valkHits[i]);
       var vhits = this._valkyrieAttack.getLastHits();
       for (var i = 0; i < vhits.length; i++) {
         if (!this._lowQuality) {
-          var vc = this.player.critChance && Math.random() < this.player.critChance;
-          if (vc) { vhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var vc = !!vhits[i].isCrit;
+          if (vc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(vhits[i].x, vhits[i].y, vhits[i].dmg, vc);
         }
       }
@@ -868,8 +873,8 @@
       var mhits = this._meleeAttack.getLastHits();
       for (var i = 0; i < mhits.length; i++) {
         if (!this._lowQuality) {
-          var mc = this.player.critChance && Math.random() < this.player.critChance;
-          if (mc) { mhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var mc = !!mhits[i].isCrit;
+          if (mc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(mhits[i].x, mhits[i].y, mhits[i].dmg, mc);
         }
       }
@@ -888,8 +893,8 @@
       for (var i = 0; i < eaHits.length; i++) this._handleKill(eaHits[i]);
       for (var i = 0; i < ahits.length; i++) {
         if (!this._lowQuality) {
-          var ac = this.player.critChance && Math.random() < this.player.critChance;
-          if (ac) { ahits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var ac = !!ahits[i].isCrit;
+          if (ac) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(ahits[i].x, ahits[i].y, ahits[i].dmg, ac);
         }
       }
@@ -899,8 +904,8 @@
       var bhits = this._boomerangAttack.getLastHits();
       for (var i = 0; i < bhits.length; i++) {
         if (!this._lowQuality) {
-          var bc = this.player.critChance && Math.random() < this.player.critChance;
-          if (bc) { bhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var bc = !!bhits[i].isCrit;
+          if (bc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(bhits[i].x, bhits[i].y, bhits[i].dmg, bc);
         }
       }
@@ -910,8 +915,8 @@
       var amhits = this._amazonAttack.getLastHits();
       for (var i = 0; i < amhits.length; i++) {
         if (!this._lowQuality) {
-          var amc = this.player.critChance && Math.random() < this.player.critChance;
-          if (amc) { amhits[i].dmg *= 2; this.renderer.shake(0.12, 4); }
+          var amc = !!amhits[i].isCrit;
+          if (amc) this.renderer.shake(0.12, 4);
           this._damageNumbers.add(amhits[i].x, amhits[i].y, amhits[i].dmg, amc);
         }
       }
@@ -943,6 +948,7 @@
         if (SG.aabbHit(p, pSize / 2, e, e.hitboxRadius)) {
           // 暴擊判定
           var dmg = p.damage * (this.player.damageMultiplier || 1) * (this._eventDamageMult || 1);
+          dmg *= SG.getTraitDamageMult(this.player, e);
           var isCrit = this.player.critChance && Math.random() < this.player.critChance;
           if (isCrit) { dmg *= 2; this.renderer.shake(0.12, 4); }
           dmg = Math.round(dmg);
@@ -1202,6 +1208,7 @@
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
     }
     this.kills++;
+    if (this._trait && this._trait.onKill) this._trait.onKill(this.player);
     if (!isBoss) this._levelKills++;
     this._combo.addKill();
     this.audio.playEnemyDeath();
@@ -1216,8 +1223,10 @@
   Game.prototype._playerTakeDamage = function(damage, attacker) {
     if (this.player.dodgeChance && Math.random() < this.player.dodgeChance) return false;
     var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1));
+    var hpBefore = this.player.hp;
     var dead = this.player.takeDamage(finalDmg);
     if (dead) { this._endGame(); return true; }
+    if (this.player.hp < hpBefore && this._trait && this._trait.onHit) this._trait.onHit(this.player);
     this.audio.playHurt();
     // 傷害反射
     if (this.player.reflect && attacker && attacker.hp > 0) {

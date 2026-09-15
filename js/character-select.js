@@ -88,6 +88,14 @@
         descDiv.textContent = ch.desc;
         card.appendChild(descDiv);
 
+        var trait = SG.getTrait && SG.getTrait(ch.id);
+        if (trait) {
+          var traitDiv = document.createElement('div');
+          traitDiv.style.cssText = 'font-size:10px; color:#ffdd55; margin-top:3px; white-space:nowrap;';
+          traitDiv.textContent = '🌟 ' + trait.name;
+          card.appendChild(traitDiv);
+        }
+
         card.onmouseover = function() { card.style.transform = 'scale(1.08)'; card.style.borderColor = '#fff'; };
         card.onmouseout = function() { card.style.transform = ''; card.style.borderColor = ch.color; };
         card.onclick = function() {
