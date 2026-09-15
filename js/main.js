@@ -46,6 +46,7 @@
     this.audio = new SG.AudioManager(cfg);
     this.leaderboard = new SG.Leaderboard();
     this._legacy = new SG.LegacySystem();
+    this.achievements = new SG.AchievementSystem();
     this._dailyChallenge = new SG.DailyChallenge();
     SG._dailyChallenge = this._dailyChallenge;
 
@@ -353,6 +354,8 @@
         updateLegacyUI();
       }
     };
+    var achievementsBtn = document.getElementById('achievements-btn');
+    if (achievementsBtn) achievementsBtn.onclick = function() { self.ui.renderAchievements(self.achievements); };
     // The shortcut is intentionally hidden in the markup until the game has
     // initialized its settings handlers. Make it visible once the icon and
     // click handler are ready so a valid image cannot be hidden by display:none.
@@ -1207,6 +1210,19 @@
     this.ui.updateSkillIcons(this.skillTree, this._relics);
   };
 
+  // 更新永久統計並一次性發放新解鎖的成就獎勵。
+  Game.prototype._recordAchievementStats = function(mutator) {
+    try {
+      this.achievements.record(mutator);
+      var gained = this.achievements.checkUnlocks();
+      for (var i = 0; i < gained.length; i++) {
+        this.meta.coins += gained[i].reward;
+        this.meta._save();
+        this.ui.showAchievementToast(gained[i], i * 3600);
+      }
+    } catch(e) {}
+  };
+
   // Boss 擊敗後提供一次遺物三選一；升級流程中則排隊至選單關閉。
   Game.prototype._offerRelicChoice = function() {
     if (this._relicChoosing || !this._relics || this._relics.length >= 3) return;
@@ -1222,6 +1238,7 @@
       if (relic) {
         relic.apply(self.player, self);
         self._relics.push(relic.id);
+        self._recordAchievementStats(function(stats) { stats.relicsCollected = (stats.relicsCollected || 0) + 1; });
       }
       self._relicChoosing = false;
     });
@@ -1256,6 +1273,12 @@
     }
     this.kills++;
     if (this._trait && this._trait.onKill) this._trait.onKill(this.player);
+    var characterId = this._selectedCharacter && this._selectedCharacter.id;
+    this._recordAchievementStats(function(stats) {
+      stats.totalKills = (stats.totalKills || 0) + 1;
+      if (isBoss) stats.totalBossKills = (stats.totalBossKills || 0) + 1;
+      if (characterId) { stats.charKills = stats.charKills || {}; stats.charKills[characterId] = (stats.charKills[characterId] || 0) + 1; }
+    });
     if (this.player._relicLifesteal) this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * this.player._relicLifesteal);
     if (!isBoss) this._levelKills++;
     this._combo.addKill();
@@ -1318,11 +1341,20 @@
     var healAmount = this.player.maxHp * (window.LEVEL_CLEAR_HEAL_PERCENT || 0.5);
     this.player.hp = Math.min(this.player.hp + healAmount, this.player.maxHp);
     var levelName = this.levelManager.getCurrent().name;
+    this._recordAchievementStats(function(stats) { stats.levelsCleared = (stats.levelsCleared || 0) + 1; });
 
     if (!this.levelManager.nextLevel()) {
       // 全通關 — 提供 Hardcore 選項
       var self = this;
       this.gameOver = true;
+      var clearCharId = this._selectedCharacter && this._selectedCharacter.id;
+      this._recordAchievementStats(function(stats) {
+        stats.gamesCleared = (stats.gamesCleared || 0) + 1;
+        stats.totalGames = (stats.totalGames || 0) + 1;
+        stats.totalPlayTime = (stats.totalPlayTime || 0) + this.gameTime;
+        stats.maxLevel = Math.max(stats.maxLevel || 0, this.player.level);
+        if (clearCharId) { stats.charClears = stats.charClears || {}; stats.charClears[clearCharId] = (stats.charClears[clearCharId] || 0) + 1; }
+      });
       this.leaderboard.addEntry(this.kills, this.player.level, this.gameTime);
       this.ui.showAllClear(this.gameTime, this.player.level, this.kills, this.hardcoreLevel, function() {
         self._startHardcore();
@@ -1353,6 +1385,8 @@
   // Hardcore 模式：保留角色進度，敵人 HP 累乘，從第一關重新開始
   Game.prototype._startHardcore = function() {
     this.hardcoreLevel++;
+    var reachedHardcore = this.hardcoreLevel;
+    this._recordAchievementStats(function(stats) { stats.hardcoreReached = Math.max(stats.hardcoreReached || 0, reachedHardcore); });
     this._hardcoreVFX.setActive(this.hardcoreLevel);
     this.gameOver = false;
     this.gameTime = 0;
@@ -1456,6 +1490,8 @@
   Game.prototype._showLevelUp = function() {
     if (this._levelUpPending) return;
     if (this._eventBlockLevelUp) return;
+    var reachedLevel = this.player.level;
+    this._recordAchievementStats(function(stats) { stats.maxLevel = Math.max(stats.maxLevel || 0, reachedLevel); });
     // Lv10 翅膀：以獨立倍率套用，與忍者疾風及局內移速升級可安全疊加。
     if (this.player.level >= 10 && !this.player._wingsApplied) {
       this.player._wingsApplied = true;
@@ -1492,6 +1528,19 @@
       this._dailyChallenge.saveScore(dailyScore, this._selectedCharacter.id, this.gameTime);
       this._dailyReward = Math.max(10, Math.round(dailyScore / 100));
     }
+    var finalLevel = this.player.level;
+    var finalTime = this.gameTime;
+    var wasEndless = this.endlessMode;
+    var finalRamp = this._endlessRamp || 0;
+    var dailyActive = this._dailyChallenge.active;
+    this._recordAchievementStats(function(stats) {
+      stats.totalDeaths = (stats.totalDeaths || 0) + 1;
+      stats.totalGames = (stats.totalGames || 0) + 1;
+      stats.totalPlayTime = (stats.totalPlayTime || 0) + finalTime;
+      stats.maxLevel = Math.max(stats.maxLevel || 0, finalLevel);
+      if (wasEndless) { stats.maxSurvivalTime = Math.max(stats.maxSurvivalTime || 0, finalTime); stats.endlessMaxRamp = Math.max(stats.endlessMaxRamp || 0, finalRamp); }
+      if (dailyActive) stats.dailyCompleted = (stats.dailyCompleted || 0) + 1;
+    });
     var earned = this.meta.earnCoins(this.kills, this.gameTime);
     var endlessResult = null;
     if (this.endlessMode) {

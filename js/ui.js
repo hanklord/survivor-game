@@ -418,6 +418,34 @@
     }
   };
 
+  UI.prototype.showAchievementToast = function(achievement, delay) {
+    setTimeout(function() {
+      var old = document.getElementById('achievement-toast');
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+      var toast = document.createElement('div');
+      toast.id = 'achievement-toast';
+      toast.style.cssText = 'position:absolute;top:18%;left:50%;transform:translateX(-50%);z-index:30;padding:12px 18px;background:rgba(32,25,8,0.94);border:2px solid #ffcc33;border-radius:10px;color:#fff;font-size:16px;text-align:center;text-shadow:0 1px 2px #000;pointer-events:none;';
+      toast.textContent = '🏆 成就解鎖：' + achievement.name + ' (+' + achievement.reward + ' 金幣)';
+      document.getElementById('game-container').appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3500);
+    }, delay || 0);
+  };
+
+  UI.prototype.renderAchievements = function(system) {
+    var el = document.getElementById('achievement-list');
+    if (!el || !system) return;
+    var all = system.getAchievements();
+    var html = '<div style="color:#ffdd55;margin-bottom:8px;">🏆 成就：' + system.getUnlockedCount() + ' / ' + all.length + '</div>';
+    for (var i = 0; i < all.length; i++) {
+      var a = all[i], unlockedAt = system.unlocked[a.id];
+      var color = unlockedAt ? '#fff' : '#777';
+      var date = unlockedAt ? ' — ' + new Date(unlockedAt).toLocaleDateString() : ' (' + (a.progress ? a.progress(system.stats) : '') + ')';
+      html += '<div style="padding:6px 2px;border-bottom:1px solid #333;color:' + color + ';">' + a.icon + ' <b>' + a.name + '</b> +' + a.reward + ' 💰<br><span style="font-size:11px;color:' + (unlockedAt ? '#aadd88' : '#888') + ';">' + a.desc + date + '</span></div>';
+    }
+    el.innerHTML = html;
+    el.style.display = 'block';
+  };
+
   // Game Over（含排行榜）
   UI.prototype.showGameOver = function(gameTime, level, kills, leaderboard, earned, totalCoins, endlessResult) {
     var rank, top5, html;

@@ -89,6 +89,8 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
       <span id="legacy-stage">最高關卡: 第 0 關</span><br>
       <button id="legacy-reset" style="margin-top:6px; padding:4px 12px; background:#662222; border:1px solid #aa4444; border-radius:4px; color:#fff; font-size:11px; cursor:pointer;">重置成長</button>
     </div>
+    <button id="achievements-btn" style="margin-top:6px;padding:7px 18px;background:#6b5413;border:1px solid #ffcc44;border-radius:6px;color:#fff;font-size:13px;cursor:pointer;">🏆 成就</button>
+    <div id="achievement-list" style="display:none;max-height:280px;overflow-y:auto;margin-top:10px;text-align:left;font-size:12px;color:#ddd;"></div>
     <button id="set-resume" style="margin-top:16px; padding:10px 30px; background:#4488ff; border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer;">▶ 繼續遊戲</button>
     <button id="set-back-menu" style="margin-top:10px; padding:10px 30px; background:#aa4444; border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer;">🏠 返回選單</button>
   </div>
@@ -134,6 +136,7 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 <script src="js/ultimate-system.js"></script>
 <script src="js/meta-progression.js"></script>
 <script src="js/legacy-system.js"></script>
+<script src="js/achievement-system.js"></script>
 <script src="js/random-events.js"></script>
 <script src="js/daily-challenge.js"></script>
 <script src="js/character-traits.js"></script>
