@@ -1427,6 +1427,11 @@
   Game.prototype._showLevelUp = function() {
     if (this._levelUpPending) return;
     if (this._eventBlockLevelUp) return;
+    // Lv10 翅膀：以獨立倍率套用，與忍者疾風及局內移速升級可安全疊加。
+    if (this.player.level >= 10 && !this.player._wingsApplied) {
+      this.player._wingsApplied = true;
+      this.player._wingBonusMult = 1.08;
+    }
     this._levelUpPending = true;
     // 每升一級攻擊力 ×1.01
     this.player.damage *= 1.01;
