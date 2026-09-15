@@ -156,6 +156,7 @@
     this._setupSettings();
 
     this._selectedCharacter = null;
+    this.endlessMode = false;
     this._archerAttack = null;
     this._valkyrieAttack = null;
     this._boomerangAttack = null;
@@ -219,6 +220,7 @@
   // 除錯：按 N 跳關
   // Boss 生成：基於擊殺數（20 隻出 Boss1，50 隻出 Boss2）
   Game.prototype._checkBossSpawn = function() {
+    if (this.endlessMode) return;
     var indices = this.levelManager.getBossIndices();
     if (this._bossesSpawnedThisLevel >= 2 || indices.length < 2) return;
 
@@ -240,8 +242,7 @@
     if (!boss) return;
     boss.animator = this._buildAnimator('boss_' + boss.cfgIdx, (this.imgConfig.bosses || [])[boss.cfgIdx]);
     this._applyAABB(boss, 'boss_' + boss.cfgIdx);
-    var hcMult = this.getHardcoreHPMult();
-    if (hcMult > 1) { boss.hp = Math.round(boss.hp * hcMult); boss.maxHp = boss.hp; }
+    this._applySpawnDifficulty(boss);
     this.bosses.push(boss);
     this.ui.showBossWarning();
     this.audio.playBossWarning();
@@ -513,6 +514,10 @@
   Game.prototype._initGame = function() {
     var self = this;
     this.player = new SG.Player();
+    this.endlessMode = localStorage.getItem('survivor_gameMode') === 'endless';
+    this._endlessRamp = 0;
+    this._endlessTimer = 0;
+    this._endlessBossTimer = 90 + Math.random() * 30;
     this._randomEvents = new SG.RandomEvents(this);
     this.player.attackType = this._selectedCharacter.attackType;
     this.player.scale = this._selectedCharacter.scale || 1.0;
@@ -987,6 +992,7 @@
 
     // 敵人移動 + 碰撞
     var speedMult = this.levelManager.getEnemySpeedMult();
+    if (this.endlessMode) speedMult *= this._getEndlessMultiplier();
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
       // 套用關卡速度倍率
@@ -1003,7 +1009,10 @@
     // Boss 移動 + 碰撞
     for (var i = 0; i < this.bosses.length; i++) {
       var b = this.bosses[i];
+      var originalBossSpeed = b.speed;
+      if (this.endlessMode) b.speed *= this._getEndlessMultiplier();
       b.moveToward(this.player, dt);
+      b.speed = originalBossSpeed;
       b.updateAnimation(dt);
       if (SG.aabbHit(this.player, this.player.hitboxRadius, b, b.hitboxRadius)) {
         if (this._playerTakeDamage(b.damage, b)) return;
@@ -1062,17 +1071,25 @@
     }
 
     // 波次（作為加強波，補充超過 TARGET 的額外怪物）
-    var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this.levelManager.getCurrent().enemyIndices);
+    if (this.endlessMode) {
+      this._endlessTimer += dt;
+      while (this._endlessTimer >= 60) {
+        this._endlessTimer -= 60;
+        this._endlessRamp += 0.1;
+      }
+      this._endlessBossTimer -= dt;
+      if (this._endlessBossTimer <= 0 && this.bosses.length === 0) {
+        var endlessBosses = this.imgConfig.bosses || [];
+        if (endlessBosses.length) this._spawnBoss(Math.floor(Math.random() * endlessBosses.length));
+        this._endlessBossTimer = 90 + Math.random() * 30;
+      }
+    }
+
+    var spawned = this.waveManager.updateWaves(dt, this.player, this.W, this.H, this.gameTime, this._getSpawnEnemyIndices());
     for (var i = 0; i < spawned.length; i++) {
       spawned[i].animator = this._buildAnimator('enemy_' + spawned[i].cfgIdx, (this.imgConfig.enemies || [])[spawned[i].cfgIdx]);
       this._applyAABB(spawned[i], 'enemy_' + spawned[i].cfgIdx);
-      // Hardcore HP 倍率
-      var hcMult = this.getHardcoreHPMult();
-      if (hcMult > 1) {
-        spawned[i].hp = Math.round(spawned[i].hp * hcMult);
-        spawned[i].maxHp = spawned[i].hp;
-        console.log('[Hardcore] Enemy HP:', spawned[i].hp, 'mult:', hcMult.toFixed(2));
-      }
+      this._applySpawnDifficulty(spawned[i]);
       if (this.enemies.length < MAX_ENEMIES) this.enemies.push(spawned[i]);
     }
 
@@ -1138,7 +1155,7 @@
       if (rushSpawned) for (var ri = 0; ri < rushSpawned.length; ri++) {
         rushSpawned[ri].animator = this._buildAnimator("enemy_" + rushSpawned[ri].cfgIdx, (this.imgConfig.enemies || [])[rushSpawned[ri].cfgIdx]);
         this._applyAABB(rushSpawned[ri], 'enemy_' + rushSpawned[ri].cfgIdx);
-        var hcR = this.getHardcoreHPMult(); if (hcR > 1) { rushSpawned[ri].hp = Math.round(rushSpawned[ri].hp * hcR); rushSpawned[ri].maxHp = rushSpawned[ri].hp; }
+        this._applySpawnDifficulty(rushSpawned[ri]);
         if (this.enemies.length < MAX_ENEMIES) this.enemies.push(rushSpawned[ri]);
       }
     } else if (rushEvent === "rush_end") {
@@ -1157,15 +1174,17 @@
     if (eliteResult.elite && this.enemies.length < MAX_ENEMIES) {
       eliteResult.elite.animator = this._buildAnimator("enemy_" + eliteResult.elite.cfgIdx, (this.imgConfig.enemies || [])[eliteResult.elite.cfgIdx]);
       this._applyAABB(eliteResult.elite, 'enemy_' + eliteResult.elite.cfgIdx);
-      var hcE = this.getHardcoreHPMult(); if (hcE > 1) { eliteResult.elite.hp = Math.round(eliteResult.elite.hp * hcE); eliteResult.elite.maxHp = eliteResult.elite.hp; }
+      this._applySpawnDifficulty(eliteResult.elite);
       this.enemies.push(eliteResult.elite);
     }
     if (eliteResult.triggerLevelUp && !this.levelingUp && !this._levelUpPending) this._showLevelUp();
     if (this._eliteSpawner.isMagnetActive()) this._magnetAllXP = true;
 
     // 關卡系統
-    var levelEvent = this.levelManager.update(dt, this.bosses.length);
-    if (levelEvent === 'level_clear') this._onLevelClear();
+    if (!this.endlessMode) {
+      var levelEvent = this.levelManager.update(dt, this.bosses.length);
+      if (levelEvent === 'level_clear') this._onLevelClear();
+    }
 
     // 無敵 + HUD
     this.player.updateInvuln(dt);
@@ -1177,7 +1196,7 @@
       for (var ui = 0; ui < ultHits.length; ui++) this._handleKill(ultHits[ui]);
     }
     this._damageNumbers.update(dt);
-    this.ui.updateHUD(this.player, this.gameTime, this.kills);
+    this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null);
     this.ui.updateSkillIcons(this.skillTree);
   };
 
@@ -1344,6 +1363,7 @@
   };
 
   Game.prototype._getLevelDisplayName = function() {
+    if (this.endlessMode) return '♾️ 無盡模式 — ' + this.levelManager.getCurrent().name;
     var name = this.levelManager.getCurrent().name;
     if (this.hardcoreLevel > 0) name += ' (Hardcore Lv.' + this.hardcoreLevel + ')';
     return name;
@@ -1357,7 +1377,7 @@
   // 在螢幕外生成一隻敵人（擊殺即補充用）
   Game.prototype._spawnOneEnemy = function() {
     if (this.enemies.length >= MAX_ENEMIES) return;
-    var enemyIndices = this.levelManager.getCurrent().enemyIndices;
+    var enemyIndices = this._getSpawnEnemyIndices();
     var pick = SG.Enemy.pickConfig(this.imgConfig, this.gameTime, enemyIndices);
     // 隨機在螢幕外 60~120px 處生成
     var angle = Math.random() * Math.PI * 2;
@@ -1372,9 +1392,29 @@
     }
     enemy.animator = this._buildAnimator('enemy_' + pick.idx, (this.imgConfig.enemies || [])[pick.idx]);
     this._applyAABB(enemy, 'enemy_' + pick.idx);
-    var hcMult = this.getHardcoreHPMult();
-    if (hcMult > 1) { enemy.hp = Math.round(enemy.hp * hcMult); enemy.maxHp = enemy.hp; }
+    this._applySpawnDifficulty(enemy);
     this.enemies.push(enemy);
+  };
+
+  Game.prototype._getEndlessMultiplier = function() {
+    return 1 + (this._endlessRamp || 0);
+  };
+
+  Game.prototype._getSpawnEnemyIndices = function() {
+    if (!this.endlessMode) return this.levelManager.getCurrent().enemyIndices;
+    var count = Math.min((this.imgConfig.enemies || []).length, 3 + Math.floor(this.gameTime / 60));
+    var indices = [];
+    for (var i = 0; i < count; i++) indices.push(i);
+    return indices;
+  };
+
+  Game.prototype._applySpawnDifficulty = function(entity) {
+    var hpMult = this.getHardcoreHPMult();
+    if (this.endlessMode) hpMult *= this._getEndlessMultiplier();
+    if (hpMult > 1) {
+      entity.hp = Math.round(entity.hp * hpMult);
+      entity.maxHp = entity.hp;
+    }
   };
 
   // 填充到目標數量（開場/關卡切換用）
@@ -1419,7 +1459,16 @@
       this._dailyReward = Math.max(10, Math.round(dailyScore / 100));
     }
     var earned = this.meta.earnCoins(this.kills, this.gameTime);
-    this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins());
+    var endlessResult = null;
+    if (this.endlessMode) {
+      var rampLevel = Math.round((this._endlessRamp || 0) * 10);
+      endlessResult = {
+        rank: this.leaderboard.addEndlessEntry(this.gameTime, this.kills, rampLevel, this._selectedCharacter.id),
+        multiplier: this._getEndlessMultiplier(),
+        character: this._selectedCharacter.name
+      };
+    }
+    this.ui.showGameOver(this.gameTime, this.player.level, this.kills, this.leaderboard, earned, this.meta.getCoins(), endlessResult);
   };
 
   SG.Game = Game;

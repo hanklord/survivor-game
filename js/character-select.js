@@ -38,6 +38,30 @@
     subtitle.textContent = '選擇角色';
     wrapper.appendChild(subtitle);
 
+    var modeRow = document.createElement('div');
+    modeRow.style.cssText = 'display:flex; gap:8px; margin:0 0 12px;';
+    var selectedMode = localStorage.getItem('survivor_gameMode') === 'endless' ? 'endless' : 'normal';
+    function makeModeButton(mode, label) {
+      var button = document.createElement('button');
+      button.textContent = label;
+      button.style.cssText = 'padding:8px 12px; border-radius:7px; cursor:pointer; color:#fff; font-size:12px; border:1px solid ' + (mode === selectedMode ? '#ffdd55' : '#667') + '; background:' + (mode === selectedMode ? '#5d4a13' : '#202040') + ';';
+      button.onclick = function() {
+        selectedMode = mode;
+        localStorage.setItem('survivor_gameMode', mode);
+        var buttons = modeRow.querySelectorAll('button');
+        for (var mi = 0; mi < buttons.length; mi++) {
+          var active = buttons[mi]._mode === mode;
+          buttons[mi].style.borderColor = active ? '#ffdd55' : '#667';
+          buttons[mi].style.background = active ? '#5d4a13' : '#202040';
+        }
+      };
+      button._mode = mode;
+      return button;
+    }
+    modeRow.appendChild(makeModeButton('normal', '⚔️ 一般模式'));
+    modeRow.appendChild(makeModeButton('endless', '♾️ 無盡模式'));
+    wrapper.appendChild(modeRow);
+
     var daily = SG._dailyChallenge;
     if (daily) {
       var dailyBtn = document.createElement('button');

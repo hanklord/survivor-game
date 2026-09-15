@@ -58,7 +58,7 @@
   }
 
   // 更新 HUD
-  UI.prototype.updateHUD = function(player, gameTime, kills) {
+  UI.prototype.updateHUD = function(player, gameTime, kills, endlessInfo) {
     var statsEl = document.getElementById('hud-stats');
     if (statsEl) {
       statsEl.innerHTML = 'Lv.' + player.level + '<br>💀 ' + kills + '<br>⚔️ ' + Math.round(player.damage) + '<br>🛡️ ' + (player.armor || 0) + '<br>👟 ' + Math.round(player.speed);
@@ -68,7 +68,9 @@
     if (xpFill) xpFill.style.width = (player.xp / player.xpNeeded * 100) + '%';
     // Timer
     var timerEl = document.getElementById('game-timer');
-    if (timerEl) timerEl.textContent = SG.formatTime(gameTime);
+    if (timerEl) {
+      timerEl.textContent = endlessInfo ? '♾️ ' + SG.formatTime(gameTime) + ' | 難度 ×' + endlessInfo.multiplier.toFixed(1) : SG.formatTime(gameTime);
+    }
   };
 
   // 更新技能圖標顯示
@@ -373,26 +375,33 @@
   };
 
   // Game Over（含排行榜）
-  UI.prototype.showGameOver = function(gameTime, level, kills, leaderboard) {
-    var rank = leaderboard.addEntry(kills, level, gameTime);
-    var top5 = leaderboard.getTop(5);
-
-    var html = 'Time: ' + SG.formatTime(gameTime) + ' | Level: ' + level + ' | Kills: ' + kills;
-    if (rank > 0) html += '<br>🏅 排名 #' + rank;
+  UI.prototype.showGameOver = function(gameTime, level, kills, leaderboard, earned, totalCoins, endlessResult) {
+    var rank, top5, html;
+    if (endlessResult) {
+      rank = endlessResult.rank;
+      top5 = leaderboard.getEndlessTop(5);
+      html = '♾️ 無盡模式<br>存活: ' + SG.formatTime(gameTime) + ' | 擊殺: ' + kills + ' | 難度 ×' + endlessResult.multiplier.toFixed(1) + '<br>角色: ' + endlessResult.character;
+      if (rank > 0) html += '<br>🏅 無盡排名 #' + rank;
+    } else {
+      rank = leaderboard.addEntry(kills, level, gameTime);
+      top5 = leaderboard.getTop(5);
+      html = 'Time: ' + SG.formatTime(gameTime) + ' | Level: ' + level + ' | Kills: ' + kills;
+      if (rank > 0) html += '<br>🏅 排名 #' + rank;
+    }
     this.els.finalStats.innerHTML = html;
 
     // 排行榜
     if (this.els.leaderboardEl) {
-      var lbHtml = '<h3>🏆 排行榜</h3><ol>';
+      var lbHtml = '<h3>🏆 ' + (endlessResult ? '無盡排行榜' : '排行榜') + '</h3><ol>';
       for (var i = 0; i < top5.length; i++) {
         var e = top5[i];
-        lbHtml += '<li>' + e.score + '分 (Lv.' + e.level + ' K:' + e.kills + ' ' + e.date + ')</li>';
+        lbHtml += endlessResult ? '<li>' + SG.formatTime(e.time) + ' (K:' + e.kills + ' 難度 ×' + (1 + e.rampLevel * 0.1).toFixed(1) + ' ' + e.character + ')</li>' : '<li>' + e.score + '分 (Lv.' + e.level + ' K:' + e.kills + ' ' + e.date + ')</li>';
       }
       lbHtml += '</ol><button id="clear-lb-btn" class="upgrade-btn" style="width:auto;padding:8px 16px;font-size:12px;">清除記錄</button>';
       this.els.leaderboardEl.innerHTML = lbHtml;
       this.els.leaderboardEl.style.display = 'block';
       document.getElementById('clear-lb-btn').onclick = function() {
-        leaderboard.clear();
+        if (endlessResult) leaderboard.clearEndless(); else leaderboard.clear();
         document.getElementById('leaderboard').innerHTML = '<p>記錄已清除</p>';
       };
     }
