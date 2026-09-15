@@ -38,17 +38,23 @@
       maxSurvivalTime:0, gamesCleared:0, levelsCleared:0, charKills:{}, charClears:{}, relicsCollected:0,
       dailyCompleted:0, hardcoreReached:0, endlessMaxRamp:0 };
   }
-  function AchievementSystem() { this.stats = this._load(STAT_KEY, defaults()); this.unlocked = this._load(ACH_KEY, {}); }
+  function AchievementSystem() {
+    this.stats = this._load(STAT_KEY, defaults()); this.unlocked = this._load(ACH_KEY, {}); this._dirty = false; this._lastFlush = Date.now();
+    var self = this;
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', function() { if (document.hidden) self.flush(); });
+  }
   AchievementSystem.prototype._load = function(key, fallback) { try { var value = JSON.parse(localStorage.getItem(key)); return value || fallback; } catch(e) { return fallback; } };
   AchievementSystem.prototype._save = function() { try { localStorage.setItem(STAT_KEY, JSON.stringify(this.stats)); localStorage.setItem(ACH_KEY, JSON.stringify(this.unlocked)); } catch(e) {} };
-  AchievementSystem.prototype.record = function(mutator) { try { mutator(this.stats); this._save(); } catch(e) {} return this.stats; };
+  AchievementSystem.prototype.record = function(mutator) { try { mutator(this.stats); this._dirty = true; } catch(e) {} return this.stats; };
+  AchievementSystem.prototype.flush = function() { if (!this._dirty) return; this._save(); this._dirty = false; this._lastFlush = Date.now(); };
+  AchievementSystem.prototype.flushIfDue = function() { if (this._dirty && Date.now() - this._lastFlush >= 5000) this.flush(); };
   AchievementSystem.prototype.checkUnlocks = function() {
     var gained = [];
     for (var i = 0; i < ACHIEVEMENTS.length; i++) {
       var achievement = ACHIEVEMENTS[i];
       if (!this.unlocked[achievement.id] && achievement.check(this.stats)) { this.unlocked[achievement.id] = Date.now(); gained.push(achievement); }
     }
-    if (gained.length) this._save();
+    if (gained.length) this._dirty = true;
     return gained;
   };
   AchievementSystem.prototype.getAchievements = function() { return ACHIEVEMENTS.slice(); };

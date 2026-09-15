@@ -1206,20 +1206,28 @@
       for (var ui = 0; ui < ultHits.length; ui++) this._handleKill(ultHits[ui]);
     }
     this._damageNumbers.update(dt);
+    this.achievements.flushIfDue();
     this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null);
     this.ui.updateSkillIcons(this.skillTree, this._relics);
   };
 
   // 更新永久統計並一次性發放新解鎖的成就獎勵。
-  Game.prototype._recordAchievementStats = function(mutator) {
+  Game.prototype._recordAchievementStats = function(mutator, options) {
     try {
       this.achievements.record(mutator);
-      var gained = this.achievements.checkUnlocks();
+      var checkNow = !options || !options.kill;
+      if (options && options.kill) {
+        this._achievementKillChecks = (this._achievementKillChecks || 0) + 1;
+        checkNow = !!options.immediate || this._achievementKillChecks >= 25;
+        if (checkNow) this._achievementKillChecks = 0;
+      }
+      var gained = checkNow ? this.achievements.checkUnlocks() : [];
       for (var i = 0; i < gained.length; i++) {
         this.meta.coins += gained[i].reward;
         this.meta._save();
         this.ui.showAchievementToast(gained[i], i * 3600);
       }
+      if (checkNow) this.achievements.flush();
     } catch(e) {}
   };
 
@@ -1278,7 +1286,7 @@
       stats.totalKills = (stats.totalKills || 0) + 1;
       if (isBoss) stats.totalBossKills = (stats.totalBossKills || 0) + 1;
       if (characterId) { stats.charKills = stats.charKills || {}; stats.charKills[characterId] = (stats.charKills[characterId] || 0) + 1; }
-    });
+    }, { kill: true, immediate: isBoss });
     if (this.player._relicLifesteal) this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * this.player._relicLifesteal);
     if (!isBoss) this._levelKills++;
     this._combo.addKill();
