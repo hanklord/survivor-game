@@ -1348,11 +1348,13 @@
       var self = this;
       this.gameOver = true;
       var clearCharId = this._selectedCharacter && this._selectedCharacter.id;
+      var clearTime = this.gameTime;
+      var clearLevel = this.player.level;
       this._recordAchievementStats(function(stats) {
         stats.gamesCleared = (stats.gamesCleared || 0) + 1;
         stats.totalGames = (stats.totalGames || 0) + 1;
-        stats.totalPlayTime = (stats.totalPlayTime || 0) + this.gameTime;
-        stats.maxLevel = Math.max(stats.maxLevel || 0, this.player.level);
+        stats.totalPlayTime = (stats.totalPlayTime || 0) + clearTime;
+        stats.maxLevel = Math.max(stats.maxLevel || 0, clearLevel);
         if (clearCharId) { stats.charClears = stats.charClears || {}; stats.charClears[clearCharId] = (stats.charClears[clearCharId] || 0) + 1; }
       });
       this.leaderboard.addEntry(this.kills, this.player.level, this.gameTime);
