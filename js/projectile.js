@@ -12,17 +12,19 @@
     this.vx = 0;
     this.vy = 0;
     this.damage = 0;
+    this.owner = null;
     this.life = 0;
     this.active = false;
   }
 
   // 初始化（重用時呼叫）
-  Projectile.prototype.init = function(x, y, angle, damage) {
+  Projectile.prototype.init = function(x, y, angle, damage, owner) {
     this.x = x;
     this.y = y;
     this.vx = Math.cos(angle) * PROJECTILE_SPEED;
     this.vy = Math.sin(angle) * PROJECTILE_SPEED;
     this.damage = damage;
+    this.owner = owner || null;
     this.life = PROJECTILE_LIFE;
     this.active = true;
   };
@@ -45,7 +47,7 @@
       var a = Math.atan2(t.y - player.y, t.x - player.x);
       if (i > 0) a += (Math.random() - 0.5) * SPREAD_ANGLE;
       var p = pool.get();
-      p.init(player.x, player.y, a, player.damage);
+      p.init(player.x, player.y, a, player.damage, player);
       bullets.push(p);
     }
     player.fireTimer = player.fireRate;
