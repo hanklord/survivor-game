@@ -58,11 +58,13 @@
   }
 
   // 更新 HUD
-  UI.prototype.updateHUD = function(player, gameTime, kills, endlessInfo) {
+  UI.prototype.updateHUD = function(player, gameTime, kills, endlessInfo, dualInfo) {
     var statsEl = document.getElementById('hud-stats');
     if (statsEl) {
+      statsEl.style.display = dualInfo ? 'none' : '';
       statsEl.innerHTML = 'Lv.' + player.level + '<br>💀 ' + kills + '<br>⚔️ ' + Math.round(player.damage) + '<br>🛡️ ' + (player.armor || 0) + '<br>👟 ' + Math.round(player.speed);
     }
+    this.updateDualHeroHUD(dualInfo);
     // XP bar
     var xpFill = document.getElementById('xp-fill');
     if (xpFill) xpFill.style.width = (player.xp / player.xpNeeded * 100) + '%';
@@ -90,6 +92,41 @@
       }
     }
     this.els.skillIcons.innerHTML = html;
+  };
+
+  UI.prototype.updateDualHeroHUD = function(dualInfo) {
+    var hud = document.getElementById('dual-hero-hud');
+    var swapBtn = document.getElementById('swap-hero-btn');
+    if (!hud) return;
+    if (!dualInfo || !dualInfo.heroes || dualInfo.heroes.length < 2) {
+      hud.style.display = 'none';
+      if (swapBtn) swapBtn.style.display = 'none';
+      return;
+    }
+    var icons = { ranged: 'mage.png', archer: 'archer.png', knight: 'knight.png', valkyrie: 'valkyrie.png', ninja: 'ninja.png', amazon: 'amazon.png', melee: 'melee.png' };
+    var active = dualInfo.activeHeroIndex;
+    var html = '';
+    for (var i = 0; i < dualInfo.heroes.length; i++) {
+      var hero = dualInfo.heroes[i];
+      var isActive = i === active;
+      var ratio = Math.max(0, Math.min(1, hero.hp / hero.maxHp));
+      html += '<div class="dual-hero-card ' + (isActive ? 'active' : '') + '">' +
+        '<img src="assets/ui/chars/' + (icons[hero.characterId] || 'mage.png') + '" alt="">' +
+        '<div>' + (isActive ? '<b>主控</b>' : '<small>AI</small>') + '<br><span style="font-size:11px;">' + (hero.character && hero.character.name || hero.characterId) + '</span>' +
+        (isActive ? '<div class="dual-hero-hp"><i style="width:' + (ratio * 100) + '%"></i></div><small>' + Math.ceil(hero.hp) + '/' + hero.maxHp + '</small>' : '') +
+        '</div></div>';
+    }
+    hud.innerHTML = html;
+    hud.style.display = 'block';
+    if (swapBtn) swapBtn.style.display = 'block';
+  };
+
+  UI.prototype.showHeroSwap = function() {
+    var flash = document.getElementById('hero-swap-flash');
+    if (!flash) return;
+    flash.style.display = 'block';
+    clearTimeout(this._heroSwapFlashTimer);
+    this._heroSwapFlashTimer = setTimeout(function() { flash.style.display = 'none'; }, 320);
   };
 
   // 更新關卡名稱

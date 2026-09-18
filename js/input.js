@@ -10,6 +10,7 @@
     this._joyId = null;
     this._onPause = null; // 外部設定的暫停回呼
     this._onMute = null;  // 靜音切換回呼
+    this._onSwapHero = null;
     this._init();
   }
 
@@ -22,6 +23,10 @@
       if (e.code === 'KeyM' && self._onMute) self._onMute();
       if (e.code === 'KeyN' && self._onSkipLevel) self._onSkipLevel(); // 除錯：跳關
       if (e.code === 'KeyL' && self._onDebugLevelUp) self._onDebugLevelUp(); // 除錯：升級
+      if (e.code === 'Tab' && !e.repeat) {
+        e.preventDefault();
+        if (self._onSwapHero) self._onSwapHero();
+      }
     });
     document.addEventListener('keyup', function(e) {
       self.keys[e.code] = false;

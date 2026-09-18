@@ -103,6 +103,7 @@
     };
     this.input._onSkipLevel = function() { self._debugSkipLevel(); };
     this.input._onDebugLevelUp = function() { self._debugLevelUp(); };
+    this.input._onSwapHero = function() { self._swapHero(); };
     this.input._onUltimate = function() {
       if (!self._ultimateReady || self.gameOver || self.paused) return;
       var killed = self._ultimate.activate(self.enemies, self.bosses);
@@ -118,6 +119,7 @@
     this._ultimateReady = false;
     this._ultimateFlash = 0;
     this._ultimateKillsNeeded = 30;
+    this._heroSwapCooldown = 0;
     this._levelKills = 0; // 本關擊殺數（用於 Boss 觸發）
     this._bossesSpawnedThisLevel = 0; // 本關已生成 Boss 數
     var doUltimate = function(e) {
@@ -146,6 +148,8 @@
         doUltimate({ clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY });
       }
     });
+    var swapBtn = document.getElementById('swap-hero-btn');
+    if (swapBtn) swapBtn.addEventListener('click', function() { self._swapHero(); });
     window.addEventListener('resize', function() { self._resize(); });
 
     // 首次互動解鎖音頻 + 播放 BGM
@@ -738,6 +742,38 @@
     return true;
   };
 
+  Game.prototype._swapHero = function() {
+    if (!this.dualHeroMode || this.heroes.length !== 2 || this._heroSwapCooldown > 0 || this.gameOver) return false;
+    var outgoing = this.player;
+    var incomingIndex = 1 - this.activeHeroIndex;
+    var incoming = this.heroes[incomingIndex];
+    // Update both flags before exposing the new active facade.
+    outgoing.invincible = true;
+    incoming.invincible = false;
+    outgoing.role = 'sub';
+    incoming.role = 'main';
+    this._setActiveHero(incomingIndex);
+    this._selectedCharacter = incoming.character;
+    this._trait = incoming._trait;
+    this._ultimate = incoming._ultimate;
+    this.weaponManager = incoming.weaponManager;
+    this.skillTree = incoming.skillTree;
+    this._passiveItems = incoming.passiveItems;
+    this._meleeAttack = incoming._attacks.melee || null;
+    this._valkyrieAttack = incoming._attacks.valkyrie || null;
+    this._archerAttack = incoming._attacks.archer || null;
+    this._boomerangAttack = incoming._attacks.boomerang || null;
+    this._amazonAttack = incoming._attacks.amazon || null;
+    // Player-caching systems must follow the active hero too.
+    if (this._autoPlay) this._autoPlay.player = incoming;
+    if (this._eliteSpawner) this._eliteSpawner.player = incoming;
+    this._subHeroAI = new SG.SubHeroAI(outgoing, this.spatialHash);
+    this._heroSwapCooldown = 0.3;
+    if (this.audio && this.audio.playPickup) this.audio.playPickup();
+    if (this.ui) this.ui.showHeroSwap();
+    return true;
+  };
+
   Game.prototype._createSubHero = function(character) {
     var hero = new SG.Player();
     hero.attackType = character.attackType;
@@ -798,7 +834,7 @@
 
   Game.prototype._updateSubHeroAttacks = function(dt) {
     if (!this.dualHeroMode || this.heroes.length < 2) return;
-    var hero = this.heroes[1];
+    var hero = this.heroes[1 - this.activeHeroIndex];
     if (!hero || hero.hp <= 0) return;
     // DH-2: companions have their own movement/attacks, but never an ultimate activation.
     if (this._subHeroAI) hero.move(this._subHeroAI.update(dt, this.player, this.enemies, this.bosses), dt);
@@ -957,6 +993,7 @@
   Game.prototype._update = function(dt) {
     var self = this;
     this.gameTime += dt;
+    if (this._heroSwapCooldown > 0) this._heroSwapCooldown = Math.max(0, this._heroSwapCooldown - dt);
     if (this._randomEvents) this._randomEvents.update(dt);
     if (this._trait && this._trait.onUpdate) this._trait.onUpdate(dt, this, this.player);
     if (this._relicOfferQueued && !this.levelingUp && !this._levelUpPending && !this.levelClearing) {
@@ -1353,7 +1390,8 @@
     }
     this._damageNumbers.update(dt);
     this.achievements.flushIfDue();
-    this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null);
+    this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null,
+      this.dualHeroMode ? { heroes: this.heroes, activeHeroIndex: this.activeHeroIndex } : null);
     this.ui.updateSkillIcons(this.skillTree, this._relics);
   };
 
