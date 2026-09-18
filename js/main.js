@@ -58,6 +58,11 @@
 
     // 遊戲狀態
     this.player = null;
+    // DH-1: player remains the controlled hero for legacy systems; heroes holds all entities.
+    this.heroes = [];
+    this.activeHeroIndex = 0;
+    this.dualHeroMode = false;
+    this._secondaryCharacter = null;
     this.enemies = [];
     this.projectiles = [];
     this.particles = [];
@@ -98,6 +103,7 @@
     };
     this.input._onSkipLevel = function() { self._debugSkipLevel(); };
     this.input._onDebugLevelUp = function() { self._debugLevelUp(); };
+    this.input._onSwapHero = function() { self._swapHero(); };
     this.input._onUltimate = function() {
       if (!self._ultimateReady || self.gameOver || self.paused) return;
       var killed = self._ultimate.activate(self.enemies, self.bosses);
@@ -113,6 +119,7 @@
     this._ultimateReady = false;
     this._ultimateFlash = 0;
     this._ultimateKillsNeeded = 30;
+    this._heroSwapCooldown = 0;
     this._levelKills = 0; // 本關擊殺數（用於 Boss 觸發）
     this._bossesSpawnedThisLevel = 0; // 本關已生成 Boss 數
     var doUltimate = function(e) {
@@ -141,6 +148,8 @@
         doUltimate({ clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY });
       }
     });
+    var swapBtn = document.getElementById('swap-hero-btn');
+    if (swapBtn) swapBtn.addEventListener('click', function() { self._swapHero(); });
     window.addEventListener('resize', function() { self._resize(); });
 
     // 首次互動解鎖音頻 + 播放 BGM
@@ -476,8 +485,10 @@
     var self = this;
     // 顯示商店 → 角色選擇
     self._showMetaShop(function() {
-      new SG.CharacterSelect(function(character) {
-        self._selectedCharacter = character;
+      new SG.CharacterSelect(function(selection) {
+        self.dualHeroMode = !!(selection && selection.dualHero);
+        self._selectedCharacter = self.dualHeroMode ? selection.primary : selection;
+        self._secondaryCharacter = self.dualHeroMode ? selection.secondary : null;
         self._initGame();
       });
     });
@@ -517,6 +528,9 @@
   Game.prototype._initGame = function() {
     var self = this;
     this.player = new SG.Player();
+    this.heroes = [];
+    this.activeHeroIndex = 0;
+    this.dualHeroMode = !!(window.DUAL_HERO_ENABLED && this.dualHeroMode && this._secondaryCharacter);
     this._relics = [];
     this._relicChoosing = false;
     this._relicOfferQueued = false;
@@ -543,6 +557,7 @@
     this._bomb = new SG.BombSystem();
     this._bossProjectiles = new SG.BossProjectileSystem();
     this._autoPlay = new SG.AutoPlay(this.spatialHash, this.player);
+    this._subHeroAI = null;
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -631,6 +646,24 @@
     this.waveManager = new SG.WaveManager(this.imgConfig);
     this.weaponManager = new SG.WeaponManager(this.player);
     this.skillTree = new SG.SkillTree();
+    this.player.skillTree = this.skillTree;
+    this.player.passiveItems = this._passiveItems;
+    this.player.weaponManager = this.weaponManager;
+    this.player._attacks = {
+      melee: this._meleeAttack,
+      valkyrie: this._valkyrieAttack,
+      archer: this._archerAttack,
+      boomerang: this._boomerangAttack,
+      amazon: this._amazonAttack
+    };
+    this._registerHero(this.player, this._selectedCharacter, 0, 'main');
+    if (this.dualHeroMode) {
+      var subHero = this._createSubHero(this._secondaryCharacter);
+      subHero.invincible = true;
+      this._subHeroAI = new SG.SubHeroAI(subHero, this.spatialHash);
+      this._applyHeroSynergy();
+    }
+    this._setActiveHero(0);
     this.levelManager = new SG.LevelManager(this.imgConfig);
     this.gameTime = 0;
     this.kills = 0;
@@ -685,6 +718,165 @@
     }
     if (!Object.keys(animConfig).length) return null;
     return new SG.SpriteAnimator(animConfig);
+  };
+
+  // DH-1 hero records keep per-hero progression objects independent.  Existing code
+  // continues to use this.player, which is always the currently controlled hero.
+  Game.prototype._registerHero = function(hero, character, slot, role) {
+    hero.characterId = character.id;
+    hero.heroSlot = slot;
+    hero.role = role;
+    hero.isActive = slot === this.activeHeroIndex;
+    hero.invincible = false;
+    hero.character = character;
+    hero._attacks = hero._attacks || {};
+    this.heroes[slot] = hero;
+    return hero;
+  };
+
+  // DH-1 keeps the legacy this.player facade in sync for later DH-3 hero switching.
+  Game.prototype._setActiveHero = function(index) {
+    if (!this.heroes[index]) return false;
+    for (var i = 0; i < this.heroes.length; i++) this.heroes[i].isActive = i === index;
+    this.activeHeroIndex = index;
+    this.player = this.heroes[index];
+    return true;
+  };
+
+  Game.prototype._swapHero = function() {
+    if (!this.dualHeroMode || this.heroes.length !== 2 || this._heroSwapCooldown > 0 || this.gameOver) return false;
+    var outgoing = this.player;
+    var incomingIndex = 1 - this.activeHeroIndex;
+    var incoming = this.heroes[incomingIndex];
+    // Update both flags before exposing the new active facade.
+    outgoing.invincible = true;
+    incoming.invincible = false;
+    outgoing.role = 'sub';
+    incoming.role = 'main';
+    this._setActiveHero(incomingIndex);
+    this._selectedCharacter = incoming.character;
+    this._trait = incoming._trait;
+    this._ultimate = incoming._ultimate;
+    this.weaponManager = incoming.weaponManager;
+    this.skillTree = incoming.skillTree;
+    this._passiveItems = incoming.passiveItems;
+    this._meleeAttack = incoming._attacks.melee || null;
+    this._valkyrieAttack = incoming._attacks.valkyrie || null;
+    this._archerAttack = incoming._attacks.archer || null;
+    this._boomerangAttack = incoming._attacks.boomerang || null;
+    this._amazonAttack = incoming._attacks.amazon || null;
+    // Player-caching systems must follow the active hero too.
+    if (this._autoPlay) this._autoPlay.player = incoming;
+    if (this._eliteSpawner) this._eliteSpawner.player = incoming;
+    this._subHeroAI = new SG.SubHeroAI(outgoing, this.spatialHash);
+    this._heroSwapCooldown = 0.3;
+    if (this.audio && this.audio.playPickup) this.audio.playPickup();
+    if (this.ui) this.ui.showHeroSwap();
+    return true;
+  };
+
+  Game.prototype._applyHeroSynergy = function() {
+    if (!this.dualHeroMode || this.heroes.length !== 2 || !SG.getSynergy) return null;
+    var synergy = SG.getSynergy(this.heroes[0].characterId, this.heroes[1].characterId);
+    for (var i = 0; i < this.heroes.length; i++) {
+      if (!this.heroes[i]._synergyApplied) {
+        synergy.apply(this.heroes[i]);
+        this.heroes[i]._synergyApplied = true;
+      }
+    }
+    this._heroSynergy = synergy;
+    if (this.ui) this.ui.showHeroSynergy(synergy);
+    return synergy;
+  };
+
+  Game.prototype._createSubHero = function(character) {
+    var hero = new SG.Player();
+    hero.attackType = character.attackType;
+    hero.scale = character.scale || 1;
+    hero.hitboxRadius = character.hitboxRadius || PLAYER_HITBOX;
+    hero.critChance = character.baseCritRate || 0;
+    hero.x = this.player.x - 44;
+    hero.y = this.player.y + 32;
+    hero._attacks = {};
+    this.meta.applyToPlayer(hero);
+
+    if (character.id === 'knight') {
+      hero.maxHp = hero.hp = 150;
+      hero.speed *= 0.85;
+      hero.animator = this._buildAnimator('knight', { sprites: { idle: { file: 'assets/strips/golden_knight_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/golden_knight_run_8f.png', fps: 10 } } });
+      hero.spriteDefaultRight = true;
+      hero._attacks.melee = new SG.MeleeAttack(hero);
+      hero._attacks.melee.damage = Math.round(hero._attacks.melee.damage * 2.5);
+    } else if (character.id === 'valkyrie') {
+      hero.animator = this._buildAnimator('valkyrie', { sprites: { idle: { file: 'assets/strips/valkyrie_idle_6f.png', fps: 8 }, run: { file: 'assets/strips/valkyrie_run_6f.png', fps: 10 } } });
+      hero.spriteDefaultRight = true;
+      hero._attacks.valkyrie = new SG.ValkyrieAttack(hero);
+    } else if (character.id === 'archer') {
+      hero.animator = this._buildAnimator('archer', { sprites: { idle: { file: 'assets/strips/archer_idle_4f.png', fps: 6 }, run: { file: 'assets/strips/archer_run_8f.png', fps: 10 } } });
+      hero.spriteDefaultRight = true;
+      hero._attacks.archer = new SG.ArcherAttack(hero);
+    } else if (character.id === 'ninja') {
+      hero.animator = this._buildAnimator('ninja', { sprites: { idle: { file: 'assets/strips/ninja_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/ninja_run_8f.png', fps: 10 } } });
+      hero.spriteDefaultRight = true;
+      hero._attacks.boomerang = new SG.BoomerangAttack(hero);
+    } else if (character.id === 'amazon') {
+      hero.animator = this._buildAnimator('amazon', { sprites: { idle: { file: 'assets/strips/amazon_idle_8f.png', fps: 6 }, run: { file: 'assets/strips/amazon_run_8f.png', fps: 10 } } });
+      hero.spriteDefaultRight = true;
+      hero.spriteWidthRatio = 0.667;
+      hero._attacks.amazon = new SG.AmazonAttack(hero);
+    } else if (character.id === 'melee') {
+      hero.animator = this._buildAnimator('melee', { sprites: { idle: { file: 'assets/strips/dark_knight_idle_5f.png', fps: 8 }, run: { file: 'assets/strips/dark_knight_walk_8f.png', fps: 10 } } });
+      hero.spriteDefaultRight = true;
+      hero._attacks.melee = new SG.MeleeAttack(hero);
+    } else {
+      hero.animator = this._buildAnimator('player', this.imgConfig.player);
+      hero.spriteDefaultRight = true;
+    }
+    hero._trait = SG.getTrait(character.id);
+    if (hero._trait && hero._trait.init) hero._trait.init(hero);
+    var legacyMult = this._legacy.getMultipliers();
+    hero.maxHp = Math.round(hero.maxHp * legacyMult.hp);
+    hero.hp = hero.maxHp;
+    hero.damage = Math.round(hero.damage * legacyMult.atk);
+    hero.skillTree = new SG.SkillTree();
+    hero.passiveItems = new SG.PassiveItems();
+    hero.weaponManager = new SG.WeaponManager(hero);
+    hero._ultimate = new SG.UltimateSystem(hero);
+    var ultTypes = { ranged: 'mage_explosion', archer: 'archer_arrowrain', melee: 'knight_dash', valkyrie: 'valkyrie_radial', boomerang: 'ninja_spiral', amazon: 'amazon_arc' };
+    hero._ultimate.type = ultTypes[hero.attackType] || 'mage_explosion';
+    return this._registerHero(hero, character, 1, 'sub');
+  };
+
+  Game.prototype._updateSubHeroAttacks = function(dt) {
+    if (!this.dualHeroMode || this.heroes.length < 2) return;
+    var hero = this.heroes[1 - this.activeHeroIndex];
+    if (!hero || hero.hp <= 0) return;
+    // DH-2: companions have their own movement/attacks, but never an ultimate activation.
+    if (this._subHeroAI) hero.move(this._subHeroAI.update(dt, this.player, this.enemies, this.bosses), dt);
+    if (hero._trait && hero._trait.onUpdate) hero._trait.onUpdate(dt, this, hero);
+    hero.updateAnimation(dt);
+    var attacks = hero._attacks;
+    var hits = [];
+    var speedMult = SG.getAttackSpeedMult(hero);
+    if (attacks.valkyrie) hits = attacks.valkyrie.update(dt, this.enemies, this.bosses, speedMult);
+    else if (attacks.melee) hits = attacks.melee.update(dt, this.enemies, this.bosses, speedMult);
+    else if (attacks.archer) {
+      hits = attacks.archer.update(dt, this.enemies, this.bosses, speedMult);
+      var explosiveHits = attacks.archer.getExplosiveArrow().update(dt, this.enemies, this.bosses, speedMult);
+      var piercingHits = attacks.archer.getPiercingArrow().update(dt, this.enemies, this.bosses, speedMult);
+      hits = hits.concat(explosiveHits, piercingHits);
+    } else if (attacks.boomerang) hits = attacks.boomerang.update(dt, this.enemies, this.bosses, speedMult);
+    else if (attacks.amazon) hits = attacks.amazon.update(dt, this.enemies, this.bosses, speedMult);
+    else {
+      hero.fireTimer -= dt * speedMult;
+      if (hero.fireTimer <= 0) {
+        var targets = this.enemies.concat(this.bosses).sort(function(a, b) { return SG.dist(hero, a) - SG.dist(hero, b); });
+        var bullets = SG.Projectile.fireAtTargets(hero, targets, this.projectilePool);
+        for (var b = 0; b < bullets.length; b++) this.projectiles.push(bullets[b]);
+        if (bullets.length) hero.triggerAttack();
+      }
+    }
+    for (var i = 0; i < hits.length; i++) this._handleKill(hits[i], hero);
   };
 
   // 預計算所有敵人/Boss sprite 的 AABB（基於輝度掃描）
@@ -765,6 +957,7 @@
     }
     this.renderer.render({
       player: this.player,
+      heroes: this.heroes,
       enemies: this.enemies,
       bosses: this.bosses,
       projectiles: this.projectiles,
@@ -815,6 +1008,7 @@
   Game.prototype._update = function(dt) {
     var self = this;
     this.gameTime += dt;
+    if (this._heroSwapCooldown > 0) this._heroSwapCooldown = Math.max(0, this._heroSwapCooldown - dt);
     if (this._randomEvents) this._randomEvents.update(dt);
     if (this._trait && this._trait.onUpdate) this._trait.onUpdate(dt, this, this.player);
     if (this._relicOfferQueued && !this.levelingUp && !this._levelUpPending && !this.levelClearing) {
@@ -950,6 +1144,9 @@
       }
     }
 
+    // DH-1 secondary hero attacks are owner-bound and run alongside the active hero.
+    this._updateSubHeroAttacks(dt);
+
     // 子彈碰撞
     var pSize = (this.imgConfig.projectile && this.imgConfig.projectile.size) || 12;
     for (var i = this.projectiles.length - 1; i >= 0; i--) {
@@ -962,17 +1159,18 @@
         if (e.hp <= 0) continue;
         if (SG.aabbHit(p, pSize / 2, e, e.hitboxRadius)) {
           // 暴擊判定
-          var dmg = p.damage * (this.player.damageMultiplier || 1) * (this._eventDamageMult || 1);
-          dmg *= SG.getTraitDamageMult(this.player, e);
-          var isCrit = this.player.critChance && Math.random() < this.player.critChance;
+          var projectileOwner = p.owner || this.player;
+          var dmg = p.damage * (projectileOwner.damageMultiplier || 1) * (this._eventDamageMult || 1);
+          dmg *= SG.getTraitDamageMult(projectileOwner, e);
+          var isCrit = projectileOwner.critChance && Math.random() < projectileOwner.critChance;
           if (isCrit) { dmg *= 2; this.renderer.shake(0.12, 4); }
           dmg = Math.round(dmg);
           e.hp -= dmg;
           if (!this._lowQuality) this._damageNumbers.add(e.x, e.y, dmg, isCrit);
           hit = true;
-          if (e.hp <= 0) this._handleKill(e);
+          if (e.hp <= 0) this._handleKill(e, projectileOwner);
           // 法師 Lv13+：火球爆炸 AOE（40% 機率）
-          if (this.player.attackType === 'ranged' && this.player.level >= 13 && Math.random() < 0.4) {
+          if (projectileOwner.attackType === 'ranged' && projectileOwner.level >= 13 && Math.random() < 0.4) {
             var expRadius = 70;
             var expDmg = Math.round(dmg * 0.5);
             // 視覺
@@ -986,7 +1184,7 @@
               if (SG.aabbHit(e, expRadius, at, at.hitboxRadius)) {
                 at.hp -= expDmg;
                 if (!this._lowQuality) this._damageNumbers.add(at.x, at.y, expDmg, false);
-                if (at.hp <= 0) this._handleKill(at);
+                if (at.hp <= 0) this._handleKill(at, projectileOwner);
               }
             }
           }
@@ -1119,9 +1317,10 @@
     // 漸進補充：每 0.3~0.5 秒生成 2~4 隻
     if (!this._spawnTimer) this._spawnTimer = 0;
     this._spawnTimer -= dt;
-    if (this._spawnTimer <= 0 && this.enemies.length < TARGET_ENEMY_COUNT) {
+    var targetEnemyCount = this._getTargetEnemyCount();
+    if (this._spawnTimer <= 0 && this.enemies.length < targetEnemyCount) {
       var spawnCount = 2 + Math.floor(Math.random() * 3); // 2~4 隻
-      for (var sp = 0; sp < spawnCount && this.enemies.length < TARGET_ENEMY_COUNT; sp++) {
+      for (var sp = 0; sp < spawnCount && this.enemies.length < targetEnemyCount; sp++) {
         this._spawnOneEnemy();
       }
       this._spawnTimer = 0.3 + Math.random() * 0.2; // 0.3~0.5 秒間隔
@@ -1207,7 +1406,8 @@
     }
     this._damageNumbers.update(dt);
     this.achievements.flushIfDue();
-    this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null);
+    this.ui.updateHUD(this.player, this.gameTime, this.kills, this.endlessMode ? { multiplier: this._getEndlessMultiplier() } : null,
+      this.dualHeroMode ? { heroes: this.heroes, activeHeroIndex: this.activeHeroIndex } : null);
     this.ui.updateSkillIcons(this.skillTree, this._relics);
   };
 
@@ -1253,7 +1453,8 @@
   };
 
   // 處理敵人/Boss 被殺死
-  Game.prototype._handleKill = function(e) {
+  Game.prototype._handleKill = function(e, owner) {
+    owner = owner || this.player;
     var isBoss = e.type === 'boss';
     var pCount = isBoss ? BOSS_PARTICLE_COUNT : undefined;
     var parts = SG.Particle.spawn(e.x, e.y, e.color, pCount, this.particlePool);
@@ -1280,14 +1481,14 @@
       if (e.isElite) this._eliteSpawner.onEliteKill(e.x, e.y);
     }
     this.kills++;
-    if (this._trait && this._trait.onKill) this._trait.onKill(this.player);
-    var characterId = this._selectedCharacter && this._selectedCharacter.id;
+    if (owner._trait && owner._trait.onKill) owner._trait.onKill(owner);
+    var characterId = owner.characterId || (this._selectedCharacter && this._selectedCharacter.id);
     this._recordAchievementStats(function(stats) {
       stats.totalKills = (stats.totalKills || 0) + 1;
       if (isBoss) stats.totalBossKills = (stats.totalBossKills || 0) + 1;
       if (characterId) { stats.charKills = stats.charKills || {}; stats.charKills[characterId] = (stats.charKills[characterId] || 0) + 1; }
     }, { kill: true, immediate: isBoss });
-    if (this.player._relicLifesteal) this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.maxHp * this.player._relicLifesteal);
+    if (owner._relicLifesteal) owner.hp = Math.min(owner.maxHp, owner.hp + owner.maxHp * owner._relicLifesteal);
     if (!isBoss) this._levelKills++;
     this._combo.addKill();
     this.audio.playEnemyDeath();
@@ -1299,7 +1500,11 @@
   };
 
   // 玩家受傷（含護甲、閃避、反射）
-  Game.prototype._playerTakeDamage = function(damage, attacker) {
+  Game.prototype._playerTakeDamage = function(damage, attacker, targetHero) {
+    // All existing collision callers omit targetHero and therefore resolve to the active hero.
+    // Keep this guard for future DH collision paths: the companion is invulnerable in DH-2.
+    targetHero = targetHero || this.player;
+    if (targetHero !== this.player || targetHero.invincible) return false;
     if (this.player.dodgeChance && Math.random() < this.player.dodgeChance) return false;
     var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1) * (this.player._relicDamageTakenMult || 1));
     var hpBefore = this.player.hp;
@@ -1484,6 +1689,7 @@
   Game.prototype._applySpawnDifficulty = function(entity) {
     var hpMult = this.getHardcoreHPMult();
     if (this.endlessMode) hpMult *= this._getEndlessMultiplier();
+    if (this.dualHeroMode && entity.type === 'boss') hpMult *= (window.DUAL_HERO_BOSS_HP_MULT || 1.5);
     if (hpMult > 1) {
       entity.hp = Math.round(entity.hp * hpMult);
       entity.maxHp = entity.hp;
@@ -1492,9 +1698,15 @@
 
   // 填充到目標數量（開場/關卡切換用）
   Game.prototype._fillEnemies = function() {
-    while (this.enemies.length < TARGET_ENEMY_COUNT) {
+    var targetEnemyCount = this._getTargetEnemyCount();
+    while (this.enemies.length < targetEnemyCount) {
       this._spawnOneEnemy();
     }
+  };
+
+  Game.prototype._getTargetEnemyCount = function() {
+    var multiplier = this.dualHeroMode ? (window.DUAL_HERO_ENEMY_MULT || 1.4) : 1;
+    return Math.min(MAX_ENEMIES, Math.round(TARGET_ENEMY_COUNT * multiplier));
   };
 
   Game.prototype._showLevelUp = function() {

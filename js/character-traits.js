@@ -79,7 +79,7 @@
     return trait && trait.getAttackSpeedMult ? trait.getAttackSpeedMult(player) : 1;
   };
   SG.getAttackSpeedMult = function(player) {
-    return SG.getTraitAttackSpeedMult(player) * (player._relicAtkSpeedMult || 1);
+    return SG.getTraitAttackSpeedMult(player) * (player._relicAtkSpeedMult || 1) * (player._synergyAtkSpeedMult || 1);
   };
   SG.applyTraitDamage = function(player, enemy, baseDamage, options) {
     var damage = baseDamage * (player.damageMultiplier || 1) * SG.getTraitDamageMult(player, enemy);

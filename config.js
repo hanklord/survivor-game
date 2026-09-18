@@ -1,4 +1,7 @@
-window.GAME_VERSION = "V320";
+window.GAME_VERSION = "V334";
+window.DUAL_HERO_ENABLED = true;
+window.DUAL_HERO_ENEMY_MULT = 1.4;
+window.DUAL_HERO_BOSS_HP_MULT = 1.5;
 window.HARDCORE_HP_MULTIPLIER = 3.0; 
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;
 window.DEBUG_SHOW_HITBOX = false;

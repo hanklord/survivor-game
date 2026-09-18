@@ -201,6 +201,13 @@
     this._drawBosses(state.bosses, camX, camY);
     this._drawProjectiles(state.projectiles, camX, camY);
     this._drawPlayer(player, state.hardcoreLevel || 0, state.ultimateReady, state.ultimateCharge);
+    // DH-1: the active hero stays the camera/HUD owner; companions share its world camera.
+    if (state.heroes) {
+      for (var hi = 0; hi < state.heroes.length; hi++) {
+        var hero = state.heroes[hi];
+        if (hero && hero !== player) this._drawPlayer(hero, 0, false, 0);
+      }
+    }
     if (state.weaponVisuals) this._drawWeapons(state.weaponVisuals, camX, camY);
     // 近戰揮砍視覺（綁定角色位置的紫色弧形斬擊）
     if (state.meleeVisual) {

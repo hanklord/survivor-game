@@ -48,6 +48,14 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 #mute-indicator { position: absolute; top: 10px; right: 15px; font-size: 18px; pointer-events: all; cursor: pointer; }
 #joystick { display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); z-index: 3; }
 #joystick-knob { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; margin: -25px; border-radius: 50%; background: rgba(255,255,255,0.4); }
+#dual-hero-hud { display:none; position:absolute; bottom:16px; left:14px; z-index:5; pointer-events:none; color:#fff; text-shadow:0 1px 2px #000; }
+.dual-hero-card { display:flex; align-items:center; gap:6px; margin-top:5px; padding:4px 7px; border:1px solid rgba(255,255,255,.35); border-radius:8px; background:rgba(0,0,0,.52); transition:all .15s; }
+.dual-hero-card.active { border-color:#ffdd55; box-shadow:0 0 9px rgba(255,221,85,.85); }
+.dual-hero-card img { image-rendering:pixelated; object-fit:contain; }
+.dual-hero-card.active img { width:52px; height:52px; }.dual-hero-card:not(.active) img { width:32px; height:32px; opacity:.8; }
+.dual-hero-hp { width:112px; height:10px; border:1px solid #fff; border-radius:5px; overflow:hidden; background:#222; }.dual-hero-hp > i { display:block; height:100%; background:linear-gradient(90deg,#e33,#f77); }
+#swap-hero-btn { display:none; position:absolute; right:12px; bottom:20px; z-index:20; pointer-events:auto; padding:9px 12px; border:1px solid #ffdd55; border-radius:18px; background:rgba(28,28,62,.9); color:#ffef99; font-size:12px; cursor:pointer; }
+#hero-swap-flash { display:none; position:absolute; left:50%; top:42%; transform:translate(-50%,-50%); z-index:8; color:#ffef99; font-size:20px; text-shadow:0 0 12px #ffcc00, 1px 1px #000; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -62,6 +70,9 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
   </div>
   <div id="level-name"></div>
   <span id="mute-indicator">🔊</span>
+  <div id="dual-hero-hud"></div>
+  <button id="swap-hero-btn" type="button">⇄ 切換</button>
+  <div id="hero-swap-flash">⇄ 英雄切換！</div>
 </div>
 <div id="level-up"><h2>LEVEL UP!</h2><div id="choices"></div></div>
 <div id="game-over"><h1>GAME OVER</h1><p id="final-stats"></p><div id="leaderboard"></div><button onclick="location.reload()">Retry</button></div>
@@ -109,6 +120,8 @@ canvas { display: block; position: absolute; top: 0; left: 0; }
 <script src="js/object-pool.js"></script>
 <script src="js/spatial-hash.js"></script>
 <script src="js/auto-play.js"></script>
+<script src="js/sub-hero-ai.js"></script>
+<script src="js/hero-synergy.js"></script>
 <script src="js/input.js"></script>
 <script src="js/sprite-animator.js"></script>
 <script src="js/player.js"></script>

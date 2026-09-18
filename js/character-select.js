@@ -40,7 +40,8 @@
 
     var modeRow = document.createElement('div');
     modeRow.style.cssText = 'display:flex; gap:8px; margin:0 0 12px;';
-    var selectedMode = localStorage.getItem('survivor_gameMode') === 'endless' ? 'endless' : 'normal';
+    var storedMode = localStorage.getItem('survivor_gameMode');
+    var selectedMode = storedMode === 'endless' || (window.DUAL_HERO_ENABLED && storedMode === 'dual') ? storedMode : 'normal';
     function makeModeButton(mode, label) {
       var button = document.createElement('button');
       button.textContent = label;
@@ -48,6 +49,8 @@
       button.onclick = function() {
         selectedMode = mode;
         localStorage.setItem('survivor_gameMode', mode);
+        dualChoices = [];
+        if (dualHint) dualHint.textContent = mode === 'dual' ? '請選擇主英雄（第 1 位）' : '';
         var buttons = modeRow.querySelectorAll('button');
         for (var mi = 0; mi < buttons.length; mi++) {
           var active = buttons[mi]._mode === mode;
@@ -60,7 +63,14 @@
     }
     modeRow.appendChild(makeModeButton('normal', '⚔️ 一般模式'));
     modeRow.appendChild(makeModeButton('endless', '♾️ 無盡模式'));
+    if (window.DUAL_HERO_ENABLED) modeRow.appendChild(makeModeButton('dual', '👥 雙英雄模式'));
     wrapper.appendChild(modeRow);
+
+    var dualHint = document.createElement('div');
+    dualHint.style.cssText = 'min-height:18px;margin:-4px 0 8px;color:#ffdd55;font-size:12px;text-align:center;';
+    if (selectedMode === 'dual') dualHint.textContent = '請選擇主英雄（第 1 位）';
+    wrapper.appendChild(dualHint);
+    var dualChoices = [];
 
     var daily = SG._dailyChallenge;
     if (daily) {
@@ -129,6 +139,25 @@
               if (!daily.conditions[di].chars || daily.conditions[di].chars.indexOf(ch.id) >= 0) { allowed = true; break; }
             }
             if (!allowed) { card.style.borderColor = '#ff4444'; return; }
+          }
+          if (selectedMode === 'dual') {
+            if (dualChoices.length === 0) {
+              dualChoices.push(ch);
+              card.style.borderColor = '#ffdd55';
+              card.style.boxShadow = '0 0 12px #ffdd55';
+              dualHint.textContent = '已選主英雄：' + ch.name + '，請選擇副英雄（第 2 位）';
+              return;
+            }
+            if (dualChoices[0].id === ch.id) {
+              dualHint.textContent = '主、副英雄不可重複，請選擇另一位角色';
+              return;
+            }
+            dualChoices.push(ch);
+            localStorage.setItem('survivor_lastCharacter', dualChoices[0].id);
+            localStorage.setItem('survivor_dualHeroIds', JSON.stringify([dualChoices[0].id, ch.id]));
+            self._el.style.display = 'none';
+            self._onSelect({ primary: dualChoices[0], secondary: ch, dualHero: true });
+            return;
           }
           localStorage.setItem('survivor_lastCharacter', ch.id);
           self._el.style.display = 'none';

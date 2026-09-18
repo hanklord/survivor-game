@@ -42,6 +42,8 @@
     this._wingsApplied = false;
     this._relicSpeedMult = 1;
     this._relicAtkSpeedMult = 1;
+    this._synergyAtkSpeedMult = 1;
+    this._synergyApplied = false;
   }
 
   // 移動玩家
