@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V331";
+window.GAME_VERSION = "V332";
 window.DUAL_HERO_ENABLED = true;
 window.HARDCORE_HP_MULTIPLIER = 3.0; 
 window.LEVEL_CLEAR_HEAL_PERCENT = 0.5;

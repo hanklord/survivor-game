@@ -553,6 +553,7 @@
     this._bomb = new SG.BombSystem();
     this._bossProjectiles = new SG.BossProjectileSystem();
     this._autoPlay = new SG.AutoPlay(this.spatialHash, this.player);
+    this._subHeroAI = null;
 
     // 根據角色類型設定動畫
     if (this._selectedCharacter.id === 'melee') {
@@ -652,7 +653,11 @@
       amazon: this._amazonAttack
     };
     this._registerHero(this.player, this._selectedCharacter, 0, 'main');
-    if (this.dualHeroMode) this._createSubHero(this._secondaryCharacter);
+    if (this.dualHeroMode) {
+      var subHero = this._createSubHero(this._secondaryCharacter);
+      subHero.invincible = true;
+      this._subHeroAI = new SG.SubHeroAI(subHero, this.spatialHash);
+    }
     this._setActiveHero(0);
     this.levelManager = new SG.LevelManager(this.imgConfig);
     this.gameTime = 0;
@@ -795,6 +800,8 @@
     if (!this.dualHeroMode || this.heroes.length < 2) return;
     var hero = this.heroes[1];
     if (!hero || hero.hp <= 0) return;
+    // DH-2: companions have their own movement/attacks, but never an ultimate activation.
+    if (this._subHeroAI) hero.move(this._subHeroAI.update(dt, this.player, this.enemies, this.bosses), dt);
     if (hero._trait && hero._trait.onUpdate) hero._trait.onUpdate(dt, this, hero);
     hero.updateAnimation(dt);
     var attacks = hero._attacks;
@@ -1125,7 +1132,7 @@
               if (SG.aabbHit(e, expRadius, at, at.hitboxRadius)) {
                 at.hp -= expDmg;
                 if (!this._lowQuality) this._damageNumbers.add(at.x, at.y, expDmg, false);
-                if (at.hp <= 0) this._handleKill(at);
+                if (at.hp <= 0) this._handleKill(at, projectileOwner);
               }
             }
           }
@@ -1439,7 +1446,11 @@
   };
 
   // 玩家受傷（含護甲、閃避、反射）
-  Game.prototype._playerTakeDamage = function(damage, attacker) {
+  Game.prototype._playerTakeDamage = function(damage, attacker, targetHero) {
+    // All existing collision callers omit targetHero and therefore resolve to the active hero.
+    // Keep this guard for future DH collision paths: the companion is invulnerable in DH-2.
+    targetHero = targetHero || this.player;
+    if (targetHero !== this.player || targetHero.invincible) return false;
     if (this.player.dodgeChance && Math.random() < this.player.dodgeChance) return false;
     var finalDmg = Math.max(1, (damage - (this.player.armor || 0)) * (this._eventDamageTakenMult || 1) * (this.player._relicDamageTakenMult || 1));
     var hpBefore = this.player.hp;
