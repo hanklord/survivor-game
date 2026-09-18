@@ -129,6 +129,18 @@
     this._heroSwapFlashTimer = setTimeout(function() { flash.style.display = 'none'; }, 320);
   };
 
+  UI.prototype.showHeroSynergy = function(synergy) {
+    if (!synergy) return;
+    var old = document.getElementById('hero-synergy-toast');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var toast = document.createElement('div');
+    toast.id = 'hero-synergy-toast';
+    toast.style.cssText = 'position:absolute;top:72px;left:50%;transform:translateX(-50%);z-index:12;padding:8px 14px;border:1px solid #ffdd55;border-radius:8px;background:rgba(22,22,55,.9);color:#ffef99;font-size:13px;text-align:center;pointer-events:none;box-shadow:0 0 12px rgba(255,221,85,.45);';
+    toast.innerHTML = '🤝 羈絆：<b>' + synergy.name + '</b><br><small>' + synergy.desc + '</small>';
+    document.getElementById('game-container').appendChild(toast);
+    setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3200);
+  };
+
   // 更新關卡名稱
   UI.prototype.updateLevelName = function(name) {
     if (this.els.levelName) this.els.levelName.textContent = name;

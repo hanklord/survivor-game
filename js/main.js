@@ -661,6 +661,7 @@
       var subHero = this._createSubHero(this._secondaryCharacter);
       subHero.invincible = true;
       this._subHeroAI = new SG.SubHeroAI(subHero, this.spatialHash);
+      this._applyHeroSynergy();
     }
     this._setActiveHero(0);
     this.levelManager = new SG.LevelManager(this.imgConfig);
@@ -772,6 +773,20 @@
     if (this.audio && this.audio.playPickup) this.audio.playPickup();
     if (this.ui) this.ui.showHeroSwap();
     return true;
+  };
+
+  Game.prototype._applyHeroSynergy = function() {
+    if (!this.dualHeroMode || this.heroes.length !== 2 || !SG.getSynergy) return null;
+    var synergy = SG.getSynergy(this.heroes[0].characterId, this.heroes[1].characterId);
+    for (var i = 0; i < this.heroes.length; i++) {
+      if (!this.heroes[i]._synergyApplied) {
+        synergy.apply(this.heroes[i]);
+        this.heroes[i]._synergyApplied = true;
+      }
+    }
+    this._heroSynergy = synergy;
+    if (this.ui) this.ui.showHeroSynergy(synergy);
+    return synergy;
   };
 
   Game.prototype._createSubHero = function(character) {
@@ -1302,9 +1317,10 @@
     // 漸進補充：每 0.3~0.5 秒生成 2~4 隻
     if (!this._spawnTimer) this._spawnTimer = 0;
     this._spawnTimer -= dt;
-    if (this._spawnTimer <= 0 && this.enemies.length < TARGET_ENEMY_COUNT) {
+    var targetEnemyCount = this._getTargetEnemyCount();
+    if (this._spawnTimer <= 0 && this.enemies.length < targetEnemyCount) {
       var spawnCount = 2 + Math.floor(Math.random() * 3); // 2~4 隻
-      for (var sp = 0; sp < spawnCount && this.enemies.length < TARGET_ENEMY_COUNT; sp++) {
+      for (var sp = 0; sp < spawnCount && this.enemies.length < targetEnemyCount; sp++) {
         this._spawnOneEnemy();
       }
       this._spawnTimer = 0.3 + Math.random() * 0.2; // 0.3~0.5 秒間隔
@@ -1673,6 +1689,7 @@
   Game.prototype._applySpawnDifficulty = function(entity) {
     var hpMult = this.getHardcoreHPMult();
     if (this.endlessMode) hpMult *= this._getEndlessMultiplier();
+    if (this.dualHeroMode && entity.type === 'boss') hpMult *= (window.DUAL_HERO_BOSS_HP_MULT || 1.5);
     if (hpMult > 1) {
       entity.hp = Math.round(entity.hp * hpMult);
       entity.maxHp = entity.hp;
@@ -1681,9 +1698,15 @@
 
   // 填充到目標數量（開場/關卡切換用）
   Game.prototype._fillEnemies = function() {
-    while (this.enemies.length < TARGET_ENEMY_COUNT) {
+    var targetEnemyCount = this._getTargetEnemyCount();
+    while (this.enemies.length < targetEnemyCount) {
       this._spawnOneEnemy();
     }
+  };
+
+  Game.prototype._getTargetEnemyCount = function() {
+    var multiplier = this.dualHeroMode ? (window.DUAL_HERO_ENEMY_MULT || 1.4) : 1;
+    return Math.min(MAX_ENEMIES, Math.round(TARGET_ENEMY_COUNT * multiplier));
   };
 
   Game.prototype._showLevelUp = function() {
