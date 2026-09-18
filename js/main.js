@@ -863,6 +863,7 @@
     else if (attacks.melee) hits = attacks.melee.update(dt, this.enemies, this.bosses, speedMult);
     else if (attacks.archer) {
       hits = attacks.archer.update(dt, this.enemies, this.bosses, speedMult);
+      if (attacks.archer.didFire()) hero.triggerAttack();
       var explosiveHits = attacks.archer.getExplosiveArrow().update(dt, this.enemies, this.bosses, speedMult);
       var piercingHits = attacks.archer.getPiercingArrow().update(dt, this.enemies, this.bosses, speedMult);
       hits = hits.concat(explosiveHits, piercingHits);
@@ -878,6 +879,16 @@
       }
     }
     for (var i = 0; i < hits.length; i++) this._handleKill(hits[i], hero);
+  };
+
+  // Attack modules own their visual state. In dual mode, find the hero which
+  // owns a module instead of reading only the active hero legacy references.
+  Game.prototype._getHeroAttack = function(key) {
+    for (var i = 0; i < this.heroes.length; i++) {
+      var hero = this.heroes[i];
+      if (hero && hero._attacks && hero._attacks[key]) return { hero: hero, attack: hero._attacks[key] };
+    }
+    return null;
   };
 
   // 預計算所有敵人/Boss sprite 的 AABB（基於輝度掃描）
@@ -956,6 +967,11 @@
         if (this._fireExplosions[fe].progress >= 1) this._fireExplosions.splice(fe, 1);
       }
     }
+    var renderMelee = this._getHeroAttack('melee');
+    var renderValkyrie = this._getHeroAttack('valkyrie');
+    var renderArcher = this._getHeroAttack('archer');
+    var renderBoomerang = this._getHeroAttack('boomerang');
+    var renderAmazon = this._getHeroAttack('amazon');
     this.renderer.render({
       player: this.player,
       heroes: this.heroes,
@@ -967,17 +983,17 @@
       healPickups: this._healPickups,
       tilemapCanvas: (this._tilemap && this._tilemap.ready) ? this._tilemap.getMapCanvas() : null,
       weaponVisuals: this.weaponManager.getVisuals(),
-      meleeVisual: this._meleeAttack ? this._meleeAttack.getVisual() : null,
-      valkyrieVisual: this._valkyrieAttack ? this._valkyrieAttack.getVisual() : null,
-      meleeIsKnight: this._selectedCharacter && this._selectedCharacter.id === 'knight',
-      archerVisual: this._archerAttack ? this._archerAttack.getVisual() : null,
-      archerFireZones: this._archerAttack ? this._archerAttack.getFireZones() : [],
-      explosiveVisual: this._archerAttack ? this._archerAttack.getExplosiveArrow().getVisual() : null,
-      boomerangVisual: this._boomerangAttack ? this._boomerangAttack.getVisual() : null,
-      boomerangChainVisual: this._boomerangAttack ? this._boomerangAttack.getChainVisual() : null,
-      amazonVisual: this._amazonAttack ? this._amazonAttack.getVisual() : null,
+      meleeVisual: renderMelee ? renderMelee.attack.getVisual() : null,
+      valkyrieVisual: renderValkyrie ? renderValkyrie.attack.getVisual() : null,
+      meleeIsKnight: renderMelee && renderMelee.hero.characterId === 'knight',
+      archerVisual: renderArcher ? renderArcher.attack.getVisual() : null,
+      archerFireZones: renderArcher ? renderArcher.attack.getFireZones() : [],
+      explosiveVisual: renderArcher ? renderArcher.attack.getExplosiveArrow().getVisual() : null,
+      boomerangVisual: renderBoomerang ? renderBoomerang.attack.getVisual() : null,
+      boomerangChainVisual: renderBoomerang ? renderBoomerang.attack.getChainVisual() : null,
+      amazonVisual: renderAmazon ? renderAmazon.attack.getVisual() : null,
       eliteVisuals: this._eliteSpawner.getVisuals(),
-      piercingVisual: this._archerAttack ? this._archerAttack.getPiercingArrow().getVisual() : null,
+      piercingVisual: renderArcher ? renderArcher.attack.getPiercingArrow().getVisual() : null,
       damageNumbers: this._damageNumbers,
       lowQuality: this._lowQuality,
       fps: this._currentFps,

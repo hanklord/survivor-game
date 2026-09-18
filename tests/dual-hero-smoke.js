@@ -72,6 +72,7 @@ function makeContext() {
     setTimeout: function() { return 1; }, clearTimeout: function() {},
     requestAnimationFrame: function() { return 1; }, cancelAnimationFrame: function() {},
     document: document, innerWidth: 360, innerHeight: 640,
+    navigator: { getGamepads: function() { return []; } },
     addEventListener: function() {}, removeEventListener: function() {},
     confirm: function() { return true; }, location: { reload: function() {} },
     localStorage: {
@@ -173,7 +174,7 @@ run(5, 'named/default synergies apply to both heroes and sort IDs', function() {
   var fallbackRun = makeGame('ranged', 'ninja');
   assert(fallbackRun._heroSynergy.name === '並肩作戰' && fallbackRun.heroes[0].damageMultiplier === 1.05 && fallbackRun.heroes[1].damageMultiplier === 1.05, 'default synergy was not applied');
 });
-run(6, 'companion has no ultimate activation but its kills charge the shared meter', function() {
+run(6, 'companion attacks in the game loop, renders its attack, and never activates an ultimate', function() {
   var ultRun = makeGame('archer', 'ranged');
   var companion = ultRun.heroes[1];
   var companionUltimateUsed = false;
@@ -184,6 +185,44 @@ run(6, 'companion has no ultimate activation but its kills charge the shared met
   ultRun._handleKill({ type: 'enemy', x: 0, y: 0, color: '#fff', hp: 0 }, companion);
   assert(ultRun._ultimateCharge > chargeBefore, 'companion kill did not charge the shared ultimate');
   assert(ultRun._ultimate && ultRun.player._ultimate && ultRun._ultimate.player === ultRun.player, 'active hero has no owner-bound ultimate instance');
+
+  function runFrame(game, attacker, targetDistance) {
+    attacker = attacker || game.player;
+    var target = new SG.Enemy(attacker.x + (targetDistance || 100), attacker.y, game.imgConfig.enemies[0], 0);
+    target.hp = target.maxHp = 10000;
+    target.speed = 0;
+    game.enemies = [target];
+    game.bosses = [];
+    game.projectiles = [];
+    game._randomEvents = { update: function() {}, getVisual: function() { return null; } };
+    game._rushWave.timer = Infinity;
+    game.audio.playArrowShoot = function() {};
+    game.audio.playShoot = function() {};
+    game._playerTakeDamage = function() { return false; };
+    var rendered;
+    game.renderer.render = function(state) { rendered = state; };
+    game.lastTime = 0;
+    game._loop(50);
+    return rendered;
+  }
+  var mainAttackRun = makeGame('archer', 'ranged');
+  mainAttackRun.heroes[1].fireTimer = 999;
+  var mainState = runFrame(mainAttackRun);
+  assert(mainAttackRun.heroes[0]._attacks.archer.arrows.length > 0 && mainState.archerVisual, 'active archer did not generate/render an attack');
+
+  var companionCases = [
+    { id: 'archer', visual: 'archerVisual' }, { id: 'knight', visual: 'meleeVisual' },
+    { id: 'valkyrie', visual: 'valkyrieVisual' }, { id: 'ninja', visual: 'boomerangVisual' },
+    { id: 'amazon', visual: 'amazonVisual' }
+  ];
+  for (var ci = 0; ci < companionCases.length; ci++) {
+    var testCase = companionCases[ci];
+    var companionAttackRun = makeGame('ranged', testCase.id);
+    companionAttackRun.player.fireTimer = 999;
+    var companionHero = companionAttackRun.heroes[1];
+    var companionState = runFrame(companionAttackRun, companionHero, testCase.id === 'knight' ? 60 : 100);
+    assert(companionState[testCase.visual], 'companion ' + testCase.id + ' attack was omitted from renderer state');
+  }
 });
 run(7, 'dual target count and boss HP compensation apply', function() {
   single = makeGame('archer');
