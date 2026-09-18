@@ -1,4 +1,4 @@
-window.GAME_VERSION = "V334";
+window.GAME_VERSION = "V336";
 window.DUAL_HERO_ENABLED = true;
 window.DUAL_HERO_ENEMY_MULT = 1.4;
 window.DUAL_HERO_BOSS_HP_MULT = 1.5;

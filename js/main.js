@@ -632,9 +632,10 @@
     this.player.damage = Math.round(this.player.damage * legacyMult.atk);
 
     // 角色專屬大招
-    this._ultimate = new SG.UltimateSystem(this.player);
+    this.player._ultimate = new SG.UltimateSystem(this.player);
     var ultTypes = { ranged: 'mage_explosion', archer: 'archer_arrowrain', melee: 'knight_dash', valkyrie: 'valkyrie_radial', boomerang: 'ninja_spiral', amazon: 'amazon_arc' };
-    this._ultimate.type = ultTypes[this.player.attackType] || 'mage_explosion';
+    this.player._ultimate.type = ultTypes[this.player.attackType] || 'mage_explosion';
+    this._ultimate = this.player._ultimate;
 
     this.enemies = [];
     this.projectiles = [];
@@ -740,6 +741,7 @@
     for (var i = 0; i < this.heroes.length; i++) this.heroes[i].isActive = i === index;
     this.activeHeroIndex = index;
     this.player = this.heroes[index];
+    this._ultimate = this.player._ultimate || null;
     return true;
   };
 
@@ -756,7 +758,6 @@
     this._setActiveHero(incomingIndex);
     this._selectedCharacter = incoming.character;
     this._trait = incoming._trait;
-    this._ultimate = incoming._ultimate;
     this.weaponManager = incoming.weaponManager;
     this.skillTree = incoming.skillTree;
     this._passiveItems = incoming.passiveItems;

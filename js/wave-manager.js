@@ -70,9 +70,6 @@
     return !!this.bossWarning;
   };
 
-  SG.WaveManager = WaveManager;
-})();
-
   // Rush Wave 快速生成
   WaveManager.prototype.spawnRushWave = function(count, player, W, H, imgConfig) {
     var spawned = [];
@@ -87,3 +84,6 @@
     }
     return spawned;
   };
+
+  SG.WaveManager = WaveManager;
+})();

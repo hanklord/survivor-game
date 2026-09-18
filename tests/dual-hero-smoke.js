@@ -142,6 +142,7 @@ var single;
 run(1, 'all core modules load and expose Game/Player/SubHeroAI/getSynergy', function() {
   assert(failures.length === 0, failures.join('; '));
   assert(SG.Game && SG.Player && SG.SubHeroAI && SG.getSynergy, 'core modules did not load');
+  assert(typeof SG.WaveManager.prototype.spawnRushWave === 'function', 'rush wave factory is not attached to WaveManager');
 });
 run(2, 'dual selection initializes two distinct heroes', function() {
   dual = makeGame('archer', 'ranged');
@@ -164,6 +165,7 @@ run(4, 'swap transfers active player, invulnerability, and cooldown', function()
   assert(swapRun._swapHero() === false && swapRun.activeHeroIndex === 1, 'swap cooldown was bypassed');
   swapRun._heroSwapCooldown = 0;
   assert(swapRun._swapHero() === true && swapRun.activeHeroIndex === 0, 'swap did not resume after cooldown');
+  assert(swapRun._ultimate && swapRun._ultimate.player === swapRun.player, 'swap did not restore the active hero ultimate');
 });
 run(5, 'named/default synergies apply to both heroes and sort IDs', function() {
   assert(dual._heroSynergy.name === '魔箭合擊' && dual.heroes[0].damageMultiplier === 1.15 && dual.heroes[1].damageMultiplier === 1.15, 'named synergy was not applied to both heroes');
